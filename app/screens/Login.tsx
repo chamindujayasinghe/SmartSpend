@@ -147,16 +147,14 @@ const Login = ({ navigation }: LoginScreenProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    // Applied to KeyboardAvoidingView
     flex: 1,
   },
   scrollContent: {
-    // Applied to ScrollView content container
     padding: 30,
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
-    width: "100%", // Ensures children stretch
+    width: "100%",
   },
   title: {
     fontSize: 24,

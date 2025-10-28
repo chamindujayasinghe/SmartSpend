@@ -21,7 +21,7 @@ const handleSignIn = async (
   }
 ) => {
   setSubmitting(true);
-  setStatus(null); // Clear previous status messages
+  setStatus(null);
 
   try {
     const { email, password } = values;
@@ -37,7 +37,6 @@ const handleSignIn = async (
     if (error) {
       setStatus({ type: "error", message: error.message });
     } else if (session) {
-      // SUCCESS: Session is active, App.tsx listener will handle navigation
       setStatus({ type: "success", message: "Signed in successfully!" });
     }
   } catch (e) {

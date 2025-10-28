@@ -30,7 +30,12 @@ const validationSchema = yup.object().shape({
     .string()
     .required("Please enter the lastname")
     .label("Last Name"),
-  email: yup.string().email().required("Please enter an email").label("Email"),
+  email: yup
+    .string()
+    .email()
+    .required("Please enter an email")
+    .label("Email")
+    .lowercase(),
   password: yup
     .string()
     .required("Please enter a password")
@@ -50,8 +55,8 @@ const Signup = ({ navigation }: SignupScreenProps) => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView
-        style={styles.container} // Take up full screen space
-        behavior={Platform.OS === "ios" ? "padding" : "height"} // 'padding' works well for iOS, 'height' or 'position' might be needed for specific Android setups
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <ScrollView
