@@ -34,7 +34,7 @@ const handleSignUp = async (
       email: email,
       password: password,
       options: {
-        emailRedirectTo: "https://smart-spend-web-ten.vercel.app/",
+        emailRedirectTo: "https://smart-spend-web-ten.vercel.app/SignUpConfirm.html",
         data: {
           first_name: firstname,
           last_name: lastname,
