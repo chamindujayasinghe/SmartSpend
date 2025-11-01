@@ -10,7 +10,7 @@ interface AppScreenLogic {
 }
 
 
-export const useAppScreenLogic = (user: User, isInitialLogin: boolean): AppScreenLogic => {
+export const useAppScreenLogic = (user: User, isInitialLogin: boolean = false): AppScreenLogic => {
   const [loading, setLoading] = useState(false); 
   const [showSuccessMessage, setShowSuccessMessage] = useState(isInitialLogin);
 

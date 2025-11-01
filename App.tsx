@@ -3,6 +3,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import gradientColors from "./config/GradientColors";
 import { renderAppContent } from "./app/screens/AppContent";
+import { NavigationContainer, DarkTheme } from "@react-navigation/native";
+import colors from "./config/colors";
 
 export default function App() {
   return (
@@ -14,9 +16,24 @@ export default function App() {
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
         >
-          <SafeAreaView style={styles.container}>
-            {renderAppContent()}
-          </SafeAreaView>
+          <NavigationContainer
+            theme={{
+              ...DarkTheme,
+              dark: true,
+              colors: {
+                primary: colors.primary,
+                background: "transparent",
+                card: colors.primary,
+                text: colors.white,
+                border: colors.dark,
+                notification: colors.secondary,
+              },
+            }}
+          >
+            <SafeAreaView style={styles.container}>
+              {renderAppContent()}
+            </SafeAreaView>
+          </NavigationContainer>
         </LinearGradient>
       </SafeAreaProvider>
     </TouchableWithoutFeedback>

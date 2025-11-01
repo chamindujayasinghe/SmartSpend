@@ -1,23 +1,24 @@
 import React from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
-import AppButton from "../components/AppButton";
+import { View, StyleSheet } from "react-native";
 import AppText from "../components/AppText";
 import colors from "../../config/colors";
 import { User } from "@supabase/supabase-js";
 import { useAppScreenLogic } from "../../Hooks/useAppScreen";
 import SuccessOverlay from "../components/SuccessOverlay";
 
-interface AppScreenProps {
+interface HomeScreenProps {
   user: User;
   isInitialLogin?: boolean;
 }
 
-const AppScreen: React.FC<AppScreenProps> = ({
+const HomeScreen: React.FC<HomeScreenProps> = ({
   user,
   isInitialLogin = false,
 }) => {
-  const { loading, showSuccessMessage, fullName, handleSignOut } =
-    useAppScreenLogic(user, isInitialLogin);
+  const { showSuccessMessage, fullName } = useAppScreenLogic(
+    user,
+    isInitialLogin
+  );
 
   if (showSuccessMessage) {
     return <SuccessOverlay fullName={fullName} />;
@@ -26,33 +27,14 @@ const AppScreen: React.FC<AppScreenProps> = ({
   return (
     <View style={styles.container}>
       <AppText style={styles.title}>Dashboard</AppText>
-
       <AppText style={[styles.title, { fontSize: 22 }]}>{fullName}</AppText>
-
       <AppText style={styles.subtitle}>
-        This is your authenticated Smart-Spend dashboard.
+        Welcome to your Smart-Spend dashboard.
       </AppText>
-
-      <AppText style={styles.userId}>User ID: {user.id}</AppText>
-
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color={colors.secondary}
-          style={{ marginTop: 30 }}
-        />
-      ) : (
-        <AppButton
-          title="Sign Out"
-          onPress={handleSignOut}
-          style={styles.signOutButton}
-        />
-      )}
     </View>
   );
 };
 
-// 3. Remove the styles that were moved to SuccessOverlay
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -60,6 +42,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
+    backgroundColor: "transparent",
   },
   title: {
     fontWeight: "bold",
@@ -71,19 +54,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.light,
     marginBottom: 30,
-  },
-  userId: {
-    fontSize: 14,
-    color: colors.light,
-    marginBottom: 50,
     textAlign: "center",
-    padding: 10,
-    backgroundColor: colors.dark,
-    borderRadius: 8,
-  },
-  signOutButton: {
-    width: "80%",
   },
 });
 
-export default AppScreen;
+export default HomeScreen;
