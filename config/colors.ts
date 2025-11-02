@@ -5,8 +5,8 @@ export default {
     black:'#000',
     dark: "#1B2A41",
     light: "#889AA4",
-    darkPrimary:'#030a13ff',
-    error:"#e78c8cff",
-    success:'#5fd482ff',
-    danger:'#c74545ff'
+    darkPrimary:'#030a13',
+    error:"#e78c8c",
+    success:'#5fd482',
+    danger:'#c74545'
 }

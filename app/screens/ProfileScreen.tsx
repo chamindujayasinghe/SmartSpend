@@ -7,7 +7,6 @@ import AppText from "../components/AppText";
 import colors from "../../config/colors";
 import { useAppScreenLogic } from "../../Hooks/useAppScreen";
 
-// Define props for the ProfileScreen
 interface ProfileScreenProps {
   user: User;
 }
