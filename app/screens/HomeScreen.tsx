@@ -8,21 +8,10 @@ import SuccessOverlay from "../components/SuccessOverlay";
 
 interface HomeScreenProps {
   user: User;
-  isInitialLogin?: boolean;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({
-  user,
-  isInitialLogin = false,
-}) => {
-  const { showSuccessMessage, fullName } = useAppScreenLogic(
-    user,
-    isInitialLogin
-  );
-
-  if (showSuccessMessage) {
-    return <SuccessOverlay fullName={fullName} />;
-  }
+const HomeScreen: React.FC<HomeScreenProps> = ({ user }) => {
+  const { fullName } = useAppScreenLogic(user);
 
   return (
     <View style={styles.container}>

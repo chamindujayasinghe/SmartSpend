@@ -11,15 +11,11 @@ import ProfileScreen from "../screens/ProfileScreen";
 
 interface MainTabNavigatorProps {
   user: User;
-  isInitialLogin?: boolean;
 }
 
 const Tab = createBottomTabNavigator();
 
-const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({
-  user,
-  isInitialLogin,
-}) => {
+const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -42,9 +38,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({
           ),
         }}
       >
-        {(props) => (
-          <HomeScreen {...props} user={user} isInitialLogin={isInitialLogin} />
-        )}
+        {(props) => <HomeScreen {...props} user={user} />}
       </Tab.Screen>
 
       <Tab.Screen
