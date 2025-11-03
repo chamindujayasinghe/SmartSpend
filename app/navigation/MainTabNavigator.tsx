@@ -8,6 +8,7 @@ import colors from "../../config/colors";
 import HomeScreen from "../screens/HomeScreen";
 import PlaceholderScreen from "../screens/PlaceholderScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import StatsScreen from "../screens/StatsScreen";
 
 interface MainTabNavigatorProps {
   user: User;
@@ -43,7 +44,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
 
       <Tab.Screen
         name="Stats"
-        component={PlaceholderScreen}
+        component={StatsScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
