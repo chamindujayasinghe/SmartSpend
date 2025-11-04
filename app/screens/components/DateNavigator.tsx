@@ -1,10 +1,10 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AppText from "./AppText";
-import colors from "../../config/colors";
+import AppText from "../../components/AppText";
+import colors from "../../../config/colors";
 import { Period } from "./PeriodSelector"; // Import the Period type
-import { DateRange } from "../screens/StatsScreen"; // Import DateRange type
+import { DateRange } from "../StatsScreen"; // Import DateRange type
 
 interface DateNavigatorProps {
   currentDate: Date;

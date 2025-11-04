@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native";
-import AppText from "./AppText";
-import colors from "../../config/colors";
+import AppText from "../../components/AppText";
+import colors from "../../../config/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const formatDate = (date: Date) => {

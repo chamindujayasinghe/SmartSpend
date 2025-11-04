@@ -9,6 +9,7 @@ import HomeScreen from "../screens/HomeScreen";
 import PlaceholderScreen from "../screens/PlaceholderScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import StatsScreen from "../screens/StatsScreen";
+import AddScreen from "../screens/AddScreen";
 
 interface MainTabNavigatorProps {
   user: User;
@@ -57,7 +58,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
       />
       <Tab.Screen
         name="Add"
-        component={PlaceholderScreen}
+        component={AddScreen}
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ focused, size }) => (

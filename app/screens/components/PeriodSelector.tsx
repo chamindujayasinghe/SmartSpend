@@ -7,8 +7,8 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AppText from "./AppText";
-import colors from "../../config/colors";
+import AppText from "../../components/AppText";
+import colors from "../../../config/colors";
 
 export type Period = "Daily" | "Monthly" | "Annually" | "Period";
 const periodOptions: Period[] = ["Daily", "Monthly", "Annually", "Period"];
