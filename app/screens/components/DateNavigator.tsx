@@ -42,7 +42,7 @@ const formatDisplayDate = (date: Date, period: Period, range: DateRange) => {
           range.end
         )}`;
       }
-      return "Select Range"; // Fallback
+      return "Select Range";
 
     default:
     case "Monthly":
@@ -57,9 +57,8 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
   currentDate,
   selectedPeriod,
   onNavigate,
-  dateRange, // Destructure dateRange
+  dateRange,
 }) => {
-  // Hide arrows if "Period" is selected
   const showArrows = selectedPeriod !== "Period";
 
   return (
@@ -76,7 +75,7 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
           />
         </TouchableOpacity>
       ) : (
-        <View style={styles.navArrow} /> // Placeholder for spacing
+        <View style={styles.navArrow} />
       )}
 
       <AppText style={styles.currentDateText}>
@@ -95,7 +94,7 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
           />
         </TouchableOpacity>
       ) : (
-        <View style={styles.navArrow} /> // Placeholder for spacing
+        <View style={styles.navArrow} />
       )}
     </View>
   );
@@ -112,14 +111,14 @@ const styles = StyleSheet.create({
   },
   navArrow: {
     padding: 5,
-    width: 35, // Give arrows a fixed width to maintain center alignment
+    width: 35,
   },
   currentDateText: {
     fontSize: 18,
     fontWeight: "bold",
     color: colors.white,
     textAlign: "center",
-    flex: 1, // Allow text to take up remaining space
+    flex: 1,
   },
 });
 

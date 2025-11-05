@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native"; // 1. Import View
+import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { User } from "@supabase/supabase-js";
@@ -65,9 +65,9 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
             <View
               style={{
                 position: "absolute",
-                top: -30,
-                width: size * 2,
-                height: size * 2,
+                top: -25,
+                width: size * 1.7,
+                height: size * 1.7,
                 borderRadius: (size * 2.2) / 2,
                 backgroundColor: focused ? colors.secondary : colors.light,
                 justifyContent: "center",
