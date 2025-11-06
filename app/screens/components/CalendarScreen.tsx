@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import CalendarHeader from "./CalenderHeader";
+import DayDetailsModal from "./DayDetailsModal"; // Import the new component
 
 const today = new Date();
 
@@ -45,6 +46,8 @@ const generateCalendarGrid = (
       month === today.getMonth() &&
       year === today.getFullYear();
 
+    // This calculation is no longer needed to show the modal,
+    // but we'll leave the logic here. We set isClicked to false.
     const isClicked =
       clickedDate !== null &&
       day === clickedDate.getDate() &&
@@ -56,7 +59,7 @@ const generateCalendarGrid = (
       day,
       isSunday,
       isToday,
-      isClicked,
+      isClicked: false, // Set to false, modal handles the "clicked" state
       fullDate: cellDate,
     });
   }
@@ -90,6 +93,7 @@ const formatMonthYear = (date: Date): string => {
 const CalendarScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [clickedDate, setClickedDate] = useState<Date | null>(today);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [income, setIncome] = useState(0);
   const [expenses, setExpense] = useState(0);
@@ -121,6 +125,7 @@ const CalendarScreen: React.FC = () => {
   const onDayPress = (date: Date | null) => {
     if (date) {
       setClickedDate(date);
+      setIsModalVisible(true);
     }
   };
 
@@ -164,13 +169,8 @@ const CalendarScreen: React.FC = () => {
         style={styles.cell}
         onPress={() => onDayPress(item.fullDate)}
       >
-        {item.isClicked ? (
-          <View style={styles.clickedBackground}>
-            <AppText style={[styles.dayText, styles.clickedText]}>
-              {item.day}
-            </AppText>
-          </View>
-        ) : item.isToday ? (
+        {/* The isClicked style is no longer used, as the modal handles it */}
+        {item.isToday ? (
           <View style={styles.todayBackground}>
             <AppText style={[styles.dayText, styles.todayText]}>
               {item.day}
@@ -222,6 +222,13 @@ const CalendarScreen: React.FC = () => {
       <TouchableOpacity style={styles.addButton} onPress={() => {}}>
         <AppText style={styles.addButtonText}>+</AppText>
       </TouchableOpacity>
+
+      {/* Render the new, separate component */}
+      <DayDetailsModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        date={clickedDate}
+      />
     </View>
   );
 };
