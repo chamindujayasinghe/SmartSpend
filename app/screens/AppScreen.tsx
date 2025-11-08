@@ -3,6 +3,7 @@ import { User } from "@supabase/supabase-js";
 import { useAppScreenLogic } from "../../Hooks/useAppScreen";
 import SuccessOverlay from "../components/SuccessOverlay";
 import MainTabNavigator from "../navigation/MainTabNavigator";
+import AppNavigator from "../navigation/AppNavigator";
 
 interface AppScreenProps {
   user: User;
@@ -22,7 +23,7 @@ const AppScreen: React.FC<AppScreenProps> = ({
     return <SuccessOverlay fullName={fullName} />;
   }
 
-  return <MainTabNavigator user={user} />;
+  return <AppNavigator user={user} />;
 };
 
 export default AppScreen;

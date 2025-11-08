@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AppStackParamList } from "./AppNavigator";
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -18,4 +19,9 @@ export type SignupScreenProps = NativeStackScreenProps<
 export type ForgotPasswordScreenProps = NativeStackScreenProps<
   AuthStackParamList,
   "ForgotPassword"
+>;
+
+export type TransactionFormProps = NativeStackScreenProps<
+  AppStackParamList,
+  "TransactionForm"
 >;

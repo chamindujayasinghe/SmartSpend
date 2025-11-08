@@ -1,21 +1,21 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import CalendarHeader from "./CalenderHeader";
-import DayDetailsModal from "./DayDetailsModal"; // Import the new component
+import DayDetailsModal from "./DayDetailsModal";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AppStackParamList } from "../../navigation/AppNavigator";
+import DayCell from "./DayCell";
+import { CalendarCell } from "../../../Hooks/calenderTypes";
 
 const today = new Date();
 
-interface CalendarCell {
-  key: string;
-  day: number | null;
-  isSunday: boolean;
-  isToday: boolean;
-  isClicked: boolean;
-  fullDate: Date | null;
-}
+type NavigationProps = NativeStackNavigationProp<
+  AppStackParamList,
+  "TransactionForm"
+>;
 
 const generateCalendarGrid = (
   date: Date,
@@ -46,8 +46,6 @@ const generateCalendarGrid = (
       month === today.getMonth() &&
       year === today.getFullYear();
 
-    // This calculation is no longer needed to show the modal,
-    // but we'll leave the logic here. We set isClicked to false.
     const isClicked =
       clickedDate !== null &&
       day === clickedDate.getDate() &&
@@ -59,7 +57,7 @@ const generateCalendarGrid = (
       day,
       isSunday,
       isToday,
-      isClicked: false, // Set to false, modal handles the "clicked" state
+      isClicked: false,
       fullDate: cellDate,
     });
   }
@@ -84,6 +82,7 @@ const generateCalendarGrid = (
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const formatMonthYear = (date: Date): string => {
+  // ... (this function is unchanged)
   return date.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -91,6 +90,7 @@ const formatMonthYear = (date: Date): string => {
 };
 
 const CalendarScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProps>();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [clickedDate, setClickedDate] = useState<Date | null>(today);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -107,6 +107,7 @@ const CalendarScreen: React.FC = () => {
   );
 
   const goToPreviousMonth = () => {
+    // ... (this function is unchanged)
     setSelectedDate((prevDate) => {
       const newDate = new Date(prevDate);
       newDate.setMonth(newDate.getMonth() - 1);
@@ -115,6 +116,7 @@ const CalendarScreen: React.FC = () => {
   };
 
   const goToNextMonth = () => {
+    // ... (this function is unchanged)
     setSelectedDate((prevDate) => {
       const newDate = new Date(prevDate);
       newDate.setMonth(newDate.getMonth() + 1);
@@ -122,11 +124,15 @@ const CalendarScreen: React.FC = () => {
     });
   };
 
+  // 4. This handler is now passed down to the DayCell
   const onDayPress = (date: Date | null) => {
     if (date) {
       setClickedDate(date);
       setIsModalVisible(true);
     }
+  };
+  const handleAddPress = () => {
+    navigation.navigate("TransactionForm", { dateString: today.toISOString() });
   };
 
   const calendarGrid = useMemo(
@@ -159,36 +165,7 @@ const CalendarScreen: React.FC = () => {
     </View>
   );
 
-  const renderCell = ({ item }: { item: CalendarCell }) => {
-    if (item.day === null) {
-      return <View style={styles.cell} />;
-    }
-
-    return (
-      <TouchableOpacity
-        style={styles.cell}
-        onPress={() => onDayPress(item.fullDate)}
-      >
-        {/* The isClicked style is no longer used, as the modal handles it */}
-        {item.isToday ? (
-          <View style={styles.todayBackground}>
-            <AppText style={[styles.dayText, styles.todayText]}>
-              {item.day}
-            </AppText>
-          </View>
-        ) : (
-          <AppText
-            style={[
-              styles.dayText,
-              item.isSunday ? styles.sundayText : styles.otherDayText,
-            ]}
-          >
-            {item.day}
-          </AppText>
-        )}
-      </TouchableOpacity>
-    );
-  };
+  // 5. The renderCell function is removed
 
   return (
     <View style={styles.container}>
@@ -212,18 +189,16 @@ const CalendarScreen: React.FC = () => {
       <View style={styles.gridContainer}>
         {calendarRows.map((week, index) => (
           <View key={`week-${index}`} style={styles.row}>
-            {week.map((item) => {
-              const cellElement = renderCell({ item });
-              return React.cloneElement(cellElement, { key: item.key });
-            })}
+            {week.map((item) => (
+              <DayCell key={item.key} item={item} onPress={onDayPress} />
+            ))}
           </View>
         ))}
       </View>
-      <TouchableOpacity style={styles.addButton} onPress={() => {}}>
+      <TouchableOpacity style={styles.addButton} onPress={handleAddPress}>
         <AppText style={styles.addButtonText}>+</AppText>
       </TouchableOpacity>
 
-      {/* Render the new, separate component */}
       <DayDetailsModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
@@ -233,6 +208,7 @@ const CalendarScreen: React.FC = () => {
   );
 };
 
+// 7. Styles that were moved to DayCell are removed from here
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -275,19 +251,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.dark,
     paddingHorizontal: 5,
   },
-  todayText: {
-    color: colors.dark,
-    fontWeight: "bold",
-  },
-  todayBackground: {
-    backgroundColor: colors.white,
-    height: 28,
-    width: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "flex-end",
-  },
+  // 'todayText' and 'todayBackground' were removed
   clickedText: {
     color: colors.white,
     fontWeight: "bold",
@@ -311,40 +275,22 @@ const styles = StyleSheet.create({
   dayHeaderSunday: {
     color: colors.danger,
   },
-  cell: {
-    flex: 1,
-    borderBottomWidth: 0.5,
-    borderRightWidth: 0.5,
-    borderColor: colors.dark,
-    padding: 5,
-  },
-  dayText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  sundayText: {
-    textAlign: "right",
-    color: colors.danger,
-  },
-  otherDayText: {
-    textAlign: "right",
-    color: colors.light,
-  },
   addButton: {
     position: "absolute",
     bottom: 20,
     right: 20,
-    height: 40,
-    width: 40,
+    height: 45,
+    width: 45,
     borderRadius: 17.5,
-    backgroundColor: colors.light,
+    backgroundColor: colors.dark,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.light,
   },
   addButtonText: {
-    color: colors.darkPrimary,
-    fontSize: 25,
-    fontWeight: "bold",
+    color: colors.light,
+    fontSize: 30,
   },
 });
 

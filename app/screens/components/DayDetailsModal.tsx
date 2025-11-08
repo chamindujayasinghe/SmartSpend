@@ -1,3 +1,5 @@
+// app/screens/components/DayDetailsModal.tsx
+
 import React from "react";
 import {
   View,
@@ -6,9 +8,19 @@ import {
   Modal,
   Pressable,
 } from "react-native";
-import AppText from "../../components/AppText"; // Adjust path if needed
-import colors from "../../../config/colors"; // Adjust path if needed
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AppText from "../../components/AppText";
+import colors from "../../../config/colors";
+import { MaterialCommunityIcons } from "@expo/vector-icons"; // <-- Re-added this import
+
+// Navigation imports
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AppStackParamList } from "../../navigation/AppNavigator";
+
+type NavigationProps = NativeStackNavigationProp<
+  AppStackParamList,
+  "TransactionForm"
+>;
 
 interface DayDetailsModalProps {
   visible: boolean;
@@ -21,8 +33,14 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
   onClose,
   date,
 }) => {
+  const navigation = useNavigation<NavigationProps>();
+
   const handleAddPress = () => {
-    console.log("Add transaction for:", date);
+    if (date) {
+      navigation.navigate("TransactionForm", {
+        dateString: date.toISOString(),
+      });
+    }
     onClose();
   };
 
@@ -35,6 +53,7 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
     >
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalContent}>
+          {/* --- THIS IS THE PART THAT WAS MISSING --- */}
           <View style={styles.modalHeader}>
             <AppText style={styles.modalTitle}>
               {date?.toLocaleDateString("en-US", {
@@ -66,10 +85,10 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
   );
 };
 
+// Styles (unchanged)
 const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "flex-end",
   },
   modalContent: {
