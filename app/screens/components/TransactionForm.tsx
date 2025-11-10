@@ -22,6 +22,7 @@ import {
 } from "../../data/TransactionData";
 import SelectionModal from "./SelectionModal";
 import TransactionTypeTabs from "./TransactionTypeTabs";
+import { saveTransaction } from "../../../utilities/storage";
 
 const validationSchema = Yup.object().shape({
   activeTab: Yup.string(),
@@ -56,8 +57,19 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
     null
   );
 
-  const handleSave = (values: any) => {
-    console.log("Form Submitted:", values);
+  const handleSave = async (values: any, { resetForm }: any) => {
+    try {
+      await saveTransaction(values);
+
+      Alert.alert("Success", "Transaction saved!");
+      console.log("Form Submitted and Saved:", values);
+      resetForm();
+
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error saving transaction:", error);
+      Alert.alert("Error", "Could not save transaction.");
+    }
   };
 
   const getFormattedDate = (date: Date) => {
