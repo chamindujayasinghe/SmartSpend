@@ -1,7 +1,6 @@
 import { ActivityIndicator, View } from "react-native";
 import { useAuthSession } from "../../Hooks/useAuthSession";
 import AuthNavigator from "../navigation/AuthNavigator";
-import MainTabNavigator from "../navigation/MainTabNavigator";
 import AppScreen from "./AppScreen";
 
 export const renderAppContent = () => {

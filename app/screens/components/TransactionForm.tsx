@@ -15,39 +15,31 @@ import { TransactionFormProps } from "../../navigation/NavigationTypes";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import {
+  ACCOUNT_TYPES,
+  EXPENSE_CATEGORIES,
+  INCOME_CATEGORIES,
+} from "../../data/TransactionData";
+import SelectionModal from "./SelectionModal";
+import TransactionTypeTabs from "./TransactionTypeTabs";
 
 const validationSchema = Yup.object().shape({
+  activeTab: Yup.string(),
   date: Yup.date().required().label("Date"),
   amount: Yup.number()
     .required("Amount is required")
     .positive("Amount must be positive")
     .typeError("Amount must be a number"),
-  category: Yup.string().required("Category is required").label("Category"),
+  category: Yup.string().when("activeTab", {
+    is: (val: string) => val !== "Transfer",
+    then: (schema) => schema.required("Category is required"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   account: Yup.string().required("Account is required").label("Account"),
   description: Yup.string().label("Description"),
 });
 
-// --- MODIFIED: This component is now inside TransactionForm or passed props ---
-const renderTabs = (
-  activeTab: string,
-  setFieldValue: (field: string, value: any) => void
-) => (
-  <View style={styles.tabContainer}>
-    {["Income", "Expense", "Transfer"].map((tab) => (
-      <TouchableOpacity
-        key={tab}
-        style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-        onPress={() => setFieldValue("activeTab", tab)}
-      >
-        <AppText
-          style={[styles.tabText, activeTab === tab && styles.activeTabText]}
-        >
-          {tab}
-        </AppText>
-      </TouchableOpacity>
-    ))}
-  </View>
-);
+// --- RENDER TABS FUNCTION IS REMOVED FROM HERE ---
 
 const handleCameraButtonPress = () => {
   Alert.alert("Camera", "Open camera or gallery to attach an image.");
@@ -58,6 +50,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const { dateString } = route.params;
 
   const [showPicker, setShowPicker] = useState(false);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<"category" | "account" | null>(
+    null
+  );
 
   const handleSave = (values: any) => {
     console.log("Form Submitted:", values);
@@ -114,11 +111,41 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
             }
           };
 
+          const getModalItems = () => {
+            if (modalType === "account") {
+              return ACCOUNT_TYPES;
+            }
+            if (modalType === "category") {
+              return values.activeTab === "Income"
+                ? INCOME_CATEGORIES
+                : EXPENSE_CATEGORIES;
+            }
+            return [];
+          };
+
+          const getModalTitle = () => {
+            if (modalType === "account") return "Select Account";
+            if (modalType === "category") return "Select Category";
+            return "";
+          };
+
+          const handleSelectItem = (item: string) => {
+            if (modalType) {
+              setFieldValue(modalType, item);
+            }
+          };
+
           return (
             <>
-              {/* Added ScrollView in case form gets long */}
               <ScrollView style={styles.body}>
-                {renderTabs(values.activeTab, setFieldValue)}
+                {/* --- RENDER TABS REPLACED WITH NEW COMPONENT --- */}
+                <TransactionTypeTabs
+                  activeTab={values.activeTab}
+                  onTabPress={(tab) => {
+                    setFieldValue("activeTab", tab);
+                    setFieldValue("category", ""); // Clear category on tab change
+                  }}
+                />
 
                 {/* Date Field */}
                 <View style={styles.fieldContainer}>
@@ -140,11 +167,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   {showPicker && (
                     <DateTimePicker
                       testID="dateTimePicker"
-                      value={values.date} // --- Use date from Formik values
+                      value={values.date}
                       mode={"date"}
                       is24Hour={true}
                       display="default"
-                      onChange={onChangeDate} // --- Use the new handler
+                      onChange={onChangeDate}
                       textColor={colors.white}
                     />
                   )}
@@ -173,42 +200,66 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                 )}
 
                 {/* Category Field */}
-                <View style={styles.fieldContainer}>
-                  <AppText style={styles.fieldLabel}>Category</AppText>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Select Category"
-                    placeholderTextColor={colors.light}
-                    value={values.category}
-                    onChangeText={handleChange("category")}
-                    onBlur={handleBlur("category")}
-                  />
-                  <MaterialCommunityIcons
-                    name="chevron-down"
-                    color={colors.light}
-                    size={16}
-                  />
-                </View>
-                {touched.category && errors.category && (
-                  <AppText style={styles.errorText}>{errors.category}</AppText>
+                {values.activeTab !== "Transfer" && (
+                  <>
+                    <View style={styles.fieldContainer}>
+                      <AppText style={styles.fieldLabel}>Category</AppText>
+                      <TouchableOpacity
+                        style={styles.fieldValueContainer}
+                        onPress={() => {
+                          setModalType("category");
+                          setModalVisible(true);
+                        }}
+                      >
+                        <AppText
+                          style={[
+                            styles.fieldValue,
+                            !values.category && styles.placeholderText,
+                          ]}
+                        >
+                          {values.category || "Select Category"}
+                        </AppText>
+                        <MaterialCommunityIcons
+                          name="chevron-down"
+                          color={colors.light}
+                          size={16}
+                          style={{ marginLeft: 10 }}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {touched.category && errors.category && (
+                      <AppText style={styles.errorText}>
+                        {errors.category}
+                      </AppText>
+                    )}
+                  </>
                 )}
 
                 {/* Account Field */}
                 <View style={styles.fieldContainer}>
                   <AppText style={styles.fieldLabel}>Account</AppText>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Select Account"
-                    placeholderTextColor={colors.light}
-                    value={values.account}
-                    onChangeText={handleChange("account")}
-                    onBlur={handleBlur("account")}
-                  />
-                  <MaterialCommunityIcons
-                    name="chevron-down"
-                    color={colors.light}
-                    size={16}
-                  />
+                  <TouchableOpacity
+                    style={styles.fieldValueContainer}
+                    onPress={() => {
+                      setModalType("account");
+                      setModalVisible(true);
+                    }}
+                  >
+                    <AppText
+                      style={[
+                        styles.fieldValue,
+                        !values.account && styles.placeholderText,
+                      ]}
+                    >
+                      {values.account || "Select Account"}
+                    </AppText>
+                    <MaterialCommunityIcons
+                      name="chevron-down"
+                      color={colors.light}
+                      size={16}
+                      style={{ marginLeft: 10 }}
+                    />
+                  </TouchableOpacity>
                 </View>
                 {touched.account && errors.account && (
                   <AppText style={styles.errorText}>{errors.account}</AppText>
@@ -262,6 +313,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   <AppText style={styles.buttonText}>Clear</AppText>
                 </TouchableOpacity>
               </View>
+
+              <SelectionModal
+                isVisible={modalVisible}
+                title={getModalTitle()}
+                items={getModalItems()}
+                onSelectItem={handleSelectItem}
+                onClose={() => setModalVisible(false)}
+              />
             </>
           );
         }}
@@ -270,7 +329,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   );
 };
 
-// --- MODIFIED: Styles ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -295,29 +353,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 15,
   },
-  tabContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    marginBottom: 20,
-  },
-  tabButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.dark,
-    marginRight: 10,
-  },
-  activeTabButton: {
-    borderColor: colors.secondary,
-  },
-  tabText: {
-    color: colors.light,
-  },
-  activeTabText: {
-    color: colors.secondary,
-    fontWeight: "bold",
-  },
+  // --- TAB STYLES REMOVED FROM HERE ---
   fieldContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -338,6 +374,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.white,
   },
+  placeholderText: {
+    color: colors.light,
+    fontSize: 16,
+  },
   textInput: {
     flex: 1,
     textAlign: "right",
@@ -346,10 +386,10 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   camerasection: {
-    marginTop: 30,
-    flexDirection: "column",
+    marginTop: 50,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
   },
   cameraButton: {
     borderWidth: 2,
