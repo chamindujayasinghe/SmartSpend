@@ -4,7 +4,6 @@ import AppText from "../components/AppText";
 import colors from "../../config/colors";
 import { User } from "@supabase/supabase-js";
 import { useAppScreenLogic } from "../../Hooks/useAppScreen";
-import SuccessOverlay from "../components/SuccessOverlay";
 
 interface HomeScreenProps {
   user: User;

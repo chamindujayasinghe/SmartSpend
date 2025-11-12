@@ -16,8 +16,6 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../../navigation/AppNavigator";
 import { getTransactions, Transaction } from "../../../utilities/storage";
-
-// --- IMPORT YOUR NEW COMPONENT ---
 import TransactionListItem from "./TransactionListItems";
 
 type NavigationProps = NativeStackNavigationProp<
@@ -69,8 +67,6 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
     onClose();
   };
 
-  // --- RENDER FUNCTION IS NOW REMOVED ---
-
   return (
     <Modal
       animationType="slide"
@@ -109,7 +105,6 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
               <FlatList
                 data={transactions}
                 keyExtractor={(item) => item.id}
-                // --- UPDATE RENDERITEM ---
                 renderItem={({ item }) => <TransactionListItem item={item} />}
               />
             )}
@@ -124,7 +119,6 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
   );
 };
 
-// --- STYLES ARE NOW CLEANER ---
 const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
@@ -179,7 +173,6 @@ const styles = StyleSheet.create({
     color: colors.light,
     fontSize: 16,
   },
-  // --- TRANSACTION STYLES ARE REMOVED ---
 });
 
 export default DayDetailsModal;

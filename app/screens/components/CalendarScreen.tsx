@@ -9,6 +9,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../../navigation/AppNavigator";
 import DayCell from "./DayCell";
 import { CalendarCell } from "../../../Hooks/calenderTypes";
+import { getTransactions, Transaction } from "../../../utilities/storage";
 
 const today = new Date();
 
@@ -19,7 +20,8 @@ type NavigationProps = NativeStackNavigationProp<
 
 const generateCalendarGrid = (
   date: Date,
-  clickedDate: Date | null
+  clickedDate: Date | null,
+  dailyAggregates: Map<number, { income: number; expense: number }>
 ): CalendarCell[] => {
   const grid: CalendarCell[] = [];
   const year = date.getFullYear();
@@ -35,6 +37,8 @@ const generateCalendarGrid = (
       isToday: false,
       isClicked: false,
       fullDate: null,
+      income: 0,
+      expense: 0,
     });
   }
 
@@ -52,6 +56,9 @@ const generateCalendarGrid = (
       month === clickedDate.getMonth() &&
       year === clickedDate.getFullYear();
 
+    // --- GET AGGREGATE DATA FOR THIS DAY ---
+    const agg = dailyAggregates.get(day) || { income: 0, expense: 0 };
+
     grid.push({
       key: `day-${day}`,
       day,
@@ -59,6 +66,9 @@ const generateCalendarGrid = (
       isToday,
       isClicked: false,
       fullDate: cellDate,
+      // --- ADD INCOME/EXPENSE DATA ---
+      income: agg.income,
+      expense: agg.expense,
     });
   }
 
@@ -73,6 +83,8 @@ const generateCalendarGrid = (
         isToday: false,
         isClicked: false,
         fullDate: null,
+        income: 0,
+        expense: 0,
       });
     }
   }
@@ -82,7 +94,6 @@ const generateCalendarGrid = (
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const formatMonthYear = (date: Date): string => {
-  // ... (this function is unchanged)
   return date.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -94,20 +105,28 @@ const CalendarScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [clickedDate, setClickedDate] = useState<Date | null>(today);
   const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const [income, setIncome] = useState(0);
-  const [expenses, setExpense] = useState(0);
-  const total = income - expenses;
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
 
   useFocusEffect(
     useCallback(() => {
       setClickedDate(today);
       setSelectedDate(today);
+
+      // Fetch all transactions
+      const fetchAllData = async () => {
+        try {
+          const transactions = await getTransactions();
+          setAllTransactions(transactions);
+        } catch (e) {
+          console.error("Failed to fetch transactions", e);
+        }
+      };
+
+      fetchAllData();
     }, [])
   );
 
   const goToPreviousMonth = () => {
-    // ... (this function is unchanged)
     setSelectedDate((prevDate) => {
       const newDate = new Date(prevDate);
       newDate.setMonth(newDate.getMonth() - 1);
@@ -116,7 +135,6 @@ const CalendarScreen: React.FC = () => {
   };
 
   const goToNextMonth = () => {
-    // ... (this function is unchanged)
     setSelectedDate((prevDate) => {
       const newDate = new Date(prevDate);
       newDate.setMonth(newDate.getMonth() + 1);
@@ -124,7 +142,6 @@ const CalendarScreen: React.FC = () => {
     });
   };
 
-  // 4. This handler is now passed down to the DayCell
   const onDayPress = (date: Date | null) => {
     if (date) {
       setClickedDate(date);
@@ -135,9 +152,50 @@ const CalendarScreen: React.FC = () => {
     navigation.navigate("TransactionForm", { dateString: today.toISOString() });
   };
 
+  const dailyAggregates = useMemo(() => {
+    const aggregates = new Map<number, { income: number; expense: number }>();
+    const currentYear = selectedDate.getFullYear();
+    const currentMonth = selectedDate.getMonth();
+
+    const monthTransactions = allTransactions.filter((tx) => {
+      const txDate = new Date(tx.date);
+      return (
+        txDate.getFullYear() === currentYear &&
+        txDate.getMonth() === currentMonth
+      );
+    });
+
+    for (const tx of monthTransactions) {
+      const day = new Date(tx.date).getDate();
+      const amount = parseFloat(tx.amount) || 0;
+
+      const dayAgg = aggregates.get(day) || { income: 0, expense: 0 };
+
+      if (tx.activeTab === "Income") {
+        dayAgg.income += amount;
+      } else {
+        dayAgg.expense += amount;
+      }
+
+      aggregates.set(day, dayAgg);
+    }
+
+    return aggregates;
+  }, [allTransactions, selectedDate]);
+  const monthlyTotals = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    for (const agg of dailyAggregates.values()) {
+      income += agg.income;
+      expense += agg.expense;
+    }
+    const total = income - expense;
+    return { income, expense, total };
+  }, [dailyAggregates]);
+
   const calendarGrid = useMemo(
-    () => generateCalendarGrid(selectedDate, clickedDate),
-    [selectedDate, clickedDate]
+    () => generateCalendarGrid(selectedDate, clickedDate, dailyAggregates),
+    [selectedDate, clickedDate, dailyAggregates]
   );
   const monthYearTitle = useMemo(
     () => formatMonthYear(selectedDate),
@@ -165,11 +223,13 @@ const CalendarScreen: React.FC = () => {
     </View>
   );
 
-  // 5. The renderCell function is removed
-
   return (
     <View style={styles.container}>
-      <CalendarHeader income={income} expenses={expenses} total={total} />
+      <CalendarHeader
+        income={monthlyTotals.income}
+        expenses={monthlyTotals.expense}
+        total={monthlyTotals.total}
+      />
 
       <View style={styles.headerContainer}>
         <TouchableOpacity
@@ -208,7 +268,6 @@ const CalendarScreen: React.FC = () => {
   );
 };
 
-// 7. Styles that were moved to DayCell are removed from here
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -251,7 +310,6 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.dark,
     paddingHorizontal: 5,
   },
-  // 'todayText' and 'todayBackground' were removed
   clickedText: {
     color: colors.white,
     fontWeight: "bold",

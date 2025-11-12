@@ -3,23 +3,22 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
-import { Period } from "./PeriodSelector"; // Import the Period type
-import { DateRange } from "../StatsScreen"; // Import DateRange type
+import { Period } from "./PeriodSelector";
+import { DateRange } from "../StatsScreen";
 
 interface DateNavigatorProps {
   currentDate: Date;
   selectedPeriod: Period;
   onNavigate: (direction: "previous" | "next") => void;
-  dateRange: DateRange; // Add dateRange prop
+  dateRange: DateRange;
 }
 
-// Helper for formatting short dates
 const formatShortDate = (date: Date | null) => {
   if (!date) return "";
   return date.toLocaleDateString("default", {
     month: "short",
     day: "numeric",
-    year: "numeric", // Keep year for clarity
+    year: "numeric",
   });
 };
 
@@ -36,7 +35,6 @@ const formatDisplayDate = (date: Date, period: Period, range: DateRange) => {
       return date.getFullYear().toString();
 
     case "Period":
-      // Format the custom range
       if (range.start && range.end) {
         return `${formatShortDate(range.start)} - ${formatShortDate(
           range.end

@@ -1,9 +1,7 @@
-// TransactionTypeTabs.tsx
-
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import AppText from "../../components/AppText"; // Adjust path if needed
-import colors from "../../../config/colors"; // Adjust path if needed
+import AppText from "../../components/AppText";
+import colors from "../../../config/colors";
 
 type TabType = "Income" | "Expense" | "Transfer";
 

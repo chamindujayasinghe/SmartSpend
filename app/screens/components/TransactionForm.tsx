@@ -40,8 +40,6 @@ const validationSchema = Yup.object().shape({
   description: Yup.string().label("Description"),
 });
 
-// --- RENDER TABS FUNCTION IS REMOVED FROM HERE ---
-
 const handleCameraButtonPress = () => {
   Alert.alert("Camera", "Open camera or gallery to attach an image.");
 };
@@ -150,16 +148,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
           return (
             <>
               <ScrollView style={styles.body}>
-                {/* --- RENDER TABS REPLACED WITH NEW COMPONENT --- */}
                 <TransactionTypeTabs
                   activeTab={values.activeTab}
                   onTabPress={(tab) => {
                     setFieldValue("activeTab", tab);
-                    setFieldValue("category", ""); // Clear category on tab change
+                    setFieldValue("category", "");
                   }}
                 />
 
-                {/* Date Field */}
                 <View style={styles.fieldContainer}>
                   <AppText style={styles.fieldLabel}>Date</AppText>
                   <TouchableOpacity
@@ -365,7 +361,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 15,
   },
-  // --- TAB STYLES REMOVED FROM HERE ---
+
   fieldContainer: {
     flexDirection: "row",
     justifyContent: "space-between",

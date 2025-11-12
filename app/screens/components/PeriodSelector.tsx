@@ -16,7 +16,7 @@ const periodOptions: Period[] = ["Daily", "Monthly", "Annually", "Period"];
 interface PeriodSelectorProps {
   selectedPeriod: Period;
   onSelectPeriod: (period: Period) => void;
-  onReset: () => void;
+  onReset?: () => void;
   onShowRangePicker: () => void;
 }
 
@@ -31,7 +31,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
 
   const handleSelect = (period: Period) => {
     if (period === "Period") {
-      onShowRangePicker(); // Trigger modal show instead of setting state
+      onShowRangePicker();
     } else {
       onSelectPeriod(period);
     }
@@ -39,12 +39,11 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   };
 
   const getPeriodInitial = (period: Period) => {
-    if (period === "Period") return "P"; // Use "P" for Period
+    if (period === "Period") return "P";
     return period.charAt(0);
   };
 
   return (
-    // Wrap both buttons in a single View to align them
     <View style={styles.wrapper}>
       <TouchableOpacity
         style={styles.periodSelector}
@@ -60,17 +59,19 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[
-          styles.resetButton,
-          isResetPressed && styles.resetButtonPressed,
-        ]}
-        onPress={onReset}
-        onPressIn={() => setIsResetPressed(true)}
-        onPressOut={() => setIsResetPressed(false)}
-      >
-        <AppText style={styles.resetButtonText}>Reset</AppText>
-      </TouchableOpacity>
+      {onReset && (
+        <TouchableOpacity
+          style={[
+            styles.resetButton,
+            isResetPressed && styles.resetButtonPressed,
+          ]}
+          onPress={onReset}
+          onPressIn={() => setIsResetPressed(true)}
+          onPressOut={() => setIsResetPressed(false)}
+        >
+          <AppText style={styles.resetButtonText}>Reset</AppText>
+        </TouchableOpacity>
+      )}
 
       <Modal
         visible={isModalVisible}

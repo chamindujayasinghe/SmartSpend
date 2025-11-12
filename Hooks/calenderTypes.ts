@@ -5,4 +5,6 @@ export interface CalendarCell {
   isToday: boolean;
   isClicked: boolean;
   fullDate: Date | null;
+  income?: number;
+  expense?: number;
 }

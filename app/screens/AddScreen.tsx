@@ -1,29 +1,25 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
-import AppText from "../components/AppText"; // Use your AppText component
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import AppText from "../components/AppText";
 import colors from "../../config/colors";
 
-// Import the content screens
-import BudgetAddScreen from "./components/BudgetAddScreen";
+// Removed BudgetAddScreen import
 import NoteAddScreen from "./components/NoteAddScreen";
 import CalendarScreen from "./components/CalendarScreen";
 
-type AddTab = "calender" | "budget" | "note";
+// Removed "budget" from the type
+type AddTab = "calender" | "note";
 
 const AddScreen: React.FC = () => {
-  // 2. Create state to hold the selected tab
   const [selectedTab, setSelectedTab] = useState<AddTab>("calender");
 
   return (
     <View style={styles.container}>
-      {/* This is your custom header from the image */}
       <View style={styles.header}>
         <AppText style={styles.title}>Add New Entry</AppText>
       </View>
 
-      {/* 3. This is the tab container, copied from StatsScreen */}
       <View style={styles.tabsContainer}>
-        {/* Tab 1: Calender */}
         <TouchableOpacity
           style={styles.tabButton}
           onPress={() => setSelectedTab("calender")}
@@ -37,23 +33,6 @@ const AddScreen: React.FC = () => {
             Calender
           </AppText>
           {selectedTab === "calender" && (
-            <View style={styles.activeTabIndicator} />
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.tabButton}
-          onPress={() => setSelectedTab("budget")}
-        >
-          <AppText
-            style={[
-              styles.tabText,
-              selectedTab === "budget" && styles.activeTabText,
-            ]}
-          >
-            Budget
-          </AppText>
-          {selectedTab === "budget" && (
             <View style={styles.activeTabIndicator} />
           )}
         </TouchableOpacity>
@@ -76,7 +55,6 @@ const AddScreen: React.FC = () => {
 
       <View style={styles.contentArea}>
         {selectedTab === "calender" && <CalendarScreen />}
-        {selectedTab === "budget" && <BudgetAddScreen />}
         {selectedTab === "note" && <NoteAddScreen />}
       </View>
     </View>
@@ -111,10 +89,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.light,
     fontWeight: "600",
-    textTransform: "capitalize", // Matches your image
+    textTransform: "capitalize",
   },
   activeTabText: {
-    color: colors.secondary, // Your active blue color
+    color: colors.secondary,
   },
   activeTabIndicator: {
     height: 3,

@@ -10,6 +10,7 @@ import PlaceholderScreen from "../screens/PlaceholderScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import StatsScreen from "../screens/StatsScreen";
 import AddScreen from "../screens/AddScreen";
+import BudgetAddScreen from "../screens/BudgetAddScreen";
 
 interface MainTabNavigatorProps {
   user: User;
@@ -85,7 +86,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
       />
       <Tab.Screen
         name="Budget"
-        component={PlaceholderScreen}
+        component={BudgetAddScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="wallet" color={color} size={size} />

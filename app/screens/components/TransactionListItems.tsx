@@ -1,10 +1,8 @@
-// app/screens/components/TransactionListItem.tsx
-
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
-import { Transaction } from "../../../utilities/storage"; // Adjust path as needed
+import { Transaction } from "../../../utilities/storage";
 
 interface TransactionListItemProps {
   item: Transaction;

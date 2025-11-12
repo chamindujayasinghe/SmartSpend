@@ -20,23 +20,43 @@ const DayCell: React.FC<DayCellProps> = React.memo(({ item, onPress }) => {
     }
   };
 
+  const { day, isToday, isSunday, income = 0, expense = 0 } = item;
+  const hasIncome = income > 0;
+  const hasExpense = expense > 0;
+
   return (
     <TouchableOpacity style={styles.cell} onPress={handlePress}>
-      {item.isToday ? (
-        <View style={styles.todayBackground}>
-          <AppText style={[styles.dayText, styles.todayText]}>
-            {item.day}
+      {/* Day Number (Top Right) */}
+      <View style={styles.dayNumberContainer}>
+        {isToday ? (
+          <View style={styles.todayBackground}>
+            <AppText style={[styles.dayText, styles.todayText]}>{day}</AppText>
+          </View>
+        ) : (
+          <AppText
+            style={[
+              styles.dayText,
+              isSunday ? styles.sundayText : styles.otherDayText,
+            ]}
+          >
+            {day}
           </AppText>
+        )}
+      </View>
+
+      {(hasIncome || hasExpense) && (
+        <View>
+          {hasIncome && (
+            <AppText style={[styles.summaryText, styles.incomeText]}>
+              {income.toFixed(0)}
+            </AppText>
+          )}
+          {hasExpense && (
+            <AppText style={[styles.summaryText, styles.expenseText]}>
+              {expense.toFixed(0)}
+            </AppText>
+          )}
         </View>
-      ) : (
-        <AppText
-          style={[
-            styles.dayText,
-            item.isSunday ? styles.sundayText : styles.otherDayText,
-          ]}
-        >
-          {item.day}
-        </AppText>
       )}
     </TouchableOpacity>
   );
@@ -48,7 +68,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderRightWidth: 0.5,
     borderColor: colors.dark,
-    padding: 5,
+    padding: 4,
+    minHeight: 60,
+    justifyContent: "space-between",
+    flexDirection: "column",
+  },
+  dayNumberContainer: {
+    alignSelf: "flex-end",
   },
   dayText: {
     fontSize: 12,
@@ -65,7 +91,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    alignSelf: "flex-end",
   },
   sundayText: {
     textAlign: "right",
@@ -74,6 +99,17 @@ const styles = StyleSheet.create({
   otherDayText: {
     textAlign: "right",
     color: colors.light,
+  },
+  summaryText: {
+    fontSize: 11,
+    fontWeight: "bold",
+    alignSelf: "flex-end",
+  },
+  incomeText: {
+    color: colors.secondary,
+  },
+  expenseText: {
+    color: colors.danger,
   },
 });
 
