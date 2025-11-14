@@ -5,7 +5,7 @@ import colors from "../../config/colors";
 
 // Removed BudgetAddScreen import
 import NoteAddScreen from "./components/NoteAddScreen";
-import CalendarScreen from "./components/CalendarScreen";
+import CalendarScreen from "./components/calender/CalendarScreen";
 
 // Removed "budget" from the type
 type AddTab = "calender" | "note";

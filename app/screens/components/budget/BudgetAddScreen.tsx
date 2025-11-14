@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import AppText from "../components/AppText";
-import colors from "../../config/colors";
-import DateRangePickerModal from "./components/DateRangePickerModal";
-import DateNavigator from "./components/DateNavigator";
-import PeriodSelector, { Period } from "./components/PeriodSelector";
+import PeriodSelector, { Period } from "../PeriodSelector";
+import AppText from "../../../components/AppText";
+import DateNavigator from "../DateNavigator";
+import DateRangePickerModal from "../DateRangePickerModal";
+import colors from "../../../../config/colors";
 
 export type DateRange = {
   start: Date | null;

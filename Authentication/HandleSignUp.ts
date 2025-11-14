@@ -1,4 +1,5 @@
 import { supabase } from "../lib/Supabase-client-config";
+import { SignupScreenProps } from "../app/navigation/NavigationTypes";
 
 interface SignupValues {
   email: string;
@@ -20,7 +21,8 @@ const handleSignUp = async (
   }: {
     setSubmitting: (isSubmitting: boolean) => void;
     setStatus: (status: ServerStatus | null) => void;
-  }
+  },
+  navigation: SignupScreenProps["navigation"]
 ) => {
   setSubmitting(true);
   setStatus(null);
@@ -34,7 +36,6 @@ const handleSignUp = async (
       email: email,
       password: password,
       options: {
-        emailRedirectTo: "https://smart-spend-web-ten.vercel.app/SignUpConfirm.html",
         data: {
           first_name: firstname,
           last_name: lastname,
@@ -50,10 +51,8 @@ const handleSignUp = async (
         message: "Successfully signed up and logged in!",
       });
     } else if (user) {
-      setStatus({
-        type: "info",
-        message: "Success! Please check your email to verify your account.",
-      });
+        setStatus(null);
+        navigation.navigate("VerifyOtp", { email: values.email });
     }
   } catch (e) {
     setStatus({

@@ -1,8 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-
-import colors from "../../../config/colors";
-import AppText from "../../components/AppText";
+import AppText from "../../../components/AppText";
+import colors from "../../../../config/colors";
 
 interface Props {
   income: number;

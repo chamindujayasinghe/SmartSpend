@@ -1,15 +1,15 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import AppText from "../../components/AppText";
-import colors from "../../../config/colors";
+import AppText from "../../../components/AppText";
+import colors from "../../../../config/colors";
 import CalendarHeader from "./CalenderHeader";
-import DayDetailsModal from "./DayDetailsModal";
+import DayDetailsModal from "../DayDetailsModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AppStackParamList } from "../../navigation/AppNavigator";
+import { AppStackParamList } from "../../../navigation/AppNavigator";
 import DayCell from "./DayCell";
-import { CalendarCell } from "../../../Hooks/calenderTypes";
-import { getTransactions, Transaction } from "../../../utilities/storage";
+import { CalendarCell } from "../../../../Hooks/calenderTypes";
+import { getTransactions, Transaction } from "../../../../utilities/storage";
 
 const today = new Date();
 

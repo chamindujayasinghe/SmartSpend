@@ -26,7 +26,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = ({ user }) => {
       <Stack.Screen
         name="TransactionForm"
         component={TransactionForm}
-        options={{ animation: "slide_from_bottom" }}
+        options={{ animation: "none" }}
       />
     </Stack.Navigator>
   );

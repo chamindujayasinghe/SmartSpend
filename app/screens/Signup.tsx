@@ -84,7 +84,7 @@ const Signup = ({ navigation }: SignupScreenProps) => {
               confirmPassword: "",
             }}
             onSubmit={(values, actions) =>
-              handleSignUp(values, { ...actions, setStatus })
+              handleSignUp(values, { ...actions, setStatus }, navigation)
             }
             validationSchema={validationSchema}
           >

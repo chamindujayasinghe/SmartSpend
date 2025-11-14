@@ -6,11 +6,10 @@ import { User } from "@supabase/supabase-js";
 
 import colors from "../../config/colors";
 import HomeScreen from "../screens/HomeScreen";
-import PlaceholderScreen from "../screens/PlaceholderScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import StatsScreen from "../screens/StatsScreen";
 import AddScreen from "../screens/AddScreen";
-import BudgetAddScreen from "../screens/BudgetAddScreen";
+import BudgetAddScreen from "../screens/components/budget/BudgetAddScreen";
 
 interface MainTabNavigatorProps {
   user: User;

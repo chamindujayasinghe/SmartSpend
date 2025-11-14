@@ -1,10 +1,16 @@
-import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 import AppText from "../components/AppText";
 import colors from "../../config/colors";
 import DateRangePickerModal from "./components/DateRangePickerModal";
 import DateNavigator from "./components/DateNavigator";
 import PeriodSelector, { Period } from "./components/PeriodSelector";
+import { getTransactions, Transaction } from "../../utilities/storage";
+import PieChartComponent from "./components/stats/PieChart";
+import CategorySummaryListItem, {
+  AggregatedCategory,
+} from "./components/stats/CategorySummaryListItem";
 
 export type DateRange = {
   start: Date | null;
@@ -14,7 +20,7 @@ export type DateRange = {
 const StatsScreen: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTab, setSelectedTab] = useState<"incomes" | "expenses">(
-    "incomes"
+    "expenses"
   );
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("Monthly");
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -22,10 +28,81 @@ const StatsScreen: React.FC = () => {
     end: null,
   });
   const [isRangePickerVisible, setIsRangePickerVisible] = useState(false);
+  const [aggregatedData, setAggregatedData] = useState<AggregatedCategory[]>(
+    []
+  );
+  const isFocused = useIsFocused();
+
+  const totalAmount = aggregatedData.reduce(
+    (sum, item) => sum + item.totalAmount,
+    0
+  );
+
+  useEffect(() => {
+    const fetchAndAggregateTransactions = async () => {
+      try {
+        const allTransactions = await getTransactions();
+        const targetTab = selectedTab === "incomes" ? "Income" : "Expense";
+
+        const filteredTransactions = allTransactions.filter((tx) => {
+          if (tx.activeTab !== targetTab) {
+            return false;
+          }
+
+          const txDate = new Date(tx.date);
+          switch (selectedPeriod) {
+            case "Daily":
+              return txDate.toDateString() === currentDate.toDateString();
+            case "Monthly":
+              return (
+                txDate.getMonth() === currentDate.getMonth() &&
+                txDate.getFullYear() === currentDate.getFullYear()
+              );
+            case "Annually":
+              return txDate.getFullYear() === currentDate.getFullYear();
+            case "Period":
+              if (!dateRange.start || !dateRange.end) return false;
+              const startDate = new Date(dateRange.start);
+              startDate.setHours(0, 0, 0, 0);
+              const endDate = new Date(dateRange.end);
+              endDate.setHours(23, 59, 59, 999);
+              return txDate >= startDate && txDate <= endDate;
+            default:
+              return false;
+          }
+        });
+
+        // 2. AGGREGATION
+        const categoryMap = new Map<string, number>();
+
+        filteredTransactions.forEach((tx) => {
+          const amount = parseFloat(tx.amount);
+          const currentTotal = categoryMap.get(tx.category) || 0;
+          categoryMap.set(tx.category, currentTotal + amount);
+        });
+
+        // Convert the Map back into an array of objects
+        const aggregatedArray = Array.from(
+          categoryMap,
+          ([category, totalAmount]) => ({
+            category,
+            totalAmount,
+          })
+        ).sort((a, b) => b.totalAmount - a.totalAmount);
+
+        setAggregatedData(aggregatedArray);
+      } catch (e) {
+        console.error("Failed to fetch or aggregate transactions", e);
+      }
+    };
+
+    if (isFocused) {
+      fetchAndAggregateTransactions();
+    }
+  }, [isFocused, currentDate, selectedPeriod, selectedTab, dateRange]);
 
   const handleNavigate = (direction: "previous" | "next") => {
     if (selectedPeriod === "Period") return;
-
     const newDate = new Date(currentDate);
     const amount = direction === "previous" ? -1 : 1;
     switch (selectedPeriod) {
@@ -66,7 +143,7 @@ const StatsScreen: React.FC = () => {
           selectedPeriod={selectedPeriod}
           onSelectPeriod={setSelectedPeriod}
           onReset={handleResetDate}
-          onShowRangePicker={() => setIsRangePickerVisible(true)} // Pass handler to show modal
+          onShowRangePicker={() => setIsRangePickerVisible(true)}
         />
       </View>
 
@@ -74,7 +151,7 @@ const StatsScreen: React.FC = () => {
         currentDate={currentDate}
         selectedPeriod={selectedPeriod}
         onNavigate={handleNavigate}
-        dateRange={dateRange} // Pass dateRange
+        dateRange={dateRange}
       />
 
       <View style={styles.tabsContainer}>
@@ -113,11 +190,38 @@ const StatsScreen: React.FC = () => {
       </View>
 
       <View style={styles.contentArea}>
-        {selectedTab === "incomes" && (
-          <AppText style={styles.contentText}>Incomes Content Here</AppText>
+        {aggregatedData.length > 0 && (
+          <PieChartComponent
+            data={aggregatedData}
+            title={`${
+              selectedTab === "incomes" ? "Incomes" : "Expenses"
+            } Distribution`}
+            type={selectedTab}
+            height={240}
+          />
         )}
-        {selectedTab === "expenses" && (
-          <AppText style={styles.contentText}>Expenses Content Here</AppText>
+
+        {aggregatedData.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <AppText style={styles.emptyText}>
+              No {selectedTab} found for this period.
+            </AppText>
+          </View>
+        ) : (
+          <FlatList
+            data={aggregatedData}
+            keyExtractor={(item) => item.category}
+            renderItem={({ item, index }) => (
+              <CategorySummaryListItem
+                index={index}
+                item={item}
+                type={selectedTab}
+                totalAmount={totalAmount} // Pass totalAmount to calculate percentage
+              />
+            )}
+            style={styles.list}
+            showsVerticalScrollIndicator={false}
+          />
         )}
       </View>
 
@@ -130,6 +234,7 @@ const StatsScreen: React.FC = () => {
   );
 };
 
+// ... keep the same styles ...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -147,10 +252,30 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: colors.white,
   },
+  totalContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    backgroundColor: colors.dark,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.white,
+  },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
   tabsContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: colors.dark,
+    marginBottom: 10,
   },
   tabButton: {
     flex: 1,
@@ -175,12 +300,19 @@ const styles = StyleSheet.create({
   },
   contentArea: {
     flex: 1,
+  },
+  list: {
+    width: "100%",
+    marginTop: 10,
+  },
+  emptyContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  contentText: {
-    color: colors.white,
-    fontSize: 18,
+  emptyText: {
+    color: colors.light,
+    fontSize: 16,
   },
 });
 

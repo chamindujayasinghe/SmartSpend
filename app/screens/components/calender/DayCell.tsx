@@ -1,8 +1,8 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import AppText from "../../components/AppText";
-import colors from "../../../config/colors";
-import { CalendarCell } from "../../../Hooks/calenderTypes";
+import { CalendarCell } from "../../../../Hooks/calenderTypes";
+import AppText from "../../../components/AppText";
+import colors from "../../../../config/colors";
 
 interface DayCellProps {
   item: CalendarCell;

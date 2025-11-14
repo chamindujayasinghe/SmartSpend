@@ -190,7 +190,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   </AppText>
                 )}
 
-                {/* Amount Field */}
                 <View style={styles.fieldContainer}>
                   <AppText style={styles.fieldLabel}>Amount</AppText>
                   <TextInput
