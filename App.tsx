@@ -5,38 +5,50 @@ import gradientColors from "./config/GradientColors";
 import { renderAppContent } from "./app/screens/AppContent";
 import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import colors from "./config/colors";
+import lightGradientColors from "./config/LightGradientColors";
+import { ThemeProvider, useTheme } from "./config/theme/ThemeProvider";
+
+const AppGradientWrapper = () => {
+  const { isLightMode } = useTheme();
+
+  return (
+    <LinearGradient
+      colors={(isLightMode ? lightGradientColors : gradientColors) as any}
+      style={styles.gradient}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
+    >
+      <NavigationContainer
+        theme={{
+          ...DarkTheme,
+          dark: !isLightMode,
+          colors: {
+            primary: colors.primary,
+            background: "transparent",
+            card: colors.primary,
+            text: colors.white,
+            border: colors.dark,
+            notification: colors.secondary,
+          },
+        }}
+      >
+        <SafeAreaView style={styles.container}>
+          {renderAppContent()}
+        </SafeAreaView>
+      </NavigationContainer>
+    </LinearGradient>
+  );
+};
 
 export default function App() {
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaProvider>
-        <LinearGradient
-          colors={gradientColors as any}
-          style={styles.gradient}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        >
-          <NavigationContainer
-            theme={{
-              ...DarkTheme,
-              dark: true,
-              colors: {
-                primary: colors.primary,
-                background: "transparent",
-                card: colors.primary,
-                text: colors.white,
-                border: colors.dark,
-                notification: colors.secondary,
-              },
-            }}
-          >
-            <SafeAreaView style={styles.container}>
-              {renderAppContent()}
-            </SafeAreaView>
-          </NavigationContainer>
-        </LinearGradient>
-      </SafeAreaProvider>
-    </TouchableWithoutFeedback>
+    <ThemeProvider>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaProvider>
+          <AppGradientWrapper />
+        </SafeAreaProvider>
+      </TouchableWithoutFeedback>
+    </ThemeProvider>
   );
 }
 

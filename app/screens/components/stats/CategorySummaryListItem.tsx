@@ -3,18 +3,19 @@ import { View, StyleSheet } from "react-native";
 import { PIE_CHART_COLORS } from "../../../../config/piechartcolors";
 import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
+import { useTheme } from "../../../../config/theme/ThemeProvider";
 
 export interface AggregatedCategory {
   category: string;
   totalAmount: number;
-  percentage?: number; // Add optional percentage prop
+  percentage?: number;
 }
 
 interface CategorySummaryListItemProps {
   item: AggregatedCategory;
   type: "incomes" | "expenses";
   index: number;
-  totalAmount?: number; // Add totalAmount prop to calculate percentage
+  totalAmount?: number;
 }
 
 const CategorySummaryListItem: React.FC<CategorySummaryListItemProps> = ({
@@ -23,20 +24,37 @@ const CategorySummaryListItem: React.FC<CategorySummaryListItemProps> = ({
   index,
   totalAmount,
 }) => {
+  const { isLightMode } = useTheme();
   const dotColor = PIE_CHART_COLORS[index % PIE_CHART_COLORS.length];
   const amountColor = dotColor;
 
-  // Calculate percentage if not provided
   const percentage =
     item.percentage ||
     (totalAmount ? (item.totalAmount / totalAmount) * 100 : 0);
 
   return (
-    <View style={styles.row}>
+    <View
+      style={[
+        styles.row,
+        { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
+      ]}
+    >
       <View style={styles.categoryContainer}>
         <View style={[styles.colorDot, { backgroundColor: dotColor }]} />
-        <AppText style={styles.categoryText}>{item.category}</AppText>
-        <AppText style={styles.percentageText}>
+        <AppText
+          style={[
+            styles.categoryText,
+            { color: isLightMode ? colors.brown : colors.white },
+          ]}
+        >
+          {item.category}
+        </AppText>
+        <AppText
+          style={[
+            styles.percentageText,
+            { color: isLightMode ? colors.darkbrown : colors.light },
+          ]}
+        >
           ({percentage.toFixed(1)}%)
         </AppText>
       </View>
@@ -55,7 +73,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: colors.dark,
   },
   categoryContainer: {
     flexDirection: "row",
@@ -69,20 +86,17 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   categoryText: {
-    color: colors.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
-    marginRight: 6,
+    marginRight: 10,
   },
   percentageText: {
-    color: colors.light,
     fontSize: 14,
     fontWeight: "400",
   },
   amountText: {
     fontSize: 16,
     fontWeight: "bold",
-    marginLeft: 10,
   },
 });
 

@@ -9,6 +9,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
+import { useTheme } from "../../../config/theme/ThemeProvider";
 
 export type Period = "Daily" | "Monthly" | "Annually" | "Period";
 const periodOptions: Period[] = ["Daily", "Monthly", "Annually", "Period"];
@@ -26,6 +27,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   onReset,
   onShowRangePicker,
 }) => {
+  const { isLightMode } = useTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isResetPressed, setIsResetPressed] = useState(false);
 
@@ -46,16 +48,24 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity
-        style={styles.periodSelector}
+        style={[
+          styles.periodSelector,
+          { backgroundColor: isLightMode ? colors.lightbrown : colors.dark },
+        ]}
         onPress={() => setIsModalVisible(true)}
       >
-        <AppText style={styles.periodText}>
+        <AppText
+          style={[
+            styles.periodText,
+            { color: isLightMode ? colors.darkSecondary : colors.secondary },
+          ]}
+        >
           {getPeriodInitial(selectedPeriod)}
         </AppText>
         <MaterialCommunityIcons
           name="chevron-down"
           size={20}
-          color={colors.white}
+          color={isLightMode ? colors.brown : colors.white}
         />
       </TouchableOpacity>
 
@@ -63,13 +73,21 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         <TouchableOpacity
           style={[
             styles.resetButton,
+            { backgroundColor: isLightMode ? colors.lightbrown : colors.dark },
             isResetPressed && styles.resetButtonPressed,
           ]}
           onPress={onReset}
           onPressIn={() => setIsResetPressed(true)}
           onPressOut={() => setIsResetPressed(false)}
         >
-          <AppText style={styles.resetButtonText}>Reset</AppText>
+          <AppText
+            style={[
+              styles.resetButtonText,
+              { color: isLightMode ? colors.brown : colors.white },
+            ]}
+          >
+            Reset
+          </AppText>
         </TouchableOpacity>
       )}
 
@@ -81,14 +99,30 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
       >
         <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
           <View style={styles.modalBackdrop}>
-            <View style={styles.modalContent}>
+            <View
+              style={[
+                styles.modalContent,
+                {
+                  backgroundColor: isLightMode ? colors.white : colors.dark,
+                },
+              ]}
+            >
               {periodOptions.map((option) => (
                 <TouchableOpacity
                   key={option}
                   style={styles.modalOption}
                   onPress={() => handleSelect(option)}
                 >
-                  <AppText style={styles.modalOptionText}>{option}</AppText>
+                  <AppText
+                    style={[
+                      styles.modalOptionText,
+                      {
+                        color: isLightMode ? colors.brown : colors.white,
+                      },
+                    ]}
+                  >
+                    {option}
+                  </AppText>
                 </TouchableOpacity>
               ))}
             </View>
@@ -107,14 +141,12 @@ const styles = StyleSheet.create({
   periodSelector: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.dark,
     borderRadius: 15,
     paddingHorizontal: 15,
     paddingVertical: 6,
     marginRight: 10,
   },
   resetButton: {
-    backgroundColor: colors.dark,
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 6,
@@ -122,7 +154,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   resetButtonText: {
-    color: colors.white,
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -130,7 +161,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.secondary,
   },
   periodText: {
-    color: colors.secondary,
     fontWeight: "bold",
     marginRight: 5,
     fontSize: 16,
@@ -142,7 +172,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: colors.dark,
     borderRadius: 15,
     padding: 10,
     width: "60%",
@@ -153,7 +182,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalOptionText: {
-    color: colors.white,
     fontSize: 18,
   },
 });

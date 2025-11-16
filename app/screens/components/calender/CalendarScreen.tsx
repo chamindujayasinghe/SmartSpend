@@ -10,6 +10,7 @@ import { AppStackParamList } from "../../../navigation/AppNavigator";
 import DayCell from "./DayCell";
 import { CalendarCell } from "../../../../Hooks/calenderTypes";
 import { getTransactions, Transaction } from "../../../../utilities/storage";
+import { useTheme } from "../../../../config/theme/ThemeProvider";
 
 const today = new Date();
 
@@ -56,7 +57,6 @@ const generateCalendarGrid = (
       month === clickedDate.getMonth() &&
       year === clickedDate.getFullYear();
 
-    // --- GET AGGREGATE DATA FOR THIS DAY ---
     const agg = dailyAggregates.get(day) || { income: 0, expense: 0 };
 
     grid.push({
@@ -66,7 +66,7 @@ const generateCalendarGrid = (
       isToday,
       isClicked: false,
       fullDate: cellDate,
-      // --- ADD INCOME/EXPENSE DATA ---
+
       income: agg.income,
       expense: agg.expense,
     });
@@ -106,13 +106,13 @@ const CalendarScreen: React.FC = () => {
   const [clickedDate, setClickedDate] = useState<Date | null>(today);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const { isLightMode } = useTheme();
 
   useFocusEffect(
     useCallback(() => {
       setClickedDate(today);
       setSelectedDate(today);
 
-      // Fetch all transactions
       const fetchAllData = async () => {
         try {
           const transactions = await getTransactions();
@@ -211,11 +211,20 @@ const CalendarScreen: React.FC = () => {
   }, [calendarGrid]);
 
   const renderDayHeaders = () => (
-    <View style={styles.dayHeadersContainer}>
+    <View
+      style={[
+        styles.dayHeadersContainer,
+        { borderBlockColor: isLightMode ? colors.darkbrown : colors.dark },
+      ]}
+    >
       {DAY_NAMES.map((day, index) => (
         <AppText
           key={day}
-          style={[styles.dayHeaderText, index === 0 && styles.dayHeaderSunday]}
+          style={[
+            styles.dayHeaderText,
+            { color: isLightMode ? colors.darkbrown : colors.light },
+            index === 0 && styles.dayHeaderSunday,
+          ]}
         >
           {day}
         </AppText>
@@ -236,11 +245,32 @@ const CalendarScreen: React.FC = () => {
           onPress={goToPreviousMonth}
           style={styles.arrowButton}
         >
-          <AppText style={styles.arrowText}>{"<"}</AppText>
+          <AppText
+            style={[
+              styles.arrowText,
+              { color: isLightMode ? colors.brown : colors.secondary },
+            ]}
+          >
+            {"<"}
+          </AppText>
         </TouchableOpacity>
-        <AppText style={styles.monthTitle}>{monthYearTitle}</AppText>
+        <AppText
+          style={[
+            styles.monthTitle,
+            { color: isLightMode ? colors.brown : colors.white },
+          ]}
+        >
+          {monthYearTitle}
+        </AppText>
         <TouchableOpacity onPress={goToNextMonth} style={styles.arrowButton}>
-          <AppText style={styles.arrowText}>{">"}</AppText>
+          <AppText
+            style={[
+              styles.arrowText,
+              { color: isLightMode ? colors.brown : colors.secondary },
+            ]}
+          >
+            {">"}
+          </AppText>
         </TouchableOpacity>
       </View>
 
@@ -255,8 +285,17 @@ const CalendarScreen: React.FC = () => {
           </View>
         ))}
       </View>
-      <TouchableOpacity style={styles.addButton} onPress={handleAddPress}>
-        <AppText style={styles.addButtonText}>+</AppText>
+      <TouchableOpacity
+        style={[
+          styles.addButton,
+          {
+            backgroundColor: isLightMode ? colors.brown : colors.dark,
+            borderColor: isLightMode ? colors.darkbrown : colors.light,
+          },
+        ]}
+        onPress={handleAddPress}
+      >
+        <AppText style={[styles.addButtonText]}>+</AppText>
       </TouchableOpacity>
 
       <DayDetailsModal
@@ -280,7 +319,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   monthTitle: {
-    color: colors.white,
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -288,7 +326,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   arrowText: {
-    color: colors.secondary,
     fontSize: 20,
     fontWeight: "bold",
   },
@@ -296,7 +333,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderTopWidth: 0.5,
     borderLeftWidth: 0.5,
-    borderColor: colors.dark,
     flexDirection: "column",
   },
   row: {
@@ -307,7 +343,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 5,
     borderBottomWidth: 1,
-    borderBottomColor: colors.dark,
     paddingHorizontal: 5,
   },
   clickedText: {
@@ -326,7 +361,6 @@ const styles = StyleSheet.create({
   dayHeaderText: {
     flex: 1,
     textAlign: "center",
-    color: colors.light,
     fontSize: 13,
     fontWeight: "600",
   },
@@ -339,16 +373,14 @@ const styles = StyleSheet.create({
     right: 20,
     height: 45,
     width: 45,
-    borderRadius: 17.5,
-    backgroundColor: colors.dark,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: colors.light,
   },
   addButtonText: {
-    color: colors.light,
     fontSize: 30,
+    color: colors.white,
   },
 });
 

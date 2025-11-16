@@ -2,24 +2,35 @@ import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../components/AppText";
 import colors from "../../config/colors";
-
-// Removed BudgetAddScreen import
 import NoteAddScreen from "./components/NoteAddScreen";
 import CalendarScreen from "./components/calender/CalendarScreen";
+import { useTheme } from "../../config/theme/ThemeProvider";
 
-// Removed "budget" from the type
 type AddTab = "calender" | "note";
 
 const AddScreen: React.FC = () => {
+  const { isLightMode } = useTheme();
   const [selectedTab, setSelectedTab] = useState<AddTab>("calender");
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText style={styles.title}>Add New Entry</AppText>
+        <AppText
+          style={[
+            styles.title,
+            { color: isLightMode ? colors.brown : colors.white },
+          ]}
+        >
+          Add New Entry
+        </AppText>
       </View>
 
-      <View style={styles.tabsContainer}>
+      <View
+        style={[
+          styles.tabsContainer,
+          { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
+        ]}
+      >
         <TouchableOpacity
           style={styles.tabButton}
           onPress={() => setSelectedTab("calender")}
@@ -27,6 +38,7 @@ const AddScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
+              { color: isLightMode ? colors.darkbrown : colors.light },
               selectedTab === "calender" && styles.activeTabText,
             ]}
           >
@@ -44,6 +56,7 @@ const AddScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
+              { color: isLightMode ? colors.darkbrown : colors.light },
               selectedTab === "note" && styles.activeTabText,
             ]}
           >
@@ -72,12 +85,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    color: colors.white,
   },
   tabsContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: colors.dark,
     paddingHorizontal: 10,
   },
   tabButton: {

@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { CalendarCell } from "../../../../Hooks/calenderTypes";
 import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
+import { useTheme } from "../../../../config/theme/ThemeProvider";
 
 interface DayCellProps {
   item: CalendarCell;
@@ -10,6 +11,7 @@ interface DayCellProps {
 }
 
 const DayCell: React.FC<DayCellProps> = React.memo(({ item, onPress }) => {
+  const { isLightMode } = useTheme();
   if (item.day === null) {
     return <View style={styles.cell} />;
   }
@@ -25,18 +27,43 @@ const DayCell: React.FC<DayCellProps> = React.memo(({ item, onPress }) => {
   const hasExpense = expense > 0;
 
   return (
-    <TouchableOpacity style={styles.cell} onPress={handlePress}>
-      {/* Day Number (Top Right) */}
+    <TouchableOpacity
+      style={[
+        styles.cell,
+        { borderColor: isLightMode ? colors.brown : colors.dark },
+      ]}
+      onPress={handlePress}
+    >
       <View style={styles.dayNumberContainer}>
         {isToday ? (
-          <View style={styles.todayBackground}>
-            <AppText style={[styles.dayText, styles.todayText]}>{day}</AppText>
+          <View
+            style={[
+              styles.todayBackground,
+              { backgroundColor: isLightMode ? colors.brown : colors.white },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.dayText,
+                [
+                  styles.todayText,
+                  { color: isLightMode ? colors.white : colors.black },
+                ],
+              ]}
+            >
+              {day}
+            </AppText>
           </View>
         ) : (
           <AppText
             style={[
               styles.dayText,
-              isSunday ? styles.sundayText : styles.otherDayText,
+              isSunday
+                ? styles.sundayText
+                : [
+                    styles.otherDayText,
+                    { color: isLightMode ? colors.brown : colors.light },
+                  ],
             ]}
           >
             {day}
@@ -67,7 +94,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomWidth: 0.5,
     borderRightWidth: 0.5,
-    borderColor: colors.dark,
     padding: 4,
     minHeight: 60,
     justifyContent: "space-between",

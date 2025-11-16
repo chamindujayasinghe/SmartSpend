@@ -11,6 +11,7 @@ import PieChartComponent from "./components/stats/PieChart";
 import CategorySummaryListItem, {
   AggregatedCategory,
 } from "./components/stats/CategorySummaryListItem";
+import { useTheme } from "../../config/theme/ThemeProvider";
 
 export type DateRange = {
   start: Date | null;
@@ -18,6 +19,7 @@ export type DateRange = {
 };
 
 const StatsScreen: React.FC = () => {
+  const { isLightMode } = useTheme();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTab, setSelectedTab] = useState<"incomes" | "expenses">(
     "expenses"
@@ -138,7 +140,14 @@ const StatsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText style={styles.headerTitle}>Stats Page</AppText>
+        <AppText
+          style={[
+            styles.headerTitle,
+            { color: isLightMode ? colors.brown : colors.white },
+          ]}
+        >
+          Stats Page
+        </AppText>
         <PeriodSelector
           selectedPeriod={selectedPeriod}
           onSelectPeriod={setSelectedPeriod}
@@ -154,7 +163,12 @@ const StatsScreen: React.FC = () => {
         dateRange={dateRange}
       />
 
-      <View style={styles.tabsContainer}>
+      <View
+        style={[
+          styles.tabsContainer,
+          { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
+        ]}
+      >
         <TouchableOpacity
           style={styles.tabButton}
           onPress={() => setSelectedTab("incomes")}
@@ -162,6 +176,7 @@ const StatsScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
+              { color: isLightMode ? colors.darkbrown : colors.light },
               selectedTab === "incomes" && styles.activeTabText,
             ]}
           >
@@ -178,6 +193,7 @@ const StatsScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
+              { color: isLightMode ? colors.darkbrown : colors.light },
               selectedTab === "expenses" && styles.activeTabText,
             ]}
           >
@@ -203,7 +219,12 @@ const StatsScreen: React.FC = () => {
 
         {aggregatedData.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <AppText style={styles.emptyText}>
+            <AppText
+              style={[
+                styles.emptyText,
+                { color: isLightMode ? colors.brown : colors.light },
+              ]}
+            >
               No {selectedTab} found for this period.
             </AppText>
           </View>
@@ -216,7 +237,7 @@ const StatsScreen: React.FC = () => {
                 index={index}
                 item={item}
                 type={selectedTab}
-                totalAmount={totalAmount} // Pass totalAmount to calculate percentage
+                totalAmount={totalAmount}
               />
             )}
             style={styles.list}
@@ -234,7 +255,6 @@ const StatsScreen: React.FC = () => {
   );
 };
 
-// ... keep the same styles ...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -250,31 +270,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: colors.white,
-  },
-  totalContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 15,
-    paddingHorizontal: 10,
-    backgroundColor: colors.dark,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.white,
-  },
-  totalAmount: {
-    fontSize: 18,
-    fontWeight: "bold",
   },
   tabsContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: colors.dark,
     marginBottom: 10,
   },
   tabButton: {
@@ -284,7 +283,6 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 18,
-    color: colors.light,
     fontWeight: "600",
   },
   activeTabText: {
@@ -311,8 +309,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    color: colors.light,
     fontSize: 16,
+    fontWeight: "500",
   },
 });
 

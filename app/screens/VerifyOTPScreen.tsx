@@ -1,5 +1,3 @@
-// screens/VerifyOtpScreen.tsx (NEW FILE)
-
 import React, { useState } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
@@ -10,19 +8,17 @@ import AppErrorText from "../components/AppErrorText";
 import colors from "../../config/colors";
 import { supabase } from "../../lib/Supabase-client-config";
 
-// Define param types for your route
 type VerifyOtpRouteParams = {
   VerifyOtp: {
     email: string;
   };
 };
 
-// Define the route prop type
 type VerifyOtpScreenRouteProp = RouteProp<VerifyOtpRouteParams, "VerifyOtp">;
 
 const VerifyOtpScreen = () => {
   const route = useRoute<VerifyOtpScreenRouteProp>();
-  const { email } = route.params; // Get the email passed from the Signup screen
+  const { email } = route.params;
 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -46,9 +42,6 @@ const VerifyOtpScreen = () => {
     if (error) {
       setError(error.message);
     } else if (session) {
-      // User is verified and logged in!
-      // You would now typically navigate to your main app.
-      // e.g., navigation.navigate("MainAppTabs");
       console.log("Verification Success!", session);
     }
   };

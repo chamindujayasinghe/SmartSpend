@@ -1,28 +1,75 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { Transaction } from "../../../utilities/storage";
+import { useTheme } from "../../../config/theme/ThemeProvider";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { AppStackParamList } from "../../navigation/AppNavigator";
+
+type NavigationProps = NativeStackNavigationProp<
+  AppStackParamList,
+  "TransactionForm"
+>;
 
 interface TransactionListItemProps {
   item: Transaction;
+  onItemPress?: () => void;
 }
 
-const TransactionListItem: React.FC<TransactionListItemProps> = ({ item }) => {
+const TransactionListItem: React.FC<TransactionListItemProps> = ({
+  item,
+  onItemPress,
+}) => {
   const isIncome = item.activeTab === "Income";
   const amountColor = isIncome ? colors.secondary : colors.danger;
   const sign = isIncome ? "+" : "-";
+  const { isLightMode } = useTheme();
+  const navigation = useNavigation<NavigationProps>();
+
+  const handlePress = () => {
+    if (onItemPress) {
+      onItemPress();
+    }
+
+    navigation.navigate("TransactionForm", {
+      dateString: new Date(item.date).toISOString(),
+      transaction: item,
+    });
+  };
 
   return (
-    <View style={styles.transactionRow}>
-      <View style={styles.transactionDetails}>
-        <AppText style={styles.categoryText}>{item.category}</AppText>
-        <AppText style={styles.accountText}>{item.account}</AppText>
+    <TouchableOpacity onPress={handlePress}>
+      <View
+        style={[
+          styles.transactionRow,
+          { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
+        ]}
+      >
+        <View style={styles.transactionDetails}>
+          <AppText
+            style={[
+              styles.categoryText,
+              { color: isLightMode ? colors.brown : colors.white },
+            ]}
+          >
+            {item.category}
+          </AppText>
+          <AppText
+            style={[
+              styles.accountText,
+              { color: isLightMode ? colors.darkbrown : colors.light },
+            ]}
+          >
+            {item.account}
+          </AppText>
+        </View>
+        <AppText style={[styles.amountText, { color: amountColor }]}>
+          {`${sign}${parseFloat(item.amount).toFixed(2)}`}
+        </AppText>
       </View>
-      <AppText style={[styles.amountText, { color: amountColor }]}>
-        {`${sign}${parseFloat(item.amount).toFixed(2)}`}
-      </AppText>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -34,7 +81,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    borderBottomColor: colors.dark,
   },
   transactionDetails: {
     flexDirection: "row",

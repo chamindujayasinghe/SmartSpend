@@ -4,10 +4,11 @@ import { User } from "@supabase/supabase-js";
 
 import MainTabNavigator from "./MainTabNavigator";
 import TransactionForm from "../screens/components/TransactionForm";
+import { Transaction } from "../../utilities/storage";
 
 export type AppStackParamList = {
   MainTabs: { user: User };
-  TransactionForm: { dateString: string };
+  TransactionForm: { dateString?: string; transaction?: Transaction };
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();

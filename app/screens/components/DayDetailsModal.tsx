@@ -17,6 +17,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../../navigation/AppNavigator";
 import { getTransactions, Transaction } from "../../../utilities/storage";
 import TransactionListItem from "./TransactionListItems";
+import { useTheme } from "../../../config/theme/ThemeProvider";
 
 type NavigationProps = NativeStackNavigationProp<
   AppStackParamList,
@@ -36,6 +37,8 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
 }) => {
   const navigation = useNavigation<NavigationProps>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  const { isLightMode } = useTheme();
 
   useEffect(() => {
     if (visible && date) {
@@ -66,6 +69,9 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
     }
     onClose();
   };
+  const handleItemPress = () => {
+    onClose();
+  };
 
   return (
     <Modal
@@ -75,9 +81,21 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
       onRequestClose={onClose}
     >
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalContent}>
+        <Pressable
+          style={[
+            styles.modalContent,
+            {
+              backgroundColor: isLightMode ? colors.white : colors.darkPrimary,
+            },
+          ]}
+        >
           <View style={styles.modalHeader}>
-            <AppText style={styles.modalTitle}>
+            <AppText
+              style={[
+                styles.modalTitle,
+                { color: isLightMode ? colors.brown : colors.white },
+              ]}
+            >
               {date?.toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -105,12 +123,23 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
               <FlatList
                 data={transactions}
                 keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <TransactionListItem item={item} />}
+                renderItem={({ item }) => (
+                  <TransactionListItem
+                    onItemPress={handleItemPress}
+                    item={item}
+                  />
+                )}
               />
             )}
           </View>
 
-          <TouchableOpacity style={styles.addButton} onPress={handleAddPress}>
+          <TouchableOpacity
+            style={[
+              styles.addButton,
+              { backgroundColor: isLightMode ? colors.brown : colors.dark },
+            ]}
+            onPress={handleAddPress}
+          >
             <AppText style={styles.addButtonText}>+</AppText>
           </TouchableOpacity>
         </Pressable>
@@ -123,10 +152,10 @@ const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
     justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     height: "70%",
-    backgroundColor: colors.darkPrimary,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -148,15 +177,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 40,
     right: 40,
-    height: 40,
-    width: 40,
+    height: 50,
+    width: 50,
     borderRadius: 20,
-    backgroundColor: colors.light,
     justifyContent: "center",
     alignItems: "center",
   },
   addButtonText: {
-    color: colors.darkPrimary,
     fontSize: 25,
     fontWeight: "bold",
   },

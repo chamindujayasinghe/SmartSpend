@@ -5,6 +5,7 @@ import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { Period } from "./PeriodSelector";
 import { DateRange } from "../StatsScreen";
+import { useTheme } from "../../../config/theme/ThemeProvider";
 
 interface DateNavigatorProps {
   currentDate: Date;
@@ -58,6 +59,7 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
   dateRange,
 }) => {
   const showArrows = selectedPeriod !== "Period";
+  const { isLightMode } = useTheme();
 
   return (
     <View style={styles.navigatorContainer}>
@@ -69,14 +71,19 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
           <MaterialCommunityIcons
             name="chevron-left"
             size={30}
-            color={colors.white}
+            color={isLightMode ? colors.brown : colors.white}
           />
         </TouchableOpacity>
       ) : (
         <View style={styles.navArrow} />
       )}
 
-      <AppText style={styles.currentDateText}>
+      <AppText
+        style={[
+          styles.currentDateText,
+          { color: isLightMode ? colors.brown : colors.white },
+        ]}
+      >
         {formatDisplayDate(currentDate, selectedPeriod, dateRange)}
       </AppText>
 
@@ -88,7 +95,7 @@ const DateNavigator: React.FC<DateNavigatorProps> = ({
           <MaterialCommunityIcons
             name="chevron-right"
             size={30}
-            color={colors.white}
+            color={isLightMode ? colors.brown : colors.white}
           />
         </TouchableOpacity>
       ) : (
@@ -114,7 +121,7 @@ const styles = StyleSheet.create({
   currentDateText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: colors.white,
+
     textAlign: "center",
     flex: 1,
   },
