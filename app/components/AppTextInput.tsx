@@ -24,13 +24,13 @@ const AppTextInput: React.FC<AppTextInputProps> = ({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {icon && <MaterialCommunityIcons style={styles.icon} name={icon} />}
       <TextInput
-        style={[styles.textinput, style]}
+        style={[styles.textinput]}
         secureTextEntry={isPassword && !isPasswordVisible}
-        {...otherProps}
         placeholderTextColor={colors.light}
+        {...otherProps}
       />
       {isPassword && (
         <TouchableOpacity
@@ -70,11 +70,13 @@ const styles = StyleSheet.create({
     shadowColor: colors.secondary,
     shadowOpacity: 1,
     shadowRadius: 10,
+    elevation: 20,
   },
   eye: {
     color: colors.secondary,
     fontSize: 18,
     paddingHorizontal: 5,
+    elevation: 20,
   },
 });
 

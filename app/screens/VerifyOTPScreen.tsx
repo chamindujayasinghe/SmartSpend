@@ -7,6 +7,7 @@ import AppButton from "../components/AppButton";
 import AppErrorText from "../components/AppErrorText";
 import colors from "../../config/colors";
 import { supabase } from "../../lib/Supabase-client-config";
+import { useThemeColors } from "../../config/theme/colorMode";
 
 type VerifyOtpRouteParams = {
   VerifyOtp: {
@@ -34,7 +35,7 @@ const VerifyOtpScreen = () => {
     } = await supabase.auth.verifyOtp({
       email: email,
       token: otp,
-      type: "signup", // Very important!
+      type: "signup",
     });
 
     setLoading(false);
@@ -42,14 +43,18 @@ const VerifyOtpScreen = () => {
     if (error) {
       setError(error.message);
     } else if (session) {
-      console.log("Verification Success!", session);
+      console.log("Verification Success!");
     }
   };
+  const { titlecolor, secondarycolormode, placeholdertext, textinputcolor } =
+    useThemeColors();
 
   return (
     <View style={styles.container}>
-      <AppText style={styles.title}>Check your email</AppText>
-      <AppText style={styles.subtitle}>
+      <AppText style={[styles.title, { color: titlecolor }]}>
+        Check your email
+      </AppText>
+      <AppText style={[styles.subtitle, { color: secondarycolormode }]}>
         We sent a 6-digit code to {email}
       </AppText>
 
@@ -60,6 +65,8 @@ const VerifyOtpScreen = () => {
         maxLength={6}
         onChangeText={setOtp}
         value={otp}
+        style={{ backgroundColor: textinputcolor }}
+        placeholderTextColor={placeholdertext}
       />
 
       {error && <AppErrorText visible={true}>{error}</AppErrorText>}
@@ -75,6 +82,7 @@ const VerifyOtpScreen = () => {
           title="Verify Account"
           onPress={handleVerifyOtp}
           disabled={otp.length !== 6}
+          textColor={colors.white}
         />
       )}
     </View>
@@ -95,7 +103,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: colors.light,
     marginBottom: 20,
     textAlign: "center",
   },

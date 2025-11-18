@@ -9,7 +9,9 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 import colors from "../../config/colors";
 import AppTextInput from "../components/AppTextInput";
 import AppButton from "../components/AppButton";
@@ -21,6 +23,8 @@ import { LoginScreenProps } from "../navigation/NavigationTypes";
 import { useState } from "react";
 import handleSignIn, { ServerStatus } from "../../Authentication/HandleSignIn";
 import handleSignInWithGoogle from "../../Authentication/HandleGoogleAuthenticattion";
+import { useThemeColors } from "../../config/theme/colorMode";
+import { AntDesign } from "@expo/vector-icons";
 
 const validationSchema = yup.object().shape({
   email: yup.string().required().email().label("Email"),
@@ -36,6 +40,15 @@ const validationSchema = yup.object().shape({
 const Login = ({ navigation }: LoginScreenProps) => {
   const [status, setStatus] = useState<ServerStatus | null>(null);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const {
+    secondarycolormode,
+    placeholdertext,
+    textinputcolor,
+    titlecolor,
+    googlebutton,
+    googlebuttontxt,
+  } = useThemeColors();
 
   const onGoogleButtonPress = async () => {
     setIsGoogleLoading(true);
@@ -68,8 +81,12 @@ const Login = ({ navigation }: LoginScreenProps) => {
               isSubmitting,
             }) => (
               <>
-                <AppText style={styles.title}>Welcome Back</AppText>
-                <AppText style={styles.subtitle}>
+                <AppText style={[styles.title, { color: titlecolor }]}>
+                  Welcome Back
+                </AppText>
+                <AppText
+                  style={[styles.subtitle, { color: secondarycolormode }]}
+                >
                   Login to your account to continue
                 </AppText>
                 {status && (
@@ -90,6 +107,8 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   keyboardType="default"
                   onBlur={() => setFieldTouched("email")}
                   onChangeText={handleChange("email")}
+                  style={{ backgroundColor: textinputcolor }}
+                  placeholderTextColor={placeholdertext}
                 />
                 <AppErrorText visible={touched.email}>
                   {errors.email}
@@ -101,6 +120,8 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   keyboardType="default"
                   onBlur={() => setFieldTouched("password")}
                   onChangeText={handleChange("password")}
+                  style={{ backgroundColor: textinputcolor }}
+                  placeholderTextColor={placeholdertext}
                 />
                 <AppErrorText visible={touched.password}>
                   {errors.password}
@@ -109,7 +130,12 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   onPress={() => navigation.navigate("ForgotPassword")}
                   style={styles.forgotPasswordWrapper}
                 >
-                  <Text style={styles.forgotPasswordText}>
+                  <Text
+                    style={[
+                      styles.forgotPasswordText,
+                      { color: secondarycolormode },
+                    ]}
+                  >
                     Forgot password?
                   </Text>
                 </TouchableOpacity>
@@ -124,22 +150,54 @@ const Login = ({ navigation }: LoginScreenProps) => {
                     title="Login"
                     onPress={() => handleSubmit()}
                     disabled={isSubmitting}
+                    textColor={colors.white}
                   />
                 )}
                 <View style={styles.dividerContainer}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>OR</Text>
-                  <View style={styles.dividerLine} />
+                  <View
+                    style={[
+                      styles.dividerLine,
+                      {
+                        backgroundColor: secondarycolormode,
+                      },
+                    ]}
+                  />
+                  <Text
+                    style={[styles.dividerText, { color: secondarycolormode }]}
+                  >
+                    OR
+                  </Text>
+                  <View
+                    style={[
+                      styles.dividerLine,
+                      {
+                        backgroundColor: secondarycolormode,
+                      },
+                    ]}
+                  />
                 </View>
 
                 <AppButton
                   title="Continue with Google"
-                  style={{ marginTop: 10, backgroundColor: colors.white }}
+                  style={{
+                    marginTop: 5,
+                    backgroundColor: googlebutton,
+                    shadowColor: colors.white,
+                  }}
+                  textColor={googlebuttontxt}
                   onPress={onGoogleButtonPress}
                   disabled={isSubmitting || isGoogleLoading}
+                  iconComponent={
+                    <Image
+                      source={require("../../assets/google.png")}
+                      style={styles.googleImage}
+                    />
+                  }
                 />
                 <View style={styles.signupWrapper}>
-                  <AppText style={styles.signupText}>
+                  <AppText
+                    style={[styles.signupText, { color: secondarycolormode }]}
+                  >
                     Don't you have an account?
                   </AppText>
                   <TouchableOpacity
@@ -194,7 +252,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   forgotPasswordText: {
-    color: colors.light,
     fontSize: 14,
     textDecorationLine: "underline",
   },
@@ -204,7 +261,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   signupText: {
-    fontSize: 14,
+    fontSize: 18,
     color: colors.light,
   },
   statusMessage: {
@@ -228,12 +285,16 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.light,
   },
   dividerText: {
     marginHorizontal: 10,
     color: colors.light,
     fontSize: 14,
+  },
+  googleImage: {
+    width: 20,
+    height: 20,
+    marginRight: 20,
   },
 });
 

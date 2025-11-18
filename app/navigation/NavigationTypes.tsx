@@ -6,6 +6,7 @@ export type AuthStackParamList = {
   Signup: undefined;
   ForgotPassword: undefined;
   VerifyOtp: { email: string };
+  NewPassword: undefined; // <--- Add this line
 };
 
 export type LoginScreenProps = NativeStackScreenProps<
@@ -20,6 +21,12 @@ export type SignupScreenProps = NativeStackScreenProps<
 export type ForgotPasswordScreenProps = NativeStackScreenProps<
   AuthStackParamList,
   "ForgotPassword"
+>;
+
+// Add this Prop Type for your NewPasswordScreen
+export type NewPasswordScreenProps = NativeStackScreenProps<
+  AuthStackParamList,
+  "NewPassword"
 >;
 
 export type TransactionFormProps = NativeStackScreenProps<

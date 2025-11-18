@@ -11,6 +11,7 @@ import StatsScreen from "../screens/StatsScreen";
 import AddScreen from "../screens/AddScreen";
 import BudgetAddScreen from "../screens/components/budget/BudgetAddScreen";
 import { useTheme } from "../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../config/theme/colorMode";
 
 interface MainTabNavigatorProps {
   user: User;
@@ -20,17 +21,19 @@ const Tab = createBottomTabNavigator();
 
 const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
   const { isLightMode } = useTheme();
+  const { tabBarColor, tabBatInactiveColor } = useThemeColors();
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.secondary,
-        tabBarInactiveTintColor: isLightMode ? colors.brown : colors.light,
+        tabBarInactiveTintColor: tabBatInactiveColor,
         tabBarStyle: {
-          height: 65,
-          backgroundColor: isLightMode ? colors.darklight : colors.darkPrimary,
-          borderTopWidth: 1,
-          borderTopColor: isLightMode ? colors.darkbrown : colors.light,
+          height: 60,
+          backgroundColor: tabBarColor,
+          borderRadius: 30,
+          marginHorizontal: 8,
+          marginVertical: 4,
         },
       }}
     >

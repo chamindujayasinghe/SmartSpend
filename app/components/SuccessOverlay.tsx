@@ -2,17 +2,21 @@ import React from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import colors from "../../config/colors";
 import AppText from "./AppText";
+import { useThemeColors } from "../../config/theme/colorMode";
 
 interface SuccessOverlayProps {
   fullName: string;
 }
 
 const SuccessOverlay: React.FC<SuccessOverlayProps> = ({ fullName }) => {
+  const { titlecolor, secondarycolormode } = useThemeColors();
   return (
     <View style={styles.container}>
       <AppText style={styles.successTitle}>SUCCESS!</AppText>
-      <AppText style={styles.successSubtitle}>Welcome, {fullName}.</AppText>
-      <AppText style={styles.redirectText}>
+      <AppText style={[styles.successSubtitle, { color: titlecolor }]}>
+        Welcome, {fullName}.
+      </AppText>
+      <AppText style={[styles.redirectText, { color: secondarycolormode }]}>
         Loading your Smart-Spend App...
       </AppText>
       <ActivityIndicator
@@ -35,19 +39,14 @@ const styles = StyleSheet.create({
     fontSize: 40,
     marginBottom: 10,
     color: colors.secondary,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 3,
   },
   successSubtitle: {
     fontSize: 22,
-    color: colors.white,
     marginBottom: 20,
     textAlign: "center",
   },
   redirectText: {
     fontSize: 16,
-    color: colors.white,
     marginTop: 10,
   },
 });

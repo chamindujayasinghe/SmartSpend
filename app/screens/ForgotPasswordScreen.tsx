@@ -6,48 +6,85 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Text,
+  TextInput,
 } from "react-native";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useState } from "react";
-import AppTextInput from "../components/AppTextInput";
-import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
 import AppErrorText from "../components/AppErrorText";
 import { ForgotPasswordScreenProps } from "../navigation/NavigationTypes";
-import handleForgotPassword from "../../Authentication/HandleForgotPassword";
+import {
+  sendResetPasswordEmail,
+  verifyResetPasswordOtp,
+} from "../../Authentication/HandleForgotPassword";
+import { useThemeColors } from "../../config/theme/colorMode";
 import { ServerStatus } from "../../Authentication/HandleSignIn";
 import colors from "../../config/colors";
+import AppButton from "../components/AppButton";
+import AppTextInput from "../components/AppTextInput";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const validationSchema = yup.object().shape({
-  email: yup.string().required().email().label("Email"),
+  email: yup.string().required("Email is required").email("Invalid email"),
+  otp: yup.string(),
 });
 
 const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
   const [status, setStatus] = useState<ServerStatus | null>(null);
+  const [otpVisible, setOtpVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { placeholdertext, titlecolor, textinputcolor, secondarycolormode } =
+    useThemeColors();
+
+  const handleSendEmail = async (values: any, setFieldTouched: any) => {
+    setFieldTouched("email", true);
+    if (!values.email) return;
+
+    const success = await sendResetPasswordEmail(
+      values.email,
+      setStatus,
+      setLoading
+    );
+    if (success) {
+      setOtpVisible(true);
+    }
+  };
+
+  const handleConfirmOtp = async (values: any) => {
+    if (!values.otp || values.otp.length < 6) {
+      setStatus({ type: "error", message: "Please enter a valid 6-digit OTP" });
+      return;
+    }
+
+    await AsyncStorage.setItem("is_resetting_password", "true");
+
+    const success = await verifyResetPasswordOtp(
+      values.email,
+      values.otp,
+      setStatus,
+      setLoading
+    );
+
+    if (success) {
+    }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <Formik
-          initialValues={{ email: "" }}
-          onSubmit={(values, actions) =>
-            handleForgotPassword(values, { ...actions, setStatus })
-          }
+          initialValues={{ email: "", otp: "" }}
           validationSchema={validationSchema}
+          onSubmit={() => {}}
         >
-          {({
-            handleChange,
-            handleSubmit,
-            errors,
-            touched,
-            setFieldTouched,
-            isSubmitting,
-          }) => (
+          {({ handleChange, values, errors, touched, setFieldTouched }) => (
             <>
-              <AppText style={styles.title}>Reset Password</AppText>
-              <AppText style={styles.subtitle}>
-                Enter your email to receive a reset link
+              <AppText style={[styles.title, { color: titlecolor }]}>
+                Reset Password
+              </AppText>
+              <AppText style={[styles.subtitle, { color: secondarycolormode }]}>
+                Enter your email to receive a verification code
               </AppText>
 
               {status && (
@@ -56,41 +93,86 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
                     styles.statusMessage,
                     status.type === "error"
                       ? styles.errorText
-                      : status.type === "info"
-                      ? styles.infoText
-                      : styles.successText,
+                      : styles.infoText,
                   ]}
                 >
                   {status.message}
                 </AppText>
               )}
 
-              <AppTextInput
-                icon="email"
-                placeholder="Enter Email"
-                keyboardType="email-address"
-                onBlur={() => setFieldTouched("email")}
-                onChangeText={handleChange("email")}
-                autoCapitalize="none"
-              />
-              <AppErrorText visible={touched.email}>
-                {errors.email}
-              </AppErrorText>
+              {/* --- Row Container for Email and Send Button --- */}
+              <View style={styles.rowContainer}>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    placeholder="Enter Email"
+                    keyboardType="email-address"
+                    onBlur={() => setFieldTouched("email")}
+                    onChangeText={handleChange("email")}
+                    autoCapitalize="none"
+                    style={[
+                      styles.defaultTextInput,
+                      { backgroundColor: textinputcolor, color: titlecolor },
+                    ]}
+                    placeholderTextColor={placeholdertext}
+                    value={values.email}
+                    editable={!otpVisible}
+                  />
+                </View>
 
-              {isSubmitting ? (
-                <ActivityIndicator
-                  size="small"
-                  color={colors.secondary}
-                  style={{ marginTop: 20 }}
-                />
-              ) : (
-                <AppButton
-                  title="Send Reset Link"
-                  onPress={() => handleSubmit()}
-                  disabled={isSubmitting}
-                  style={{ marginTop: 20 }}
-                />
+                <View style={styles.sendButtonWrapper}>
+                  {loading && !otpVisible ? (
+                    <ActivityIndicator
+                      color={colors.secondary}
+                      style={{ alignSelf: "center" }}
+                    />
+                  ) : (
+                    <TouchableOpacity
+                      style={styles.defaultButton}
+                      onPress={() => handleSendEmail(values, setFieldTouched)}
+                      disabled={loading}
+                    >
+                      <Text style={styles.defaultButtonText}>
+                        {otpVisible ? "Resend" : "Send"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.errorContainer}>
+                <AppErrorText visible={touched.email}>
+                  {errors.email}
+                </AppErrorText>
+              </View>
+
+              {otpVisible && (
+                <View style={styles.otpContainer}>
+                  <AppTextInput
+                    icon="numeric"
+                    placeholder="Enter 6-digit OTP"
+                    keyboardType="number-pad"
+                    onChangeText={handleChange("otp")}
+                    placeholderTextColor={placeholdertext}
+                    maxLength={6}
+                    style={{ backgroundColor: textinputcolor }}
+                  />
+
+                  {loading ? (
+                    <ActivityIndicator
+                      size="small"
+                      color={colors.secondary}
+                      style={{ marginTop: 20 }}
+                    />
+                  ) : (
+                    <AppButton
+                      title="Confirm"
+                      textColor={colors.white}
+                      onPress={() => handleConfirmOtp(values)}
+                    />
+                  )}
+                </View>
               )}
+
               <TouchableOpacity
                 style={styles.backButton}
                 onPress={() => navigation.goBack()}
@@ -135,11 +217,55 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
   },
-  successText: {
-    color: colors.success,
-  },
   infoText: {
     color: colors.success,
+  },
+  rowContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    width: "100%",
+    gap: 10,
+  },
+  inputWrapper: {
+    flex: 1,
+  },
+  sendButtonWrapper: {
+    width: 80,
+    height: 50,
+    justifyContent: "center",
+  },
+  defaultTextInput: {
+    borderRadius: 10,
+    padding: 15,
+    width: "100%",
+    fontSize: 18,
+  },
+  defaultButton: {
+    backgroundColor: colors.secondary,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 45,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    width: "100%",
+  },
+  confirmButton: {
+    marginTop: 20,
+  },
+  defaultButtonText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  errorContainer: {
+    width: "100%",
+    marginBottom: 10,
+  },
+  otpContainer: {
+    width: "100%",
+    marginTop: 10,
   },
   backButton: {
     marginTop: 20,

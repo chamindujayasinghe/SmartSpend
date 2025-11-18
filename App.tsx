@@ -2,7 +2,7 @@ import { Keyboard, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import gradientColors from "./config/GradientColors";
-import { renderAppContent } from "./app/screens/AppContent";
+import { AppContent } from "./app/screens/AppContent";
 import { NavigationContainer, DarkTheme } from "@react-navigation/native";
 import colors from "./config/colors";
 import lightGradientColors from "./config/LightGradientColors";
@@ -33,7 +33,7 @@ const AppGradientWrapper = () => {
         }}
       >
         <SafeAreaView style={styles.container}>
-          {renderAppContent()}
+          <AppContent />
         </SafeAreaView>
       </NavigationContainer>
     </LinearGradient>

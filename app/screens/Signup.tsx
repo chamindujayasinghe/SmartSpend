@@ -20,6 +20,7 @@ import AppTextInput from "../components/AppTextInput";
 import AppButton from "../components/AppButton";
 import AppErrorText from "../components/AppErrorText";
 import handleSignUp, { ServerStatus } from "../../Authentication/HandleSignUp";
+import { useThemeColors } from "../../config/theme/colorMode";
 
 const validationSchema = yup.object().shape({
   firstname: yup
@@ -51,6 +52,8 @@ const validationSchema = yup.object().shape({
 });
 
 const Signup = ({ navigation }: SignupScreenProps) => {
+  const { secondarycolormode, placeholdertext, textinputcolor, titlecolor } =
+    useThemeColors();
   const [status, setStatus] = useState<ServerStatus | null>(null);
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -63,8 +66,12 @@ const Signup = ({ navigation }: SignupScreenProps) => {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <AppText style={styles.title}>Welcome to Smart Spend</AppText>
-          <AppText style={styles.subtitle}>Create your free account.</AppText>
+          <AppText style={[styles.title, { color: titlecolor }]}>
+            Welcome to Smart Spend
+          </AppText>
+          <AppText style={[styles.subtitle, { color: secondarycolormode }]}>
+            Create your free account.
+          </AppText>
           {status && (
             <AppText
               style={[
@@ -103,6 +110,8 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   placeholder="Enter First Name"
                   onChangeText={handleChange("firstname")}
                   onBlur={() => setFieldTouched("firstname")}
+                  style={{ backgroundColor: textinputcolor }}
+                  placeholderTextColor={placeholdertext}
                 />
                 <AppErrorText visible={touched.firstname}>
                   {errors.firstname}
@@ -113,6 +122,8 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   placeholder="Enter your Last Name"
                   onChangeText={handleChange("lastname")}
                   onBlur={() => setFieldTouched("lastname")}
+                  style={{ backgroundColor: textinputcolor }}
+                  placeholderTextColor={placeholdertext}
                 />
                 <AppErrorText visible={touched.lastname}>
                   {errors.lastname}
@@ -123,6 +134,8 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   placeholder="Enter Your Email"
                   onChangeText={handleChange("email")}
                   onBlur={() => setFieldTouched("email")}
+                  style={{ backgroundColor: textinputcolor }}
+                  placeholderTextColor={placeholdertext}
                 />
                 <AppErrorText visible={touched.email}>
                   {errors.email}
@@ -134,6 +147,8 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   placeholder="Enter A Password"
                   onChangeText={handleChange("password")}
                   onBlur={() => setFieldTouched("password")}
+                  style={{ backgroundColor: textinputcolor }}
+                  placeholderTextColor={placeholdertext}
                 />
                 <AppErrorText visible={touched.password}>
                   {errors.password}
@@ -145,6 +160,8 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   placeholder="Confirm Password"
                   onChangeText={handleChange("confirmPassword")}
                   onBlur={() => setFieldTouched("confirmPassword")}
+                  style={{ backgroundColor: textinputcolor }}
+                  placeholderTextColor={placeholdertext}
                 />
                 <AppErrorText visible={touched.confirmPassword}>
                   {errors.confirmPassword}
@@ -161,10 +178,13 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                     title="Signup"
                     onPress={() => handleSubmit()}
                     disabled={isSubmitting}
+                    textColor={colors.white}
                   />
                 )}
                 <View style={styles.signinWrapper}>
-                  <AppText style={styles.signinText}>
+                  <AppText
+                    style={[styles.signinText, { color: secondarycolormode }]}
+                  >
                     Already have an account?
                   </AppText>
                   <TouchableOpacity
@@ -220,7 +240,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   signinText: {
-    fontSize: 14,
+    fontSize: 17,
     color: colors.light,
   },
   statusMessage: {
