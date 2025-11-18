@@ -2,7 +2,7 @@ import React, { isValidElement } from "react";
 import { View, StyleSheet } from "react-native";
 import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
-import { useTheme } from "../../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 interface Props {
   income: number;
@@ -11,41 +11,24 @@ interface Props {
 }
 
 const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
-  const { isLightMode } = useTheme();
+  const { titlecolor, darksecondary, tabBarColor } = useThemeColors();
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: isLightMode ? colors.darklight : colors.darkPrimary,
+          backgroundColor: tabBarColor,
         },
       ]}
     >
       <View style={styles.column}>
-        <AppText
-          style={[
-            styles.title,
-            { color: isLightMode ? colors.brown : colors.light },
-          ]}
-        >
-          Income
-        </AppText>
-        <AppText
-          style={[
-            styles.amount,
-            { color: isLightMode ? colors.darkSecondary : colors.secondary },
-          ]}
-        >
+        <AppText style={[styles.title, { color: titlecolor }]}>Income</AppText>
+        <AppText style={[styles.amount, { color: darksecondary }]}>
           $ {income.toFixed(2)}
         </AppText>
       </View>
       <View style={styles.column}>
-        <AppText
-          style={[
-            styles.title,
-            { color: isLightMode ? colors.brown : colors.light },
-          ]}
-        >
+        <AppText style={[styles.title, { color: titlecolor }]}>
           Expenses
         </AppText>
         <AppText style={[styles.amount, styles.expense]}>
@@ -53,20 +36,8 @@ const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
         </AppText>
       </View>
       <View style={styles.column}>
-        <AppText
-          style={[
-            styles.title,
-            { color: isLightMode ? colors.brown : colors.light },
-          ]}
-        >
-          Total
-        </AppText>
-        <AppText
-          style={[
-            styles.amount,
-            { color: isLightMode ? colors.dark : colors.white },
-          ]}
-        >
+        <AppText style={[styles.title, { color: titlecolor }]}>Total</AppText>
+        <AppText style={[styles.amount, { color: titlecolor }]}>
           $ {total.toFixed(2)}
         </AppText>
       </View>
@@ -76,9 +47,11 @@ const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
 
 const styles = StyleSheet.create({
   container: {
+    margin: 5,
     flexDirection: "row",
     justifyContent: "space-around",
     padding: 10,
+    borderRadius: 20,
   },
   column: {
     alignItems: "center",

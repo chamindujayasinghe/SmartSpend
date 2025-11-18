@@ -3,10 +3,10 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { Transaction } from "../../../utilities/storage";
-import { useTheme } from "../../../config/theme/ThemeProvider";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../../navigation/AppNavigator";
+import { useThemeColors } from "../../../config/theme/colorMode";
 
 type NavigationProps = NativeStackNavigationProp<
   AppStackParamList,
@@ -25,8 +25,9 @@ const TransactionListItem: React.FC<TransactionListItemProps> = ({
   const isIncome = item.activeTab === "Income";
   const amountColor = isIncome ? colors.secondary : colors.danger;
   const sign = isIncome ? "+" : "-";
-  const { isLightMode } = useTheme();
   const navigation = useNavigation<NavigationProps>();
+
+  const { titlecolor, secondarycolormode, textinputcolor } = useThemeColors();
 
   const handlePress = () => {
     if (onItemPress) {
@@ -42,26 +43,13 @@ const TransactionListItem: React.FC<TransactionListItemProps> = ({
   return (
     <TouchableOpacity onPress={handlePress}>
       <View
-        style={[
-          styles.transactionRow,
-          { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
-        ]}
+        style={[styles.transactionRow, { borderBottomColor: textinputcolor }]}
       >
         <View style={styles.transactionDetails}>
-          <AppText
-            style={[
-              styles.categoryText,
-              { color: isLightMode ? colors.brown : colors.white },
-            ]}
-          >
+          <AppText style={[styles.categoryText, { color: titlecolor }]}>
             {item.category}
           </AppText>
-          <AppText
-            style={[
-              styles.accountText,
-              { color: isLightMode ? colors.darkbrown : colors.light },
-            ]}
-          >
+          <AppText style={[styles.accountText, { color: secondarycolormode }]}>
             {item.account}
           </AppText>
         </View>

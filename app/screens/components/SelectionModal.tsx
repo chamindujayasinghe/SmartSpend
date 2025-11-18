@@ -1,5 +1,3 @@
-// app/components/SelectionModal.tsx
-
 import React from "react";
 import {
   Modal,

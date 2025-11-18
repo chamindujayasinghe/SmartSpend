@@ -6,21 +6,19 @@ import { AggregatedCategory } from "./CategorySummaryListItem";
 import colors from "../../../../config/colors";
 import { PIE_CHART_COLORS } from "../../../../config/piechartcolors";
 import { useTheme } from "../../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 interface PieChartComponentProps {
   data: AggregatedCategory[];
   title?: string;
   height?: number;
-  type: "incomes" | "expenses";
 }
 
 const PieChartComponent: React.FC<PieChartComponentProps> = ({
   data,
   title,
   height = 250,
-  type,
 }) => {
-  const { isLightMode } = useTheme();
   const filteredData = data.filter((item) => item.totalAmount > 0);
   const total = filteredData.reduce((sum, item) => sum + item.totalAmount, 0);
   const chartSize = height - 50;
@@ -81,18 +79,12 @@ const PieChartComponent: React.FC<PieChartComponentProps> = ({
     startAngle = endAngle;
     return segment;
   });
+  const { titlecolor } = useThemeColors();
 
   return (
     <View style={styles.container}>
       {title && (
-        <AppText
-          style={[
-            styles.title,
-            { color: isLightMode ? colors.brown : colors.white },
-          ]}
-        >
-          {title}
-        </AppText>
+        <AppText style={[styles.title, { color: titlecolor }]}>{title}</AppText>
       )}
       <View style={[styles.chartContainer, { height }]}>
         <Svg width={chartSize} height={chartSize}>
@@ -123,7 +115,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    color: colors.white,
     textAlign: "center",
     marginBottom: 10,
   },
@@ -131,11 +122,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-  },
-  noDataText: {
-    color: colors.light,
-    fontSize: 16,
-    textAlign: "center",
   },
 });
 

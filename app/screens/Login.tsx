@@ -47,7 +47,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
     textinputcolor,
     titlecolor,
     googlebutton,
-    googlebuttontxt,
+    modal2,
   } = useThemeColors();
 
   const onGoogleButtonPress = async () => {
@@ -184,7 +184,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
                     backgroundColor: googlebutton,
                     shadowColor: colors.white,
                   }}
-                  textColor={googlebuttontxt}
+                  textColor={modal2}
                   onPress={onGoogleButtonPress}
                   disabled={isSubmitting || isGoogleLoading}
                   iconComponent={

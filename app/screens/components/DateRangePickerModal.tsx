@@ -9,6 +9,7 @@ import {
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useThemeColors } from "../../../config/theme/colorMode";
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString("default", {
@@ -45,26 +46,31 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
   date,
   setDate,
 }) => {
+  const { titlecolor, modal3, secondarycolormode } = useThemeColors();
   return (
     <View style={styles.pickerContainer}>
-      <AppText style={styles.pickerLabel}>{label}</AppText>
-      <View style={styles.pickerControls}>
+      <AppText style={[styles.pickerLabel, { color: secondarycolormode }]}>
+        {label}
+      </AppText>
+      <View style={[styles.pickerControls, { backgroundColor: modal3 }]}>
         <View style={styles.pickerColumn}>
           <TouchableOpacity onPress={() => setDate(modifyDate(date, "day", 1))}>
             <MaterialCommunityIcons
               name="chevron-up"
               size={28}
-              color={colors.white}
+              color={titlecolor}
             />
           </TouchableOpacity>
-          <AppText style={styles.pickerValue}>{date.getDate()}</AppText>
+          <AppText style={[styles.pickerValue, { color: titlecolor }]}>
+            {date.getDate()}
+          </AppText>
           <TouchableOpacity
             onPress={() => setDate(modifyDate(date, "day", -1))}
           >
             <MaterialCommunityIcons
               name="chevron-down"
               size={28}
-              color={colors.white}
+              color={titlecolor}
             />
           </TouchableOpacity>
         </View>
@@ -76,10 +82,10 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-up"
               size={28}
-              color={colors.white}
+              color={titlecolor}
             />
           </TouchableOpacity>
-          <AppText style={styles.pickerValue}>
+          <AppText style={[styles.pickerValue, { color: titlecolor }]}>
             {date.toLocaleString("default", { month: "short" })}
           </AppText>
           <TouchableOpacity
@@ -88,7 +94,7 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-down"
               size={28}
-              color={colors.white}
+              color={titlecolor}
             />
           </TouchableOpacity>
         </View>
@@ -99,17 +105,19 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-up"
               size={28}
-              color={colors.white}
+              color={titlecolor}
             />
           </TouchableOpacity>
-          <AppText style={styles.pickerValue}>{date.getFullYear()}</AppText>
+          <AppText style={[styles.pickerValue, { color: titlecolor }]}>
+            {date.getFullYear()}
+          </AppText>
           <TouchableOpacity
             onPress={() => setDate(modifyDate(date, "year", -1))}
           >
             <MaterialCommunityIcons
               name="chevron-down"
               size={28}
-              color={colors.white}
+              color={titlecolor}
             />
           </TouchableOpacity>
         </View>
@@ -129,6 +137,8 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { modal, titlecolor, modal3, darksecondary, secondarycolormode } =
+    useThemeColors();
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
 
@@ -150,8 +160,10 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.modalBackdrop}>
           <TouchableWithoutFeedback>
-            <View style={styles.modalContent}>
-              <AppText style={styles.modalTitle}>Select Date Range</AppText>
+            <View style={[styles.modalContent, { backgroundColor: modal }]}>
+              <AppText style={[styles.modalTitle, { color: titlecolor }]}>
+                Select Date Range
+              </AppText>
 
               <SimpleDatePicker
                 label="Start Date"
@@ -164,15 +176,23 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
                 setDate={setEndDate}
               />
 
-              <View style={styles.summaryContainer}>
-                <AppText style={styles.summaryText}>
+              <View
+                style={[styles.summaryContainer, { backgroundColor: modal3 }]}
+              >
+                <AppText style={[styles.summaryText, { color: darksecondary }]}>
                   {formatDate(startDate)} - {formatDate(endDate)}
                 </AppText>
               </View>
 
               <View style={styles.buttonContainer}>
                 <TouchableOpacity
-                  style={[styles.button, styles.cancelButton]}
+                  style={[
+                    styles.button,
+                    [
+                      styles.cancelButton,
+                      { backgroundColor: secondarycolormode },
+                    ],
+                  ]}
                   onPress={onClose}
                 >
                   <AppText style={styles.buttonText}>Cancel</AppText>
@@ -200,7 +220,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: colors.dark,
     borderRadius: 15,
     padding: 20,
     width: "90%",
@@ -209,7 +228,6 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: colors.white,
     textAlign: "center",
     marginBottom: 20,
   },
@@ -218,13 +236,11 @@ const styles = StyleSheet.create({
   },
   pickerLabel: {
     fontSize: 16,
-    color: colors.light,
     marginBottom: 10,
   },
   pickerControls: {
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: colors.primary,
     borderRadius: 10,
     padding: 10,
   },
@@ -232,7 +248,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pickerValue: {
-    color: colors.white,
     fontSize: 18,
     fontWeight: "bold",
     marginVertical: 5,
@@ -240,12 +255,10 @@ const styles = StyleSheet.create({
   summaryContainer: {
     marginVertical: 15,
     padding: 10,
-    backgroundColor: colors.primary,
     borderRadius: 5,
     alignItems: "center",
   },
   summaryText: {
-    color: colors.secondary,
     fontSize: 16,
     fontWeight: "bold",
   },
@@ -261,7 +274,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: colors.light,
     marginRight: 10,
   },
   confirmButton: {
@@ -269,7 +281,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   buttonText: {
-    color: colors.dark,
+    color: colors.white,
     fontWeight: "bold",
     fontSize: 16,
   },

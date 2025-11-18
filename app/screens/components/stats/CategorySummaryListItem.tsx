@@ -2,8 +2,8 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { PIE_CHART_COLORS } from "../../../../config/piechartcolors";
 import AppText from "../../../components/AppText";
-import colors from "../../../../config/colors";
-import { useTheme } from "../../../../config/theme/ThemeProvider";
+
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 export interface AggregatedCategory {
   category: string;
@@ -13,18 +13,16 @@ export interface AggregatedCategory {
 
 interface CategorySummaryListItemProps {
   item: AggregatedCategory;
-  type: "incomes" | "expenses";
   index: number;
   totalAmount?: number;
 }
 
 const CategorySummaryListItem: React.FC<CategorySummaryListItemProps> = ({
   item,
-  type,
   index,
   totalAmount,
 }) => {
-  const { isLightMode } = useTheme();
+  const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
   const dotColor = PIE_CHART_COLORS[index % PIE_CHART_COLORS.length];
   const amountColor = dotColor;
 
@@ -33,28 +31,13 @@ const CategorySummaryListItem: React.FC<CategorySummaryListItemProps> = ({
     (totalAmount ? (item.totalAmount / totalAmount) * 100 : 0);
 
   return (
-    <View
-      style={[
-        styles.row,
-        { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
-      ]}
-    >
+    <View style={[styles.row, { borderBottomColor: textinputcolor }]}>
       <View style={styles.categoryContainer}>
         <View style={[styles.colorDot, { backgroundColor: dotColor }]} />
-        <AppText
-          style={[
-            styles.categoryText,
-            { color: isLightMode ? colors.brown : colors.white },
-          ]}
-        >
+        <AppText style={[styles.categoryText, { color: titlecolor }]}>
           {item.category}
         </AppText>
-        <AppText
-          style={[
-            styles.percentageText,
-            { color: isLightMode ? colors.darkbrown : colors.light },
-          ]}
-        >
+        <AppText style={[styles.percentageText, { color: secondarycolormode }]}>
           ({percentage.toFixed(1)}%)
         </AppText>
       </View>

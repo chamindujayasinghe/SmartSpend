@@ -4,32 +4,25 @@ import AppText from "../components/AppText";
 import colors from "../../config/colors";
 import NoteAddScreen from "./components/NoteAddScreen";
 import CalendarScreen from "./components/calender/CalendarScreen";
-import { useTheme } from "../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../config/theme/colorMode";
 
 type AddTab = "calender" | "note";
 
 const AddScreen: React.FC = () => {
-  const { isLightMode } = useTheme();
   const [selectedTab, setSelectedTab] = useState<AddTab>("calender");
+
+  const { titlecolor, secondarycolormode, textinputcolor } = useThemeColors();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText
-          style={[
-            styles.title,
-            { color: isLightMode ? colors.brown : colors.white },
-          ]}
-        >
+        <AppText style={[styles.title, { color: titlecolor }]}>
           Add New Entry
         </AppText>
       </View>
 
       <View
-        style={[
-          styles.tabsContainer,
-          { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
-        ]}
+        style={[styles.tabsContainer, { borderBottomColor: textinputcolor }]}
       >
         <TouchableOpacity
           style={styles.tabButton}
@@ -38,7 +31,7 @@ const AddScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
-              { color: isLightMode ? colors.darkbrown : colors.light },
+              { color: secondarycolormode },
               selectedTab === "calender" && styles.activeTabText,
             ]}
           >
@@ -56,7 +49,7 @@ const AddScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
-              { color: isLightMode ? colors.darkbrown : colors.light },
+              { color: secondarycolormode },
               selectedTab === "note" && styles.activeTabText,
             ]}
           >
@@ -88,8 +81,8 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flexDirection: "row",
+    marginHorizontal: 15,
     borderBottomWidth: 1,
-    paddingHorizontal: 10,
   },
   tabButton: {
     flex: 1,

@@ -9,7 +9,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
-import { useTheme } from "../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../config/theme/colorMode";
 
 export type Period = "Daily" | "Monthly" | "Annually" | "Period";
 const periodOptions: Period[] = ["Daily", "Monthly", "Annually", "Period"];
@@ -27,7 +27,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   onReset,
   onShowRangePicker,
 }) => {
-  const { isLightMode } = useTheme();
+  const { periodbtn, darksecondary, titlecolor, modal } = useThemeColors();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isResetPressed, setIsResetPressed] = useState(false);
 
@@ -48,24 +48,16 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity
-        style={[
-          styles.periodSelector,
-          { backgroundColor: isLightMode ? colors.lightbrown : colors.dark },
-        ]}
+        style={[styles.periodSelector, { backgroundColor: periodbtn }]}
         onPress={() => setIsModalVisible(true)}
       >
-        <AppText
-          style={[
-            styles.periodText,
-            { color: isLightMode ? colors.darkSecondary : colors.secondary },
-          ]}
-        >
+        <AppText style={[styles.periodText, { color: darksecondary }]}>
           {getPeriodInitial(selectedPeriod)}
         </AppText>
         <MaterialCommunityIcons
           name="chevron-down"
           size={20}
-          color={isLightMode ? colors.brown : colors.white}
+          color={titlecolor}
         />
       </TouchableOpacity>
 
@@ -73,19 +65,14 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         <TouchableOpacity
           style={[
             styles.resetButton,
-            { backgroundColor: isLightMode ? colors.lightbrown : colors.dark },
+            { backgroundColor: periodbtn },
             isResetPressed && styles.resetButtonPressed,
           ]}
           onPress={onReset}
           onPressIn={() => setIsResetPressed(true)}
           onPressOut={() => setIsResetPressed(false)}
         >
-          <AppText
-            style={[
-              styles.resetButtonText,
-              { color: isLightMode ? colors.brown : colors.white },
-            ]}
-          >
+          <AppText style={[styles.resetButtonText, { color: titlecolor }]}>
             Reset
           </AppText>
         </TouchableOpacity>
@@ -99,14 +86,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
       >
         <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
           <View style={styles.modalBackdrop}>
-            <View
-              style={[
-                styles.modalContent,
-                {
-                  backgroundColor: isLightMode ? colors.white : colors.dark,
-                },
-              ]}
-            >
+            <View style={[styles.modalContent, { backgroundColor: modal }]}>
               {periodOptions.map((option) => (
                 <TouchableOpacity
                   key={option}
@@ -117,7 +97,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
                     style={[
                       styles.modalOptionText,
                       {
-                        color: isLightMode ? colors.brown : colors.white,
+                        color: titlecolor,
                       },
                     ]}
                   >

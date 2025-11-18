@@ -21,12 +21,12 @@ const Tab = createBottomTabNavigator();
 
 const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
   const { isLightMode } = useTheme();
-  const { tabBarColor, tabBatInactiveColor } = useThemeColors();
+  const { tabBarColor, tabBatInactiveColor, darksecondary } = useThemeColors();
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.secondary,
+        tabBarActiveTintColor: colors.darkSecondary,
         tabBarInactiveTintColor: tabBatInactiveColor,
         tabBarStyle: {
           height: 60,

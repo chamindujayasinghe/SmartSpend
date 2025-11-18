@@ -11,6 +11,7 @@ import DayCell from "./DayCell";
 import { CalendarCell } from "../../../../Hooks/calenderTypes";
 import { getTransactions, Transaction } from "../../../../utilities/storage";
 import { useTheme } from "../../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 const today = new Date();
 
@@ -107,6 +108,9 @@ const CalendarScreen: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const { isLightMode } = useTheme();
+
+  const { titlecolor, secondarycolormode, textinputcolor, arrows } =
+    useThemeColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -212,17 +216,14 @@ const CalendarScreen: React.FC = () => {
 
   const renderDayHeaders = () => (
     <View
-      style={[
-        styles.dayHeadersContainer,
-        { borderBlockColor: isLightMode ? colors.darkbrown : colors.dark },
-      ]}
+      style={[styles.dayHeadersContainer, { borderBlockColor: textinputcolor }]}
     >
       {DAY_NAMES.map((day, index) => (
         <AppText
           key={day}
           style={[
             styles.dayHeaderText,
-            { color: isLightMode ? colors.darkbrown : colors.light },
+            { color: secondarycolormode },
             index === 0 && styles.dayHeaderSunday,
           ]}
         >
@@ -245,32 +246,13 @@ const CalendarScreen: React.FC = () => {
           onPress={goToPreviousMonth}
           style={styles.arrowButton}
         >
-          <AppText
-            style={[
-              styles.arrowText,
-              { color: isLightMode ? colors.brown : colors.secondary },
-            ]}
-          >
-            {"<"}
-          </AppText>
+          <AppText style={[styles.arrowText, { color: arrows }]}>{"<"}</AppText>
         </TouchableOpacity>
-        <AppText
-          style={[
-            styles.monthTitle,
-            { color: isLightMode ? colors.brown : colors.white },
-          ]}
-        >
+        <AppText style={[styles.monthTitle, { color: titlecolor }]}>
           {monthYearTitle}
         </AppText>
         <TouchableOpacity onPress={goToNextMonth} style={styles.arrowButton}>
-          <AppText
-            style={[
-              styles.arrowText,
-              { color: isLightMode ? colors.brown : colors.secondary },
-            ]}
-          >
-            {">"}
-          </AppText>
+          <AppText style={[styles.arrowText, { color: arrows }]}>{">"}</AppText>
         </TouchableOpacity>
       </View>
 
@@ -289,8 +271,8 @@ const CalendarScreen: React.FC = () => {
         style={[
           styles.addButton,
           {
-            backgroundColor: isLightMode ? colors.brown : colors.dark,
-            borderColor: isLightMode ? colors.darkbrown : colors.light,
+            backgroundColor: textinputcolor,
+            borderColor: secondarycolormode,
           },
         ]}
         onPress={handleAddPress}

@@ -22,8 +22,8 @@ import {
 } from "../../data/TransactionData";
 import SelectionModal from "./SelectionModal";
 import TransactionTypeTabs from "./TransactionTypeTabs";
-import { saveTransaction, deleteTransaction } from "../../../utilities/storage"; // Import deleteTransaction
-import { useTheme } from "../../../config/theme/ThemeProvider";
+import { saveTransaction, deleteTransaction } from "../../../utilities/storage";
+import { useThemeColors } from "../../../config/theme/colorMode";
 
 const validationSchema = Yup.object().shape({
   activeTab: Yup.string(),
@@ -46,9 +46,10 @@ const handleCameraButtonPress = () => {
 };
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
-  const { isLightMode } = useTheme();
   const navigation = useNavigation();
   const { dateString, transaction } = route.params;
+  const { titlecolor, secondarycolormode, textinputcolor, placeholderdark } =
+    useThemeColors();
 
   const [showPicker, setShowPicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -145,16 +146,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
           <MaterialCommunityIcons
             name="chevron-left"
             size={30}
-            color={isLightMode ? colors.brown : colors.white}
+            color={titlecolor}
             style={styles.backIcon}
           />
         </TouchableOpacity>
-        <AppText
-          style={[
-            styles.headerText,
-            { color: isLightMode ? colors.brown : colors.white },
-          ]}
-        >
+        <AppText style={[styles.headerText, { color: titlecolor }]}>
           {isEditing ? "Edit Transaction" : "New Transaction"}
         </AppText>
       </View>
@@ -228,18 +224,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   style={[
                     styles.fieldContainer,
                     {
-                      borderBottomColor: isLightMode
-                        ? colors.darkbrown
-                        : colors.dark,
+                      borderBottomColor: textinputcolor,
                     },
                   ]}
                 >
-                  <AppText
-                    style={[
-                      styles.fieldLabel,
-                      { color: isLightMode ? colors.brown : colors.white },
-                    ]}
-                  >
+                  <AppText style={[styles.fieldLabel, { color: titlecolor }]}>
                     Date
                   </AppText>
                   <TouchableOpacity
@@ -250,7 +239,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                       style={[
                         styles.fieldValue,
                         {
-                          color: isLightMode ? colors.darkbrown : colors.light,
+                          color: secondarycolormode,
                         },
                       ]}
                     >
@@ -271,7 +260,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                       is24Hour={true}
                       display="default"
                       onChange={onChangeDate}
-                      textColor={isLightMode ? colors.lightbrown : colors.white}
+                      textColor={titlecolor}
                     />
                   )}
                 </View>
@@ -284,29 +273,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   style={[
                     styles.fieldContainer,
                     {
-                      borderBottomColor: isLightMode
-                        ? colors.darkbrown
-                        : colors.dark,
+                      borderBottomColor: textinputcolor,
                     },
                   ]}
                 >
-                  <AppText
-                    style={[
-                      styles.fieldLabel,
-                      { color: isLightMode ? colors.brown : colors.white },
-                    ]}
-                  >
+                  <AppText style={[styles.fieldLabel, { color: titlecolor }]}>
                     Amount
                   </AppText>
                   <TextInput
-                    style={[
-                      styles.textInput,
-                      { color: isLightMode ? colors.brown : colors.white },
-                    ]}
+                    style={[styles.textInput, { color: titlecolor }]}
                     placeholder="0.00"
-                    placeholderTextColor={
-                      isLightMode ? colors.darkbrown : colors.light
-                    }
+                    placeholderTextColor={placeholderdark}
                     keyboardType="numeric"
                     value={values.amount}
                     onChangeText={handleChange("amount")}
@@ -322,17 +299,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                       style={[
                         styles.fieldContainer,
                         {
-                          borderBottomColor: isLightMode
-                            ? colors.darkbrown
-                            : colors.dark,
+                          borderBottomColor: textinputcolor,
                         },
                       ]}
                     >
                       <AppText
-                        style={[
-                          styles.fieldLabel,
-                          { color: isLightMode ? colors.brown : colors.white },
-                        ]}
+                        style={[styles.fieldLabel, { color: titlecolor }]}
                       >
                         Category
                       </AppText>
@@ -348,17 +320,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                             [
                               styles.fieldValue,
                               {
-                                color: isLightMode
-                                  ? colors.brown
-                                  : colors.white,
+                                color: titlecolor,
                               },
                             ],
                             !values.category && [
                               styles.placeholderText,
                               {
-                                color: isLightMode
-                                  ? colors.darkbrown
-                                  : colors.light,
+                                color: placeholderdark,
                               },
                             ],
                           ]}
@@ -384,18 +352,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   style={[
                     styles.fieldContainer,
                     {
-                      borderBottomColor: isLightMode
-                        ? colors.darkbrown
-                        : colors.dark,
+                      borderBottomColor: textinputcolor,
                     },
                   ]}
                 >
-                  <AppText
-                    style={[
-                      styles.fieldLabel,
-                      { color: isLightMode ? colors.brown : colors.white },
-                    ]}
-                  >
+                  <AppText style={[styles.fieldLabel, { color: titlecolor }]}>
                     Account
                   </AppText>
                   <TouchableOpacity
@@ -407,19 +368,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   >
                     <AppText
                       style={[
-                        [
-                          styles.fieldValue,
-                          {
-                            color: isLightMode ? colors.brown : colors.white,
-                          },
-                        ],
+                        [styles.fieldValue, { color: titlecolor }],
                         !values.account && [
                           styles.placeholderText,
-                          {
-                            color: isLightMode
-                              ? colors.darkbrown
-                              : colors.light,
-                          },
+                          { color: placeholderdark },
                         ],
                       ]}
                     >
@@ -440,29 +392,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   style={[
                     styles.fieldContainer,
                     {
-                      borderBottomColor: isLightMode
-                        ? colors.darkbrown
-                        : colors.dark,
+                      borderBottomColor: textinputcolor,
                     },
                   ]}
                 >
-                  <AppText
-                    style={[
-                      styles.fieldLabel,
-                      { color: isLightMode ? colors.brown : colors.white },
-                    ]}
-                  >
+                  <AppText style={[styles.fieldLabel, { color: titlecolor }]}>
                     Description
                   </AppText>
                   <TextInput
-                    style={[
-                      styles.textInput,
-                      { color: isLightMode ? colors.brown : colors.white },
-                    ]}
+                    style={[styles.textInput, { color: titlecolor }]}
                     placeholder="Enter Description"
-                    placeholderTextColor={
-                      isLightMode ? colors.darkbrown : colors.light
-                    }
+                    placeholderTextColor={placeholderdark}
                     value={values.description}
                     onChangeText={handleChange("description")}
                     onBlur={handleBlur("description")}
@@ -475,44 +415,22 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                 )}
 
                 <View style={styles.camerasection}>
-                  <AppText
-                    style={[
-                      styles.cameraText,
-                      { color: isLightMode ? colors.brown : colors.light },
-                    ]}
-                  >
+                  <AppText style={[styles.cameraText, { color: titlecolor }]}>
                     Add your expense / income
                   </AppText>
                   <TouchableOpacity
                     onPress={handleCameraButtonPress}
-                    onPressIn={() => setIsCameraPressed(true)}
-                    onPressOut={() => setIsCameraPressed(false)}
                     style={[
                       styles.cameraButton,
                       {
-                        backgroundColor: isCameraPressed
-                          ? colors.secondary
-                          : isLightMode
-                          ? colors.lightbrown
-                          : colors.dark,
-                        borderColor: isCameraPressed
-                          ? colors.secondary
-                          : isLightMode
-                          ? colors.brown
-                          : colors.light,
+                        backgroundColor: colors.secondary,
                       },
                     ]}
                   >
                     <MaterialCommunityIcons
                       name="camera-outline"
                       size={20}
-                      color={
-                        isCameraPressed
-                          ? colors.white
-                          : isLightMode
-                          ? colors.brown
-                          : colors.white
-                      }
+                      color={colors.white}
                     />
                   </TouchableOpacity>
                 </View>
@@ -526,9 +444,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                       styles.button,
                       styles.deleteButton,
                       {
-                        backgroundColor: isLightMode
-                          ? colors.danger
-                          : colors.danger,
+                        backgroundColor: colors.danger,
                       },
                     ]}
                     onPress={handleDelete}
@@ -555,9 +471,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                     styles.button,
                     styles.clearButton,
                     {
-                      backgroundColor: isLightMode
-                        ? colors.darkbrown
-                        : colors.dark,
+                      backgroundColor: textinputcolor,
                     },
                   ]}
                   onPress={() => resetForm()}
@@ -640,7 +554,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   cameraButton: {
-    borderWidth: 2,
+    borderWidth: 1,
     padding: 15,
     borderRadius: 10,
   },

@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { CalendarCell } from "../../../../Hooks/calenderTypes";
 import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
-import { useTheme } from "../../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 interface DayCellProps {
   item: CalendarCell;
@@ -11,9 +11,11 @@ interface DayCellProps {
 }
 
 const DayCell: React.FC<DayCellProps> = React.memo(({ item, onPress }) => {
-  const { isLightMode } = useTheme();
+  const { secondarycolormode, titlecolor, textinputcolor, colormode2 } =
+    useThemeColors();
+
   if (item.day === null) {
-    return <View style={styles.cell} />;
+    return <View style={[styles.cell, { borderColor: textinputcolor }]} />;
   }
 
   const handlePress = () => {
@@ -28,27 +30,18 @@ const DayCell: React.FC<DayCellProps> = React.memo(({ item, onPress }) => {
 
   return (
     <TouchableOpacity
-      style={[
-        styles.cell,
-        { borderColor: isLightMode ? colors.brown : colors.dark },
-      ]}
+      style={[styles.cell, { borderColor: textinputcolor }]}
       onPress={handlePress}
     >
       <View style={styles.dayNumberContainer}>
         {isToday ? (
           <View
-            style={[
-              styles.todayBackground,
-              { backgroundColor: isLightMode ? colors.brown : colors.white },
-            ]}
+            style={[styles.todayBackground, { backgroundColor: titlecolor }]}
           >
             <AppText
               style={[
                 styles.dayText,
-                [
-                  styles.todayText,
-                  { color: isLightMode ? colors.white : colors.black },
-                ],
+                [styles.todayText, { color: colormode2 }],
               ]}
             >
               {day}
@@ -60,10 +53,7 @@ const DayCell: React.FC<DayCellProps> = React.memo(({ item, onPress }) => {
               styles.dayText,
               isSunday
                 ? styles.sundayText
-                : [
-                    styles.otherDayText,
-                    { color: isLightMode ? colors.brown : colors.light },
-                  ],
+                : [styles.otherDayText, { color: secondarycolormode }],
             ]}
           >
             {day}
@@ -92,8 +82,7 @@ const DayCell: React.FC<DayCellProps> = React.memo(({ item, onPress }) => {
 const styles = StyleSheet.create({
   cell: {
     flex: 1,
-    borderBottomWidth: 0.5,
-    borderRightWidth: 0.5,
+    borderWidth: 0.5,
     padding: 4,
     minHeight: 60,
     justifyContent: "space-between",

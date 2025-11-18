@@ -3,6 +3,7 @@ export default {
     darkPrimary:'#030a13',
     dark: "#1b2a41",
     black:'#000',
+
     midDark:'#462a0eb6',
     
     white: "#FFFFFF",
@@ -13,7 +14,6 @@ export default {
     midbrown:'#a59883ff',
     darkbrown:'#8f8571ff',
     brown:'#6A492B',
-
     
     secondary: "#1bc499ff",
     darkSecondary:'#328f78ff',

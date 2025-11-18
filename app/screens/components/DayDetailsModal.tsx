@@ -1,5 +1,3 @@
-// app/screens/components/DayDetailsModal.tsx
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -17,7 +15,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../../navigation/AppNavigator";
 import { getTransactions, Transaction } from "../../../utilities/storage";
 import TransactionListItem from "./TransactionListItems";
-import { useTheme } from "../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../config/theme/colorMode";
 
 type NavigationProps = NativeStackNavigationProp<
   AppStackParamList,
@@ -38,7 +36,8 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
   const navigation = useNavigation<NavigationProps>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const { isLightMode } = useTheme();
+  const { titlecolor, secondarycolormode, modal2, textinputcolor } =
+    useThemeColors();
 
   useEffect(() => {
     if (visible && date) {
@@ -85,17 +84,12 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
           style={[
             styles.modalContent,
             {
-              backgroundColor: isLightMode ? colors.white : colors.darkPrimary,
+              backgroundColor: modal2,
             },
           ]}
         >
           <View style={styles.modalHeader}>
-            <AppText
-              style={[
-                styles.modalTitle,
-                { color: isLightMode ? colors.brown : colors.white },
-              ]}
-            >
+            <AppText style={[styles.modalTitle, { color: titlecolor }]}>
               {date?.toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -134,10 +128,7 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
           </View>
 
           <TouchableOpacity
-            style={[
-              styles.addButton,
-              { backgroundColor: isLightMode ? colors.brown : colors.dark },
-            ]}
+            style={[styles.addButton, { backgroundColor: textinputcolor }]}
             onPress={handleAddPress}
           >
             <AppText style={styles.addButtonText}>+</AppText>

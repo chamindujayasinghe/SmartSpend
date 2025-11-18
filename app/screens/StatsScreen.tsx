@@ -6,12 +6,12 @@ import colors from "../../config/colors";
 import DateRangePickerModal from "./components/DateRangePickerModal";
 import DateNavigator from "./components/DateNavigator";
 import PeriodSelector, { Period } from "./components/PeriodSelector";
-import { getTransactions, Transaction } from "../../utilities/storage";
+import { getTransactions } from "../../utilities/storage";
 import PieChartComponent from "./components/stats/PieChart";
 import CategorySummaryListItem, {
   AggregatedCategory,
 } from "./components/stats/CategorySummaryListItem";
-import { useTheme } from "../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../config/theme/colorMode";
 
 export type DateRange = {
   start: Date | null;
@@ -19,7 +19,7 @@ export type DateRange = {
 };
 
 const StatsScreen: React.FC = () => {
-  const { isLightMode } = useTheme();
+  const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTab, setSelectedTab] = useState<"incomes" | "expenses">(
     "expenses"
@@ -140,12 +140,7 @@ const StatsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText
-          style={[
-            styles.headerTitle,
-            { color: isLightMode ? colors.brown : colors.white },
-          ]}
-        >
+        <AppText style={[styles.headerTitle, { color: titlecolor }]}>
           Stats Page
         </AppText>
         <PeriodSelector
@@ -164,10 +159,7 @@ const StatsScreen: React.FC = () => {
       />
 
       <View
-        style={[
-          styles.tabsContainer,
-          { borderBottomColor: isLightMode ? colors.darkbrown : colors.dark },
-        ]}
+        style={[styles.tabsContainer, { borderBottomColor: textinputcolor }]}
       >
         <TouchableOpacity
           style={styles.tabButton}
@@ -176,7 +168,7 @@ const StatsScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
-              { color: isLightMode ? colors.darkbrown : colors.light },
+              { color: secondarycolormode },
               selectedTab === "incomes" && styles.activeTabText,
             ]}
           >
@@ -193,7 +185,7 @@ const StatsScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
-              { color: isLightMode ? colors.darkbrown : colors.light },
+              { color: secondarycolormode },
               selectedTab === "expenses" && styles.activeTabText,
             ]}
           >
@@ -212,19 +204,13 @@ const StatsScreen: React.FC = () => {
             title={`${
               selectedTab === "incomes" ? "Incomes" : "Expenses"
             } Distribution`}
-            type={selectedTab}
             height={240}
           />
         )}
 
         {aggregatedData.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <AppText
-              style={[
-                styles.emptyText,
-                { color: isLightMode ? colors.brown : colors.light },
-              ]}
-            >
+            <AppText style={[styles.emptyText, { color: secondarycolormode }]}>
               No {selectedTab} found for this period.
             </AppText>
           </View>
@@ -236,7 +222,6 @@ const StatsScreen: React.FC = () => {
               <CategorySummaryListItem
                 index={index}
                 item={item}
-                type={selectedTab}
                 totalAmount={totalAmount}
               />
             )}

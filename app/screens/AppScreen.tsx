@@ -2,7 +2,6 @@ import React from "react";
 import { User } from "@supabase/supabase-js";
 import { useAppScreenLogic } from "../../Hooks/useAppScreen";
 import SuccessOverlay from "../components/SuccessOverlay";
-import MainTabNavigator from "../navigation/MainTabNavigator";
 import AppNavigator from "../navigation/AppNavigator";
 
 interface AppScreenProps {
