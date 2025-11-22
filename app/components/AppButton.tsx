@@ -12,7 +12,7 @@ interface AppButtonProps extends TouchableOpacityProps {
   title: string;
   iconName?: React.ComponentProps<typeof MaterialCommunityIcons>["name"];
   textColor?: string;
-  iconComponent?: React.ReactNode; // Add this line
+  iconComponent?: React.ReactNode;
 }
 
 const AppButton: React.FC<AppButtonProps> = ({
@@ -20,7 +20,7 @@ const AppButton: React.FC<AppButtonProps> = ({
   style,
   iconName,
   textColor = colors.primary,
-  iconComponent, // Add this line
+  iconComponent,
   ...otherProps
 }) => {
   return (

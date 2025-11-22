@@ -13,6 +13,7 @@ interface DateNavigatorProps {
   dateRange: DateRange;
 }
 
+// Utility to format date in short style
 const formatShortDate = (date: Date | null) => {
   if (!date) return "";
   return date.toLocaleDateString("default", {
@@ -22,6 +23,24 @@ const formatShortDate = (date: Date | null) => {
   });
 };
 
+// Utility to get week range (Monday → Sunday)
+const getWeekRange = (date: Date) => {
+  const current = new Date(date);
+  const day = current.getDay(); // Sunday = 0, Monday = 1, ...
+  const diffToMonday = day === 0 ? -6 : 1 - day; // Sunday goes back 6 days
+
+  const monday = new Date(current);
+  monday.setDate(current.getDate() + diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+
+  return { monday, sunday };
+};
+
+// Format display based on period
 const formatDisplayDate = (date: Date, period: Period, range: DateRange) => {
   switch (period) {
     case "Daily":
@@ -31,19 +50,10 @@ const formatDisplayDate = (date: Date, period: Period, range: DateRange) => {
         year: "numeric",
       });
 
-    case "Weekly":
-      const day = date.getDay();
-      const monday = new Date(date);
-      const sunday = new Date(date);
-
-      // Find Monday
-      const diffToMonday = day === 0 ? -6 : 1 - day;
-      monday.setDate(date.getDate() + diffToMonday);
-
-      // Find Sunday
-      sunday.setDate(monday.getDate() + 6);
-
+    case "Weekly": {
+      const { monday, sunday } = getWeekRange(date);
       return `${formatShortDate(monday)} - ${formatShortDate(sunday)}`;
+    }
 
     case "Monthly":
       return date.toLocaleString("default", {
@@ -131,7 +141,6 @@ const styles = StyleSheet.create({
   currentDateText: {
     fontSize: 18,
     fontWeight: "bold",
-
     textAlign: "center",
     flex: 1,
   },

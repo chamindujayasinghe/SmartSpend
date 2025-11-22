@@ -18,6 +18,20 @@ export type DateRange = {
   end: Date | null;
 };
 
+// Utility to get week range (Monday → Sunday)
+const getWeekRange = (date: Date) => {
+  const current = new Date(date);
+  const day = current.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const monday = new Date(current);
+  monday.setDate(current.getDate() + diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  return { monday, sunday };
+};
+
 const StatsScreen: React.FC = () => {
   const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -47,25 +61,15 @@ const StatsScreen: React.FC = () => {
         const targetTab = selectedTab === "incomes" ? "Income" : "Expense";
 
         const filteredTransactions = allTransactions.filter((tx) => {
-          if (tx.activeTab !== targetTab) {
-            return false;
-          }
-
+          if (tx.activeTab !== targetTab) return false;
           const txDate = new Date(tx.date);
+
           switch (selectedPeriod) {
             case "Daily":
               return txDate.toDateString() === currentDate.toDateString();
 
             case "Weekly": {
-              const day = currentDate.getDay();
-              const monday = new Date(currentDate);
-              monday.setDate(currentDate.getDate() - (day === 0 ? 6 : day - 1));
-              monday.setHours(0, 0, 0, 0);
-
-              const sunday = new Date(monday);
-              sunday.setDate(monday.getDate() + 6);
-              sunday.setHours(23, 59, 59, 999);
-
+              const { monday, sunday } = getWeekRange(currentDate);
               return txDate >= monday && txDate <= sunday;
             }
 
@@ -91,16 +95,13 @@ const StatsScreen: React.FC = () => {
           }
         });
 
-        // 2. AGGREGATION
         const categoryMap = new Map<string, number>();
-
         filteredTransactions.forEach((tx) => {
           const amount = parseFloat(tx.amount);
           const currentTotal = categoryMap.get(tx.category) || 0;
           categoryMap.set(tx.category, currentTotal + amount);
         });
 
-        // Convert the Map back into an array of objects
         const aggregatedArray = Array.from(
           categoryMap,
           ([category, totalAmount]) => ({
@@ -115,9 +116,7 @@ const StatsScreen: React.FC = () => {
       }
     };
 
-    if (isFocused) {
-      fetchAndAggregateTransactions();
-    }
+    if (isFocused) fetchAndAggregateTransactions();
   }, [isFocused, currentDate, selectedPeriod, selectedTab, dateRange]);
 
   const handleNavigate = (direction: "previous" | "next") => {
@@ -129,15 +128,12 @@ const StatsScreen: React.FC = () => {
       case "Daily":
         newDate.setDate(newDate.getDate() + amount);
         break;
-
       case "Weekly":
         newDate.setDate(newDate.getDate() + amount * 7);
         break;
-
       case "Monthly":
         newDate.setMonth(newDate.getMonth() + amount);
         break;
-
       case "Annually":
         newDate.setFullYear(newDate.getFullYear() + amount);
         break;
@@ -149,9 +145,7 @@ const StatsScreen: React.FC = () => {
   const handleResetDate = () => {
     setCurrentDate(new Date());
     setDateRange({ start: null, end: null });
-    if (selectedPeriod === "Period") {
-      setSelectedPeriod("Monthly");
-    }
+    setSelectedPeriod("Monthly");
   };
 
   const handleConfirmRange = (range: { start: Date; end: Date }) => {
@@ -259,16 +253,15 @@ const StatsScreen: React.FC = () => {
         isVisible={isRangePickerVisible}
         onClose={() => setIsRangePickerVisible(false)}
         onConfirm={handleConfirmRange}
+        startDate={dateRange.start || new Date()}
+        endDate={dateRange.end || new Date()}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
+  container: { flex: 1, paddingHorizontal: 20 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -276,27 +269,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 5,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-  },
+  headerTitle: { fontSize: 22, fontWeight: "bold" },
   tabsContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
     marginBottom: 10,
   },
-  tabButton: {
-    flex: 1,
-    alignItems: "center",
-    paddingBottom: 10,
-  },
-  tabText: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  activeTabText: {
-    color: colors.secondary,
-  },
+  tabButton: { flex: 1, alignItems: "center", paddingBottom: 10 },
+  tabText: { fontSize: 18, fontWeight: "600" },
+  activeTabText: { color: colors.secondary },
   activeTabIndicator: {
     height: 3,
     width: "70%",
@@ -305,22 +286,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 1.5,
   },
-  contentArea: {
-    flex: 1,
-  },
-  list: {
-    width: "100%",
-    marginTop: 10,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
+  contentArea: { flex: 1 },
+  list: { width: "100%", marginTop: 10 },
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  emptyText: { fontSize: 16, fontWeight: "500" },
 });
 
 export default StatsScreen;
