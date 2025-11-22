@@ -55,13 +55,29 @@ const StatsScreen: React.FC = () => {
           switch (selectedPeriod) {
             case "Daily":
               return txDate.toDateString() === currentDate.toDateString();
+
+            case "Weekly": {
+              const day = currentDate.getDay();
+              const monday = new Date(currentDate);
+              monday.setDate(currentDate.getDate() - (day === 0 ? 6 : day - 1));
+              monday.setHours(0, 0, 0, 0);
+
+              const sunday = new Date(monday);
+              sunday.setDate(monday.getDate() + 6);
+              sunday.setHours(23, 59, 59, 999);
+
+              return txDate >= monday && txDate <= sunday;
+            }
+
             case "Monthly":
               return (
                 txDate.getMonth() === currentDate.getMonth() &&
                 txDate.getFullYear() === currentDate.getFullYear()
               );
+
             case "Annually":
               return txDate.getFullYear() === currentDate.getFullYear();
+
             case "Period":
               if (!dateRange.start || !dateRange.end) return false;
               const startDate = new Date(dateRange.start);
@@ -69,6 +85,7 @@ const StatsScreen: React.FC = () => {
               const endDate = new Date(dateRange.end);
               endDate.setHours(23, 59, 59, 999);
               return txDate >= startDate && txDate <= endDate;
+
             default:
               return false;
           }
@@ -107,18 +124,25 @@ const StatsScreen: React.FC = () => {
     if (selectedPeriod === "Period") return;
     const newDate = new Date(currentDate);
     const amount = direction === "previous" ? -1 : 1;
+
     switch (selectedPeriod) {
       case "Daily":
         newDate.setDate(newDate.getDate() + amount);
         break;
-      case "Annually":
-        newDate.setFullYear(newDate.getFullYear() + amount);
+
+      case "Weekly":
+        newDate.setDate(newDate.getDate() + amount * 7);
         break;
-      default:
+
       case "Monthly":
         newDate.setMonth(newDate.getMonth() + amount);
         break;
+
+      case "Annually":
+        newDate.setFullYear(newDate.getFullYear() + amount);
+        break;
     }
+
     setCurrentDate(newDate);
   };
 
