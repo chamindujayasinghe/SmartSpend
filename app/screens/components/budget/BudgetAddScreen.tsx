@@ -6,6 +6,8 @@ import DateNavigator from "../DateNavigator";
 import DateRangePickerModal from "../DateRangePickerModal";
 import colors from "../../../../config/colors";
 import { useThemeColors } from "../../../../config/theme/colorMode";
+import BudgetHeader from "./BudgetHeader";
+import BudgetLists from "./BudgetList";
 
 export type DateRange = {
   start: Date | null;
@@ -33,6 +35,9 @@ const BudgetAddScreen: React.FC = () => {
       case "Daily":
         newDate.setDate(newDate.getDate() + amount);
         break;
+      case "Weekly":
+        newDate.setDate(newDate.getDate() + amount * 7);
+        break;
       case "Annually":
         newDate.setFullYear(newDate.getFullYear() + amount);
         break;
@@ -53,9 +58,7 @@ const BudgetAddScreen: React.FC = () => {
   const handleResetDate = () => {
     setCurrentDate(new Date());
     setDateRange({ start: null, end: null });
-    if (selectedPeriod === "Period") {
-      setSelectedPeriod("Monthly");
-    }
+    setSelectedPeriod("Monthly");
   };
   const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
 
@@ -120,19 +123,21 @@ const BudgetAddScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.contentArea}>
-        {selectedTab === "incomes" && (
-          <AppText style={styles.contentText}>Incomes Content Here</AppText>
-        )}
-        {selectedTab === "expenses" && (
-          <AppText style={styles.contentText}>Expenses Content Here</AppText>
-        )}
-      </View>
+      <BudgetHeader selectedPeriod={selectedPeriod} />
+
+      <BudgetLists
+        selectedTab={selectedTab}
+        selectedPeriod={selectedPeriod}
+        dateRange={dateRange}
+        currentDate={currentDate}
+      />
 
       <DateRangePickerModal
         isVisible={isRangePickerVisible}
         onClose={() => setIsRangePickerVisible(false)}
         onConfirm={handleConfirmRange}
+        startDate={dateRange.start || new Date()}
+        endDate={dateRange.end || new Date()}
       />
     </View>
   );
@@ -177,15 +182,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     borderRadius: 1.5,
-  },
-  contentArea: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  contentText: {
-    color: colors.white,
-    fontSize: 18,
   },
 });
 

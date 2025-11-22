@@ -130,23 +130,34 @@ interface DateRangePickerModalProps {
   isVisible: boolean;
   onClose: () => void;
   onConfirm: (range: { start: Date; end: Date }) => void;
+  startDate: Date;
+  endDate: Date;
 }
 
 const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
   isVisible,
   onClose,
   onConfirm,
+  startDate,
+  endDate,
 }) => {
   const { modal, titlecolor, modal3, darksecondary, secondarycolormode } =
     useThemeColors();
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+
+  const [internalStartDate, setInternalStartDate] = useState(startDate);
+  const [internalEndDate, setInternalEndDate] = useState(endDate);
+
+  // Reset modal state whenever parent startDate/endDate changes
+  React.useEffect(() => {
+    setInternalStartDate(startDate);
+    setInternalEndDate(endDate);
+  }, [startDate, endDate]);
 
   const handleConfirm = () => {
-    if (startDate > endDate) {
-      onConfirm({ start: endDate, end: startDate });
+    if (internalStartDate > internalEndDate) {
+      onConfirm({ start: internalEndDate, end: internalStartDate });
     } else {
-      onConfirm({ start: startDate, end: endDate });
+      onConfirm({ start: internalStartDate, end: internalEndDate });
     }
   };
 
@@ -167,13 +178,13 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
 
               <SimpleDatePicker
                 label="Start Date"
-                date={startDate}
-                setDate={setStartDate}
+                date={internalStartDate}
+                setDate={setInternalStartDate}
               />
               <SimpleDatePicker
                 label="End Date"
-                date={endDate}
-                setDate={setEndDate}
+                date={internalEndDate}
+                setDate={setInternalEndDate}
               />
 
               <View
