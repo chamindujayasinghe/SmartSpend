@@ -11,13 +11,19 @@ import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { useThemeColors } from "../../../config/theme/colorMode";
 
-export type Period = "Daily" | "Monthly" | "Annually" | "Period";
-const periodOptions: Period[] = ["Daily", "Monthly", "Annually", "Period"];
+export type Period = "Daily" | "Weekly" | "Monthly" | "Annually" | "Period";
+const periodOptions: Period[] = [
+  "Daily",
+  "Weekly",
+  "Monthly",
+  "Annually",
+  "Period",
+];
 
 interface PeriodSelectorProps {
   selectedPeriod: Period;
   onSelectPeriod: (period: Period) => void;
-  onReset?: () => void;
+  onReset: () => void;
   onShowRangePicker: () => void;
 }
 

@@ -5,6 +5,7 @@ import AppText from "../../../components/AppText";
 import DateNavigator from "../DateNavigator";
 import DateRangePickerModal from "../DateRangePickerModal";
 import colors from "../../../../config/colors";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 export type DateRange = {
   start: Date | null;
@@ -49,12 +50,23 @@ const BudgetAddScreen: React.FC = () => {
     setCurrentDate(range.start);
     setIsRangePickerVisible(false);
   };
+  const handleResetDate = () => {
+    setCurrentDate(new Date());
+    setDateRange({ start: null, end: null });
+    if (selectedPeriod === "Period") {
+      setSelectedPeriod("Monthly");
+    }
+  };
+  const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText style={styles.headerTitle}>Budget</AppText>
+        <AppText style={[styles.headerTitle, { color: titlecolor }]}>
+          Budget
+        </AppText>
         <PeriodSelector
+          onReset={handleResetDate}
           selectedPeriod={selectedPeriod}
           onSelectPeriod={setSelectedPeriod}
           onShowRangePicker={() => setIsRangePickerVisible(true)}
@@ -68,7 +80,9 @@ const BudgetAddScreen: React.FC = () => {
         dateRange={dateRange}
       />
 
-      <View style={styles.tabsContainer}>
+      <View
+        style={[styles.tabsContainer, { borderBottomColor: textinputcolor }]}
+      >
         <TouchableOpacity
           style={styles.tabButton}
           onPress={() => setSelectedTab("incomes")}
@@ -76,6 +90,7 @@ const BudgetAddScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
+              { color: secondarycolormode },
               selectedTab === "incomes" && styles.activeTabText,
             ]}
           >
@@ -93,6 +108,7 @@ const BudgetAddScreen: React.FC = () => {
           <AppText
             style={[
               styles.tabText,
+              { color: secondarycolormode },
               selectedTab === "expenses" && styles.activeTabText,
             ]}
           >
@@ -137,12 +153,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: colors.white,
   },
   tabsContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: colors.dark,
   },
   tabButton: {
     flex: 1,
@@ -151,7 +165,6 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 18,
-    color: colors.light,
     fontWeight: "600",
   },
   activeTabText: {

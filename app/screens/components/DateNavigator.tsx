@@ -31,6 +31,26 @@ const formatDisplayDate = (date: Date, period: Period, range: DateRange) => {
         year: "numeric",
       });
 
+    case "Weekly":
+      const day = date.getDay();
+      const monday = new Date(date);
+      const sunday = new Date(date);
+
+      // Find Monday
+      const diffToMonday = day === 0 ? -6 : 1 - day;
+      monday.setDate(date.getDate() + diffToMonday);
+
+      // Find Sunday
+      sunday.setDate(monday.getDate() + 6);
+
+      return `${formatShortDate(monday)} - ${formatShortDate(sunday)}`;
+
+    case "Monthly":
+      return date.toLocaleString("default", {
+        month: "short",
+        year: "numeric",
+      });
+
     case "Annually":
       return date.getFullYear().toString();
 
@@ -43,11 +63,7 @@ const formatDisplayDate = (date: Date, period: Period, range: DateRange) => {
       return "Select Range";
 
     default:
-    case "Monthly":
-      return date.toLocaleString("default", {
-        month: "short",
-        year: "numeric",
-      });
+      return "";
   }
 };
 
