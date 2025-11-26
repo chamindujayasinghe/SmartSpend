@@ -2,29 +2,37 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import colors from "../../../../config/colors";
 import AppText from "../../../components/AppText";
-import { Transaction } from "../../../../utilities/storage";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 interface headerprops {
   selectedPeriod: string;
 }
 
 const BudgetHeader = ({ selectedPeriod }: headerprops) => {
+  const { tabBarColor, titlecolor, secondarycolormode, darksecondary } =
+    useThemeColors();
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { backgroundColor: tabBarColor }]}>
       <View style={styles.budgetRow}>
         <View style={styles.remainingContainer}>
-          <AppText style={styles.remainingtxt}>
+          <AppText style={[styles.remainingtxt, { color: titlecolor }]}>
             Remaining ({selectedPeriod})
           </AppText>
           <AppText style={styles.remainingtxt}>0.00</AppText>
         </View>
-        <TouchableOpacity style={styles.budgetBtn}>
-          <AppText style={styles.budgetsettingtxt}>Budget Setting</AppText>
+        <TouchableOpacity
+          style={[styles.budgetBtn, { borderColor: secondarycolormode }]}
+        >
+          <AppText style={[styles.budgetsettingtxt, { color: titlecolor }]}>
+            Budget Setting
+          </AppText>
         </TouchableOpacity>
       </View>
       <View style={[styles.budgetRow, { marginTop: 25 }]}>
         <View style={styles.progressContainer}>
-          <AppText style={styles.spendedTxt}>{selectedPeriod}</AppText>
+          <AppText style={[styles.spendedTxt, { color: titlecolor }]}>
+            {selectedPeriod}
+          </AppText>
           <AppText style={styles.spendedTxt}>0.00</AppText>
         </View>
         <View style={styles.progressBarWrapper}>
@@ -33,8 +41,12 @@ const BudgetHeader = ({ selectedPeriod }: headerprops) => {
             <AppText style={styles.progressPercentText}>50%</AppText>
           </View>
           <View style={styles.bottomValuesRow}>
-            <AppText style={styles.bottomValueText}>0.00</AppText>
-            <AppText style={styles.bottomValueText}>0.00</AppText>
+            <AppText style={[styles.bottomValueText, { color: darksecondary }]}>
+              0.00
+            </AppText>
+            <AppText style={[styles.bottomValueText, { color: darksecondary }]}>
+              0.00
+            </AppText>
           </View>
         </View>
       </View>
@@ -46,7 +58,6 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 15,
     paddingVertical: 20,
-    backgroundColor: colors.dark,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
   },
@@ -54,7 +65,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   remainingtxt: {
-    color: colors.white,
     fontSize: 15,
     fontWeight: "500",
   },
@@ -68,8 +78,7 @@ const styles = StyleSheet.create({
     padding: 8,
     justifyContent: "center",
     textAlign: "center",
-    borderWidth: 1,
-    borderColor: colors.white,
+    borderWidth: 1.5,
     borderRadius: 10,
   },
 
@@ -120,8 +129,8 @@ const styles = StyleSheet.create({
 
   bottomValueText: {
     color: colors.white,
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });
 

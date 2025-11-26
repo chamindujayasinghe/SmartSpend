@@ -4,6 +4,7 @@ import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
 import { DateRange } from "./BudgetAddScreen";
 import { getTransactions, Transaction } from "../../../../utilities/storage";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 interface BudgetListsProps {
   selectedTab: "incomes" | "expenses";
@@ -12,7 +13,6 @@ interface BudgetListsProps {
   currentDate: Date;
 }
 
-// Utility to get week range (Monday → Sunday)
 const getWeekRange = (date: Date) => {
   const current = new Date(date);
   const day = current.getDay();
@@ -34,6 +34,7 @@ const BudgetLists: React.FC<BudgetListsProps> = ({
 }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const { tabBarColor, titlecolor } = useThemeColors();
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -95,11 +96,13 @@ const BudgetLists: React.FC<BudgetListsProps> = ({
       data={transactions}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <View style={styles.listItem}>
-          <AppText style={styles.amountText}>
+        <View style={[styles.listItem, { borderColor: tabBarColor }]}>
+          <AppText style={[styles.amountText, { color: titlecolor }]}>
             {parseFloat(item.amount).toFixed(2)}
           </AppText>
-          <AppText style={styles.categoryText}>{item.category}</AppText>
+          <AppText style={[styles.categoryText, { color: titlecolor }]}>
+            {item.category}
+          </AppText>
         </View>
       )}
       ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
@@ -112,20 +115,19 @@ const styles = StyleSheet.create({
   listItem: {
     flexDirection: "row",
     justifyContent: "space-between",
+    backgroundColor: "transparent",
     paddingVertical: 12,
     paddingHorizontal: 15,
-    backgroundColor: colors.dark,
     borderRadius: 8,
+    borderWidth: 2,
   },
   amountText: {
-    color: colors.white,
     fontWeight: "600",
     fontSize: 16,
   },
   categoryText: {
-    color: colors.white,
-    fontWeight: "400",
-    fontSize: 16,
+    fontWeight: "500",
+    fontSize: 15,
   },
 });
 

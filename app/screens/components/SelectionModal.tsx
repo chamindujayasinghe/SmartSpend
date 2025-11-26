@@ -18,6 +18,7 @@ interface Props {
   items: string[];
   onSelectItem: (item: string) => void;
   onClose: () => void;
+  onAddPress: () => void;
 }
 
 const SelectionModal: React.FC<Props> = ({
@@ -26,8 +27,10 @@ const SelectionModal: React.FC<Props> = ({
   items,
   onSelectItem,
   onClose,
+  onAddPress,
 }) => {
   const { isLightMode } = useTheme();
+
   return (
     <Modal visible={isVisible} transparent={true} animationType="fade">
       <Pressable style={styles.backdrop} onPress={onClose} />
@@ -83,6 +86,19 @@ const SelectionModal: React.FC<Props> = ({
             </TouchableOpacity>
           )}
         />
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => {
+            onClose();
+            onAddPress();
+          }}
+        >
+          <MaterialCommunityIcons
+            name="plus-circle"
+            size={30}
+            color={colors.white}
+          />
+        </TouchableOpacity>
       </View>
     </Modal>
   );
@@ -120,6 +136,20 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 16,
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: colors.dark,
+    marginTop: 5,
+  },
+  addButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

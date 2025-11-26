@@ -60,7 +60,7 @@ const BudgetAddScreen: React.FC = () => {
     setDateRange({ start: null, end: null });
     setSelectedPeriod("Monthly");
   };
-  const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
+  const { titlecolor, textinputcolor, secondarycolormode,tabBarColor } = useThemeColors();
 
   return (
     <View style={styles.container}>

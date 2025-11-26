@@ -24,6 +24,7 @@ import SelectionModal from "./SelectionModal";
 import TransactionTypeTabs from "./TransactionTypeTabs";
 import { saveTransaction, deleteTransaction } from "../../../utilities/storage";
 import { useThemeColors } from "../../../config/theme/colorMode";
+import AddNewModal from "./transaction/AddTransactionData";
 
 const validationSchema = Yup.object().shape({
   activeTab: Yup.string(),
@@ -56,9 +57,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const [modalType, setModalType] = useState<"category" | "account" | null>(
     null
   );
+
+  const [addNewModalVisible, setAddNewModalVisible] = useState(false);
+
   const [isCameraPressed, setIsCameraPressed] = useState(false);
 
   const isEditing = !!transaction;
+
+  const handleAddNew = () => {
+    setAddNewModalVisible(true);
+  };
 
   const initialDate = (() => {
     if (transaction?.date) {
@@ -178,6 +186,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
           touched,
           resetForm,
         }) => {
+          // Move handleSaveNewItem inside Formik render function
+          const handleSaveNewItem = (value: string) => {
+            if (modalType && value.trim()) {
+              setFieldValue(modalType, value);
+              console.log(`New ${modalType} added:`, value);
+            }
+          };
+
           const onChangeDate = (event: any, selectedDate?: Date) => {
             setShowPicker(false);
             if (selectedDate) {
@@ -486,6 +502,15 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                 items={getModalItems()}
                 onSelectItem={handleSelectItem}
                 onClose={() => setModalVisible(false)}
+                onAddPress={handleAddNew}
+              />
+              <AddNewModal
+                visible={addNewModalVisible}
+                onClose={() => setAddNewModalVisible(false)}
+                onSave={handleSaveNewItem}
+                title={`Add New ${
+                  modalType === "category" ? "Category" : "Account"
+                }`}
               />
             </>
           );
@@ -566,7 +591,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     padding: 15,
-    gap: 10, // Add gap between buttons
+    gap: 10,
   },
   button: {
     flex: 1,
@@ -574,11 +599,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 50, // Ensure consistent height
+    minHeight: 50,
   },
   deleteButton: {
     backgroundColor: colors.danger,
-    flex: 0.5, // Make delete button smaller
+    flex: 0.5,
   },
   saveButton: {
     backgroundColor: colors.secondary,

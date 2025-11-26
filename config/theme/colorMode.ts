@@ -30,6 +30,8 @@ export const useThemeColors = () => {
   const modal2 = isLightMode ? colors.white : colors.primary
   const modal3 = isLightMode ? colors.darklight : colors.primary
 
+
+
   return {
     secondarycolormode,
     textinputcolor,
@@ -45,6 +47,6 @@ export const useThemeColors = () => {
     colormode2,
     modal2,
     placeholderdark,
-    modal3
+    modal3,
   };
 };
