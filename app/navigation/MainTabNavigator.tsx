@@ -10,7 +10,6 @@ import ProfileScreen from "../screens/ProfileScreen";
 import StatsScreen from "../screens/StatsScreen";
 import AddScreen from "../screens/AddScreen";
 import BudgetAddScreen from "../screens/components/budget/BudgetAddScreen";
-import { useTheme } from "../../config/theme/ThemeProvider";
 import { useThemeColors } from "../../config/theme/colorMode";
 
 interface MainTabNavigatorProps {
@@ -20,17 +19,16 @@ interface MainTabNavigatorProps {
 const Tab = createBottomTabNavigator();
 
 const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
-  const { isLightMode } = useTheme();
-  const { tabBarColor, tabBatInactiveColor, darksecondary } = useThemeColors();
+  const { colormode1, colormode2, secondarycolormode } = useThemeColors();
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.darkSecondary,
-        tabBarInactiveTintColor: tabBatInactiveColor,
+        tabBarActiveTintColor: colors.secondary,
+        tabBarInactiveTintColor: colormode2,
         tabBarStyle: {
           height: 60,
-          backgroundColor: tabBarColor,
+          backgroundColor: secondarycolormode,
           borderRadius: 30,
           marginHorizontal: 8,
           marginVertical: 4,
@@ -74,24 +72,14 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
                 width: size * 1.7,
                 height: size * 1.7,
                 borderRadius: (size * 2.2) / 2,
-                backgroundColor: focused
-                  ? colors.secondary
-                  : isLightMode
-                  ? colors.brown
-                  : colors.light,
+                backgroundColor: focused ? colors.secondary : colormode1,
                 justifyContent: "center",
                 alignItems: "center",
               }}
             >
               <MaterialCommunityIcons
                 name="plus"
-                color={
-                  focused
-                    ? colors.white
-                    : isLightMode
-                    ? colors.white
-                    : colors.primary
-                }
+                color={colormode2}
                 size={size * 1.5}
               />
             </View>

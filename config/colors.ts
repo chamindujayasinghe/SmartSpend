@@ -1,22 +1,15 @@
 export default {
-    primary: "#0E172A",
-    darkPrimary:'#030a13',
-    dark: "#1b2a41",
-    black:'#000',
+    dark:'#444e5aff',
+    darkPrimary : '#2a333aff',
 
-    midDark:'#462a0ead',
+    black:'#000',
     
     white: "#FFFFFF",
-    lightPrimary:'#EEE6CA',  
-    darklight:'#cac3b4ff',
-    light: "#889AA4",
-    lightbrown:'#dfceaec7',
-    midbrown:'#a59883ff',
-    darkbrown:'#8f8571ff',
-    brown:'#6A492B',
+    light: "#c4c4c4ff",
+    lightprimary:'#ecececff',
     
-    secondary: "#1bc499ff",
-    darkSecondary:'#328f78ff',
+    
+    secondary: "#00ADB5",
     
     error:"#e78c8c",
     success:'#5fd482',

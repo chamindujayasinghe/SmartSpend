@@ -5,6 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppText from "../../../components/AppText";
@@ -20,7 +22,7 @@ interface Props {
 
 const AddNewModal: React.FC<Props> = ({ visible, onClose, onSave, title }) => {
   const [value, setValue] = useState("");
-  const { titlecolor, placeholderdark, textinputcolor, modal } =
+  const { colormode1, colormode2, textinputcolor, secondarycolormode } =
     useThemeColors();
 
   const handleSave = () => {
@@ -32,39 +34,40 @@ const AddNewModal: React.FC<Props> = ({ visible, onClose, onSave, title }) => {
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={[styles.modal, { backgroundColor: modal }]}>
-          <View style={styles.header}>
-            <AppText style={[styles.headerText, { color: titlecolor }]}>
-              {title}
-            </AppText>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.overlay}>
+          <View style={[styles.modal, { backgroundColor: colormode2 }]}>
+            <View style={styles.header}>
+              <AppText style={[styles.headerText, { color: colormode1 }]}>
+                {title}
+              </AppText>
 
-            <TouchableOpacity onPress={onClose}>
-              <MaterialCommunityIcons
-                name="close"
-                size={28}
-                color={colors.danger}
-              />
+              <TouchableOpacity onPress={onClose}>
+                <MaterialCommunityIcons
+                  name="close"
+                  size={28}
+                  color={colors.danger}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TextInput
+              placeholder="Enter name"
+              placeholderTextColor={secondarycolormode}
+              value={value}
+              onChangeText={setValue}
+              style={[
+                styles.input,
+                { borderColor: textinputcolor, color: colormode1 },
+              ]}
+            />
+
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+              <AppText style={styles.saveButtonText}>Save</AppText>
             </TouchableOpacity>
           </View>
-
-          <TextInput
-            placeholder="Enter name"
-            placeholderTextColor={placeholderdark}
-            value={value}
-            onChangeText={setValue}
-            style={[
-              styles.input,
-              { borderColor: textinputcolor, color: titlecolor },
-            ]}
-          />
-
-          {/* Save Button */}
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <AppText style={styles.saveButtonText}>Save</AppText>
-          </TouchableOpacity>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -72,7 +75,7 @@ const AddNewModal: React.FC<Props> = ({ visible, onClose, onSave, title }) => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(92, 92, 92, 0.5)",
     justifyContent: "flex-end",
     alignItems: "center",
   },

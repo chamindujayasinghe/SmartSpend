@@ -23,11 +23,11 @@ const AppGradientWrapper = () => {
           ...DarkTheme,
           dark: !isLightMode,
           colors: {
-            primary: colors.primary,
+            primary: colors.black,
             background: "transparent",
-            card: colors.primary,
+            card: colors.black,
             text: colors.white,
-            border: colors.dark,
+            border: colors.black,
             notification: colors.secondary,
           },
         }}

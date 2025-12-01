@@ -7,15 +7,15 @@ import {
   Pressable,
   FlatList,
 } from "react-native";
-import AppText from "../../components/AppText";
-import colors from "../../../config/colors";
+import AppText from "../../../components/AppText";
+import colors from "../../../../config/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AppStackParamList } from "../../navigation/AppNavigator";
-import { getTransactions, Transaction } from "../../../utilities/storage";
-import TransactionListItem from "./TransactionListItems";
-import { useThemeColors } from "../../../config/theme/colorMode";
+import { AppStackParamList } from "../../../navigation/AppNavigator";
+import { getTransactions, Transaction } from "../../../../utilities/storage";
+import TransactionListItem from "../TransactionListItems";
+import { useThemeColors } from "../../../../config/theme/colorMode";
 
 type NavigationProps = NativeStackNavigationProp<
   AppStackParamList,
@@ -36,8 +36,7 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
   const navigation = useNavigation<NavigationProps>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  const { titlecolor, secondarycolormode, modal2, textinputcolor } =
-    useThemeColors();
+  const { colormode1, colormode2, secondarycolormode } = useThemeColors();
 
   useEffect(() => {
     if (visible && date) {
@@ -84,12 +83,12 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
           style={[
             styles.modalContent,
             {
-              backgroundColor: modal2,
+              backgroundColor: colormode2,
             },
           ]}
         >
           <View style={styles.modalHeader}>
-            <AppText style={[styles.modalTitle, { color: titlecolor }]}>
+            <AppText style={[styles.modalTitle, { color: colormode1 }]}>
               {date?.toLocaleDateString("en-US", {
                 weekday: "long",
                 year: "numeric",
@@ -109,7 +108,9 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
           <View style={styles.listContainer}>
             {transactions.length === 0 ? (
               <View style={styles.emptyContainer}>
-                <AppText style={styles.emptyText}>
+                <AppText
+                  style={[styles.emptyText, { color: secondarycolormode }]}
+                >
                   No transactions for this day.
                 </AppText>
               </View>
@@ -128,10 +129,12 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
           </View>
 
           <TouchableOpacity
-            style={[styles.addButton, { backgroundColor: textinputcolor }]}
+            style={[styles.addButton, { backgroundColor: colormode1 }]}
             onPress={handleAddPress}
           >
-            <AppText style={styles.addButtonText}>+</AppText>
+            <AppText style={[styles.addButtonText, { color: colormode2 }]}>
+              +
+            </AppText>
           </TouchableOpacity>
         </Pressable>
       </Pressable>
@@ -143,7 +146,7 @@ const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(66, 66, 66, 0.5)",
   },
   modalContent: {
     height: "70%",
@@ -188,7 +191,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    color: colors.light,
     fontSize: 16,
   },
 });

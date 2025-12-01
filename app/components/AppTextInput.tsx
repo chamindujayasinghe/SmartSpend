@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
 import colors from "../../config/colors";
+import { useThemeColors } from "../../config/theme/colorMode";
 
 interface AppTextInputProps extends TextInputProps {
   icon?: keyof typeof MaterialCommunityIcons.glyphMap;
@@ -22,14 +23,14 @@ const AppTextInput: React.FC<AppTextInputProps> = ({
   ...otherProps
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const { colormode2, colormode1 } = useThemeColors();
 
   return (
     <View style={[styles.container, style]}>
       {icon && <MaterialCommunityIcons style={styles.icon} name={icon} />}
       <TextInput
-        style={[styles.textinput]}
+        style={[styles.textinput, { color: colormode1 }]}
         secureTextEntry={isPassword && !isPasswordVisible}
-        placeholderTextColor={colors.light}
         {...otherProps}
       />
       {isPassword && (
@@ -50,7 +51,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.dark,
     borderRadius: 10,
     height: 50,
     marginTop: 20,
@@ -59,7 +59,6 @@ const styles = StyleSheet.create({
   textinput: {
     flex: 1,
     height: "100%",
-    color: colors.white,
     fontSize: 16,
     fontFamily: Platform.OS === "android" ? "Roboto" : "Avenir",
   },

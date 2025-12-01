@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  TextStyle,
-  StyleProp,
-  Platform,
-} from "react-native";
+import { Text, StyleSheet, TextStyle, StyleProp, Platform } from "react-native";
 import colors from "../../config/colors";
 
 interface AppTextProps {
