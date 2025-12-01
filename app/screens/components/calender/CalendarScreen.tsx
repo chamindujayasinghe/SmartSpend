@@ -4,13 +4,12 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
 import CalendarHeader from "./CalenderHeader";
-import DayDetailsModal from "../DayDetailsModal";
+import DayDetailsModal from "./DayDetailsModal";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../../../navigation/AppNavigator";
 import DayCell from "./DayCell";
 import { CalendarCell } from "../../../../Hooks/calenderTypes";
 import { getTransactions, Transaction } from "../../../../utilities/storage";
-import { useTheme } from "../../../../config/theme/ThemeProvider";
 import { useThemeColors } from "../../../../config/theme/colorMode";
 
 const today = new Date();
@@ -107,10 +106,8 @@ const CalendarScreen: React.FC = () => {
   const [clickedDate, setClickedDate] = useState<Date | null>(today);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
-  const { isLightMode } = useTheme();
 
-  const { titlecolor, secondarycolormode, textinputcolor, arrows } =
-    useThemeColors();
+  const { titlecolor, secondarycolormode, textinputcolor } = useThemeColors();
 
   useFocusEffect(
     useCallback(() => {
@@ -246,13 +243,17 @@ const CalendarScreen: React.FC = () => {
           onPress={goToPreviousMonth}
           style={styles.arrowButton}
         >
-          <AppText style={[styles.arrowText, { color: arrows }]}>{"<"}</AppText>
+          <AppText style={[styles.arrowText, { color: colors.secondary }]}>
+            {"<"}
+          </AppText>
         </TouchableOpacity>
         <AppText style={[styles.monthTitle, { color: titlecolor }]}>
           {monthYearTitle}
         </AppText>
         <TouchableOpacity onPress={goToNextMonth} style={styles.arrowButton}>
-          <AppText style={[styles.arrowText, { color: arrows }]}>{">"}</AppText>
+          <AppText style={[styles.arrowText, { color: colors.secondary }]}>
+            {">"}
+          </AppText>
         </TouchableOpacity>
       </View>
 

@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { useTheme } from "../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../config/theme/colorMode";
 
 type TabType = "Income" | "Expense";
 
@@ -14,7 +15,7 @@ interface Props {
 const TABS: TabType[] = ["Income", "Expense"];
 
 const TransactionTypeTabs: React.FC<Props> = ({ activeTab, onTabPress }) => {
-  const { isLightMode } = useTheme();
+  const { colormode1, colormode2, secondarycolormode } = useThemeColors();
   return (
     <View style={styles.tabContainer}>
       {TABS.map((tab) => (
@@ -23,8 +24,8 @@ const TransactionTypeTabs: React.FC<Props> = ({ activeTab, onTabPress }) => {
           style={[
             styles.tabButton,
             {
-              backgroundColor: isLightMode ? colors.lightbrown : colors.dark,
-              borderColor: isLightMode ? colors.brown : colors.white,
+              backgroundColor: secondarycolormode,
+              borderColor: colormode2,
             },
             activeTab === tab && styles.activeTabButton,
           ]}
@@ -32,10 +33,7 @@ const TransactionTypeTabs: React.FC<Props> = ({ activeTab, onTabPress }) => {
         >
           <AppText
             style={[
-              [
-                styles.tabText,
-                { color: isLightMode ? colors.brown : colors.light },
-              ],
+              [styles.tabText, { color: colormode2 }],
               activeTab === tab && styles.activeTabText,
             ]}
           >

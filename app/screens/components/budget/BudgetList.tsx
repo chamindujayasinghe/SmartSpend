@@ -34,7 +34,7 @@ const BudgetLists: React.FC<BudgetListsProps> = ({
 }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const { tabBarColor, titlecolor } = useThemeColors();
+  const { colormode2, secondarycolormode } = useThemeColors();
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -96,11 +96,13 @@ const BudgetLists: React.FC<BudgetListsProps> = ({
       data={transactions}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <View style={[styles.listItem, { borderColor: tabBarColor }]}>
-          <AppText style={[styles.amountText, { color: titlecolor }]}>
+        <View
+          style={[styles.listItem, { backgroundColor: secondarycolormode }]}
+        >
+          <AppText style={[styles.amountText, { color: colormode2 }]}>
             {parseFloat(item.amount).toFixed(2)}
           </AppText>
-          <AppText style={[styles.categoryText, { color: titlecolor }]}>
+          <AppText style={[styles.categoryText, { color: colormode2 }]}>
             {item.category}
           </AppText>
         </View>
@@ -119,7 +121,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 15,
     borderRadius: 8,
-    borderWidth: 2,
   },
   amountText: {
     fontWeight: "600",

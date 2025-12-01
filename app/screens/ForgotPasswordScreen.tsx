@@ -34,8 +34,13 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
   const [status, setStatus] = useState<ServerStatus | null>(null);
   const [otpVisible, setOtpVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { placeholdertext, titlecolor, textinputcolor, secondarycolormode } =
-    useThemeColors();
+  const {
+    placeholder,
+    textinputcolor,
+    secondarycolormode,
+    colormode1,
+    colormode2,
+  } = useThemeColors();
 
   const handleSendEmail = async (values: any, setFieldTouched: any) => {
     setFieldTouched("email", true);
@@ -80,7 +85,7 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
         >
           {({ handleChange, values, errors, touched, setFieldTouched }) => (
             <>
-              <AppText style={[styles.title, { color: titlecolor }]}>
+              <AppText style={[styles.title, { color: colormode1 }]}>
                 Reset Password
               </AppText>
               <AppText style={[styles.subtitle, { color: secondarycolormode }]}>
@@ -111,9 +116,9 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
                     autoCapitalize="none"
                     style={[
                       styles.defaultTextInput,
-                      { backgroundColor: textinputcolor, color: titlecolor },
+                      { backgroundColor: textinputcolor, color: colormode1 },
                     ]}
-                    placeholderTextColor={placeholdertext}
+                    placeholderTextColor={placeholder}
                     value={values.email}
                     editable={!otpVisible}
                   />
@@ -152,7 +157,7 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
                     placeholder="Enter 6-digit OTP"
                     keyboardType="number-pad"
                     onChangeText={handleChange("otp")}
-                    placeholderTextColor={placeholdertext}
+                    placeholderTextColor={placeholder}
                     maxLength={6}
                     style={{ backgroundColor: textinputcolor }}
                   />

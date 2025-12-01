@@ -49,7 +49,7 @@ const handleCameraButtonPress = () => {
 const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const navigation = useNavigation();
   const { dateString, transaction } = route.params;
-  const { titlecolor, secondarycolormode, textinputcolor, placeholderdark } =
+  const { titlecolor, textinputcolor, secondarycolormode, colormode2 } =
     useThemeColors();
 
   const [showPicker, setShowPicker] = useState(false);
@@ -299,7 +299,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   <TextInput
                     style={[styles.textInput, { color: titlecolor }]}
                     placeholder="0.00"
-                    placeholderTextColor={placeholderdark}
+                    placeholderTextColor={secondarycolormode}
                     keyboardType="numeric"
                     value={values.amount}
                     onChangeText={handleChange("amount")}
@@ -342,7 +342,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                             !values.category && [
                               styles.placeholderText,
                               {
-                                color: placeholderdark,
+                                color: secondarycolormode,
                               },
                             ],
                           ]}
@@ -387,7 +387,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                         [styles.fieldValue, { color: titlecolor }],
                         !values.account && [
                           styles.placeholderText,
-                          { color: placeholderdark },
+                          { color: secondarycolormode },
                         ],
                       ]}
                     >
@@ -418,7 +418,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   <TextInput
                     style={[styles.textInput, { color: titlecolor }]}
                     placeholder="Enter Description"
-                    placeholderTextColor={placeholderdark}
+                    placeholderTextColor={secondarycolormode}
                     value={values.description}
                     onChangeText={handleChange("description")}
                     onBlur={handleBlur("description")}
@@ -487,12 +487,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                     styles.button,
                     styles.clearButton,
                     {
-                      backgroundColor: textinputcolor,
+                      backgroundColor: secondarycolormode,
                     },
                   ]}
                   onPress={() => resetForm()}
                 >
-                  <AppText style={styles.buttonText}>Clear</AppText>
+                  <AppText style={[styles.buttonText, { color: colormode2 }]}>
+                    Clear
+                  </AppText>
                 </TouchableOpacity>
               </View>
 

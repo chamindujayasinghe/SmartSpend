@@ -11,7 +11,6 @@ import {
   Platform,
   Image,
 } from "react-native";
-import { FontAwesome5 } from "@expo/vector-icons";
 import colors from "../../config/colors";
 import AppTextInput from "../components/AppTextInput";
 import AppButton from "../components/AppButton";
@@ -24,7 +23,6 @@ import { useState } from "react";
 import handleSignIn, { ServerStatus } from "../../Authentication/HandleSignIn";
 import handleSignInWithGoogle from "../../Authentication/HandleGoogleAuthenticattion";
 import { useThemeColors } from "../../config/theme/colorMode";
-import { AntDesign } from "@expo/vector-icons";
 
 const validationSchema = yup.object().shape({
   email: yup.string().required().email().label("Email"),
@@ -42,12 +40,12 @@ const Login = ({ navigation }: LoginScreenProps) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const {
-    secondarycolormode,
-    placeholdertext,
-    textinputcolor,
+    colormode1,
     titlecolor,
-    googlebutton,
-    modal2,
+    secondarycolormode,
+    textinputcolor,
+    placeholder,
+    colormode2,
   } = useThemeColors();
 
   const onGoogleButtonPress = async () => {
@@ -108,7 +106,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   onBlur={() => setFieldTouched("email")}
                   onChangeText={handleChange("email")}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.email}>
                   {errors.email}
@@ -121,7 +119,7 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   onBlur={() => setFieldTouched("password")}
                   onChangeText={handleChange("password")}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.password}>
                   {errors.password}
@@ -181,10 +179,10 @@ const Login = ({ navigation }: LoginScreenProps) => {
                   title="Continue with Google"
                   style={{
                     marginTop: 5,
-                    backgroundColor: googlebutton,
+                    backgroundColor: colormode1,
                     shadowColor: colors.white,
                   }}
-                  textColor={modal2}
+                  textColor={colormode2}
                   onPress={onGoogleButtonPress}
                   disabled={isSubmitting || isGoogleLoading}
                   iconComponent={

@@ -46,22 +46,24 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
   date,
   setDate,
 }) => {
-  const { titlecolor, modal3, secondarycolormode } = useThemeColors();
+  const { colormode1, colormode2, secondarycolormode } = useThemeColors();
   return (
     <View style={styles.pickerContainer}>
       <AppText style={[styles.pickerLabel, { color: secondarycolormode }]}>
         {label}
       </AppText>
-      <View style={[styles.pickerControls, { backgroundColor: modal3 }]}>
+      <View
+        style={[styles.pickerControls, { backgroundColor: secondarycolormode }]}
+      >
         <View style={styles.pickerColumn}>
           <TouchableOpacity onPress={() => setDate(modifyDate(date, "day", 1))}>
             <MaterialCommunityIcons
               name="chevron-up"
               size={28}
-              color={titlecolor}
+              color={colormode2}
             />
           </TouchableOpacity>
-          <AppText style={[styles.pickerValue, { color: titlecolor }]}>
+          <AppText style={[styles.pickerValue, { color: colormode2 }]}>
             {date.getDate()}
           </AppText>
           <TouchableOpacity
@@ -70,7 +72,7 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-down"
               size={28}
-              color={titlecolor}
+              color={colormode2}
             />
           </TouchableOpacity>
         </View>
@@ -82,10 +84,10 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-up"
               size={28}
-              color={titlecolor}
+              color={colormode2}
             />
           </TouchableOpacity>
-          <AppText style={[styles.pickerValue, { color: titlecolor }]}>
+          <AppText style={[styles.pickerValue, { color: colormode2 }]}>
             {date.toLocaleString("default", { month: "short" })}
           </AppText>
           <TouchableOpacity
@@ -94,7 +96,7 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-down"
               size={28}
-              color={titlecolor}
+              color={colormode2}
             />
           </TouchableOpacity>
         </View>
@@ -105,10 +107,10 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-up"
               size={28}
-              color={titlecolor}
+              color={colormode2}
             />
           </TouchableOpacity>
-          <AppText style={[styles.pickerValue, { color: titlecolor }]}>
+          <AppText style={[styles.pickerValue, { color: colormode2 }]}>
             {date.getFullYear()}
           </AppText>
           <TouchableOpacity
@@ -117,7 +119,7 @@ const SimpleDatePicker: React.FC<DatePickerProps> = ({
             <MaterialCommunityIcons
               name="chevron-down"
               size={28}
-              color={titlecolor}
+              color={colormode2}
             />
           </TouchableOpacity>
         </View>
@@ -141,8 +143,7 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
   startDate,
   endDate,
 }) => {
-  const { modal, titlecolor, modal3, darksecondary, secondarycolormode } =
-    useThemeColors();
+  const { secondarycolormode, colormode1, colormode2 } = useThemeColors();
 
   const [internalStartDate, setInternalStartDate] = useState(startDate);
   const [internalEndDate, setInternalEndDate] = useState(endDate);
@@ -171,8 +172,10 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.modalBackdrop}>
           <TouchableWithoutFeedback>
-            <View style={[styles.modalContent, { backgroundColor: modal }]}>
-              <AppText style={[styles.modalTitle, { color: titlecolor }]}>
+            <View
+              style={[styles.modalContent, { backgroundColor: colormode2 }]}
+            >
+              <AppText style={[styles.modalTitle, { color: colormode1 }]}>
                 Select Date Range
               </AppText>
 
@@ -188,9 +191,14 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
               />
 
               <View
-                style={[styles.summaryContainer, { backgroundColor: modal3 }]}
+                style={[
+                  styles.summaryContainer,
+                  { backgroundColor: colormode2 },
+                ]}
               >
-                <AppText style={[styles.summaryText, { color: darksecondary }]}>
+                <AppText
+                  style={[styles.summaryText, { color: secondarycolormode }]}
+                >
                   {formatDate(startDate)} - {formatDate(endDate)}
                 </AppText>
               </View>
@@ -206,7 +214,9 @@ const DateRangePickerModal: React.FC<DateRangePickerModalProps> = ({
                   ]}
                   onPress={onClose}
                 >
-                  <AppText style={styles.buttonText}>Cancel</AppText>
+                  <AppText style={[styles.buttonText, { color: colormode2 }]}>
+                    Cancel
+                  </AppText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.button, styles.confirmButton]}

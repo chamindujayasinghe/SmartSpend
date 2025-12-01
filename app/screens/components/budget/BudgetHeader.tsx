@@ -9,28 +9,28 @@ interface headerprops {
 }
 
 const BudgetHeader = ({ selectedPeriod }: headerprops) => {
-  const { tabBarColor, titlecolor, secondarycolormode, darksecondary } =
+  const { titlecolor, secondarycolormode, colormode2, colormode1 } =
     useThemeColors();
   return (
-    <View style={[styles.header, { backgroundColor: tabBarColor }]}>
+    <View style={[styles.header, { backgroundColor: secondarycolormode }]}>
       <View style={styles.budgetRow}>
         <View style={styles.remainingContainer}>
-          <AppText style={[styles.remainingtxt, { color: titlecolor }]}>
+          <AppText style={[styles.remainingtxt, { color: colormode2 }]}>
             Remaining ({selectedPeriod})
           </AppText>
           <AppText style={styles.remainingtxt}>0.00</AppText>
         </View>
         <TouchableOpacity
-          style={[styles.budgetBtn, { borderColor: secondarycolormode }]}
+          style={[styles.budgetBtn, { borderColor: colormode2 }]}
         >
-          <AppText style={[styles.budgetsettingtxt, { color: titlecolor }]}>
+          <AppText style={[styles.budgetsettingtxt, { color: colormode2 }]}>
             Budget Setting
           </AppText>
         </TouchableOpacity>
       </View>
       <View style={[styles.budgetRow, { marginTop: 25 }]}>
         <View style={styles.progressContainer}>
-          <AppText style={[styles.spendedTxt, { color: titlecolor }]}>
+          <AppText style={[styles.spendedTxt, { color: colormode2 }]}>
             {selectedPeriod}
           </AppText>
           <AppText style={styles.spendedTxt}>0.00</AppText>
@@ -41,10 +41,10 @@ const BudgetHeader = ({ selectedPeriod }: headerprops) => {
             <AppText style={styles.progressPercentText}>50%</AppText>
           </View>
           <View style={styles.bottomValuesRow}>
-            <AppText style={[styles.bottomValueText, { color: darksecondary }]}>
+            <AppText style={[styles.bottomValueText, { color: colormode2 }]}>
               0.00
             </AppText>
-            <AppText style={[styles.bottomValueText, { color: darksecondary }]}>
+            <AppText style={[styles.bottomValueText, { color: colormode2 }]}>
               0.00
             </AppText>
           </View>

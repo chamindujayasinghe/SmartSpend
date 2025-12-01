@@ -11,24 +11,24 @@ interface Props {
 }
 
 const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
-  const { titlecolor, darksecondary, tabBarColor } = useThemeColors();
+  const { colormode2, secondarycolormode } = useThemeColors();
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: tabBarColor,
+          backgroundColor: secondarycolormode,
         },
       ]}
     >
       <View style={styles.column}>
-        <AppText style={[styles.title, { color: titlecolor }]}>Income</AppText>
-        <AppText style={[styles.amount, { color: darksecondary }]}>
+        <AppText style={[styles.title, { color: colormode2 }]}>Income</AppText>
+        <AppText style={[styles.amount, { color: colors.secondary }]}>
           $ {income.toFixed(2)}
         </AppText>
       </View>
       <View style={styles.column}>
-        <AppText style={[styles.title, { color: titlecolor }]}>
+        <AppText style={[styles.title, { color: colormode2 }]}>
           Expenses
         </AppText>
         <AppText style={[styles.amount, styles.expense]}>
@@ -36,8 +36,8 @@ const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
         </AppText>
       </View>
       <View style={styles.column}>
-        <AppText style={[styles.title, { color: titlecolor }]}>Total</AppText>
-        <AppText style={[styles.amount, { color: titlecolor }]}>
+        <AppText style={[styles.title, { color: colormode2 }]}>Total</AppText>
+        <AppText style={[styles.amount, { color: colormode2 }]}>
           $ {total.toFixed(2)}
         </AppText>
       </View>

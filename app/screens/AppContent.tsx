@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuthSession } from "../../Hooks/useAuthSession";
 import AuthNavigator from "../navigation/AuthNavigator";
 import AppScreen from "./AppScreen";
+import colors from "../../config/colors";
 
 export const AppContent = () => {
   const { session, isFreshLogin, loading: authLoading } = useAuthSession();
@@ -24,7 +25,7 @@ export const AppContent = () => {
   if (authLoading || checkingResetState) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.secondary} />
       </View>
     );
   }

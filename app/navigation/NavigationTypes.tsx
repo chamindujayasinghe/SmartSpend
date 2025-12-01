@@ -6,7 +6,7 @@ export type AuthStackParamList = {
   Signup: undefined;
   ForgotPassword: undefined;
   VerifyOtp: { email: string };
-  NewPassword: undefined; // <--- Add this line
+  NewPassword: undefined;
 };
 
 export type LoginScreenProps = NativeStackScreenProps<

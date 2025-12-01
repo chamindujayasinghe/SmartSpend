@@ -11,6 +11,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { useTheme } from "../../../config/theme/ThemeProvider";
+import { useThemeColors } from "../../../config/theme/colorMode";
 
 interface Props {
   isVisible: boolean;
@@ -29,30 +30,15 @@ const SelectionModal: React.FC<Props> = ({
   onClose,
   onAddPress,
 }) => {
-  const { isLightMode } = useTheme();
+  const { colormode1, colormode2 } = useThemeColors();
 
   return (
     <Modal visible={isVisible} transparent={true} animationType="fade">
       <Pressable style={styles.backdrop} onPress={onClose} />
 
-      <View
-        style={[
-          styles.modalContainer,
-          { backgroundColor: isLightMode ? colors.white : colors.darkPrimary },
-        ]}
-      >
-        <View
-          style={[
-            styles.header,
-            { borderBlockColor: isLightMode ? colors.darkbrown : colors.light },
-          ]}
-        >
-          <AppText
-            style={[
-              styles.title,
-              { color: isLightMode ? colors.brown : colors.white },
-            ]}
-          >
+      <View style={[styles.modalContainer, { backgroundColor: colormode2 }]}>
+        <View style={[styles.header, { borderBlockColor: colormode1 }]}>
+          <AppText style={[styles.title, { color: colormode1 }]}>
             {title}
           </AppText>
           <TouchableOpacity onPress={onClose}>
@@ -75,12 +61,7 @@ const SelectionModal: React.FC<Props> = ({
                 onClose();
               }}
             >
-              <AppText
-                style={[
-                  styles.itemText,
-                  { color: isLightMode ? colors.brown : colors.light },
-                ]}
-              >
+              <AppText style={[styles.itemText, { color: colormode1 }]}>
                 {item}
               </AppText>
             </TouchableOpacity>

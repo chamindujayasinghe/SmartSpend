@@ -60,7 +60,7 @@ const BudgetAddScreen: React.FC = () => {
     setDateRange({ start: null, end: null });
     setSelectedPeriod("Monthly");
   };
-  const { titlecolor, textinputcolor, secondarycolormode,tabBarColor } = useThemeColors();
+  const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
 
   return (
     <View style={styles.container}>
@@ -84,7 +84,10 @@ const BudgetAddScreen: React.FC = () => {
       />
 
       <View
-        style={[styles.tabsContainer, { borderBottomColor: textinputcolor }]}
+        style={[
+          styles.tabsContainer,
+          { borderBottomColor: secondarycolormode },
+        ]}
       >
         <TouchableOpacity
           style={styles.tabButton}

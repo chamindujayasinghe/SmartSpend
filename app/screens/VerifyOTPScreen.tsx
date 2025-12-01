@@ -46,7 +46,7 @@ const VerifyOtpScreen = () => {
       console.log("Verification Success!");
     }
   };
-  const { titlecolor, secondarycolormode, placeholdertext, textinputcolor } =
+  const { titlecolor, secondarycolormode, placeholder, textinputcolor } =
     useThemeColors();
 
   return (
@@ -66,7 +66,7 @@ const VerifyOtpScreen = () => {
         onChangeText={setOtp}
         value={otp}
         style={{ backgroundColor: textinputcolor }}
-        placeholderTextColor={placeholdertext}
+        placeholderTextColor={placeholder}
       />
 
       {error && <AppErrorText visible={true}>{error}</AppErrorText>}

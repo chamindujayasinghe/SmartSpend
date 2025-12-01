@@ -19,7 +19,7 @@ const AppButton: React.FC<AppButtonProps> = ({
   title,
   style,
   iconName,
-  textColor = colors.primary,
+  textColor = colors.black,
   iconComponent,
   ...otherProps
 }) => {

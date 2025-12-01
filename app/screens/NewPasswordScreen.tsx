@@ -35,7 +35,7 @@ type Props = NewPasswordScreenProps;
 const NewPasswordScreen = ({ navigation }: Props) => {
   const [status, setStatus] = useState<ServerStatus | null>(null);
   const [loading, setLoading] = useState(false);
-  const { titlecolor, secondarycolormode, placeholdertext, textinputcolor } =
+  const { titlecolor, secondarycolormode, placeholder, textinputcolor } =
     useThemeColors();
 
   const handlePasswordReset = async (values: any) => {
@@ -98,7 +98,7 @@ const NewPasswordScreen = ({ navigation }: Props) => {
                   onChangeText={handleChange("password")}
                   value={values.password}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.password}>
                   {errors.password}
@@ -114,7 +114,7 @@ const NewPasswordScreen = ({ navigation }: Props) => {
                   onBlur={() => setFieldTouched("confirmPassword")}
                   onChangeText={handleChange("confirmPassword")}
                   value={values.confirmPassword}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.confirmPassword}>
                   {errors.confirmPassword}

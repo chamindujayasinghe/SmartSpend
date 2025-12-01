@@ -52,7 +52,7 @@ const validationSchema = yup.object().shape({
 });
 
 const Signup = ({ navigation }: SignupScreenProps) => {
-  const { secondarycolormode, placeholdertext, textinputcolor, titlecolor } =
+  const { secondarycolormode, placeholder, textinputcolor, titlecolor } =
     useThemeColors();
   const [status, setStatus] = useState<ServerStatus | null>(null);
   return (
@@ -111,7 +111,7 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   onChangeText={handleChange("firstname")}
                   onBlur={() => setFieldTouched("firstname")}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.firstname}>
                   {errors.firstname}
@@ -123,7 +123,7 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   onChangeText={handleChange("lastname")}
                   onBlur={() => setFieldTouched("lastname")}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.lastname}>
                   {errors.lastname}
@@ -135,7 +135,7 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   onChangeText={handleChange("email")}
                   onBlur={() => setFieldTouched("email")}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.email}>
                   {errors.email}
@@ -148,7 +148,7 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   onChangeText={handleChange("password")}
                   onBlur={() => setFieldTouched("password")}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.password}>
                   {errors.password}
@@ -161,7 +161,7 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   onChangeText={handleChange("confirmPassword")}
                   onBlur={() => setFieldTouched("confirmPassword")}
                   style={{ backgroundColor: textinputcolor }}
-                  placeholderTextColor={placeholdertext}
+                  placeholderTextColor={placeholder}
                 />
                 <AppErrorText visible={touched.confirmPassword}>
                   {errors.confirmPassword}

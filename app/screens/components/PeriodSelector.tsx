@@ -33,7 +33,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   onReset,
   onShowRangePicker,
 }) => {
-  const { periodbtn, darksecondary, titlecolor, modal } = useThemeColors();
+  const { colormode2, colormode1, secondarycolormode } = useThemeColors();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isResetPressed, setIsResetPressed] = useState(false);
 
@@ -54,16 +54,16 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   return (
     <View style={styles.wrapper}>
       <TouchableOpacity
-        style={[styles.periodSelector, { backgroundColor: periodbtn }]}
+        style={[styles.periodSelector, { backgroundColor: secondarycolormode }]}
         onPress={() => setIsModalVisible(true)}
       >
-        <AppText style={[styles.periodText, { color: darksecondary }]}>
+        <AppText style={[styles.periodText, { color: colormode2 }]}>
           {getPeriodInitial(selectedPeriod)}
         </AppText>
         <MaterialCommunityIcons
           name="chevron-down"
           size={20}
-          color={titlecolor}
+          color={colormode2}
         />
       </TouchableOpacity>
 
@@ -71,14 +71,14 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         <TouchableOpacity
           style={[
             styles.resetButton,
-            { backgroundColor: periodbtn },
+            { backgroundColor: secondarycolormode },
             isResetPressed && styles.resetButtonPressed,
           ]}
           onPress={onReset}
           onPressIn={() => setIsResetPressed(true)}
           onPressOut={() => setIsResetPressed(false)}
         >
-          <AppText style={[styles.resetButtonText, { color: titlecolor }]}>
+          <AppText style={[styles.resetButtonText, { color: colormode2 }]}>
             Reset
           </AppText>
         </TouchableOpacity>
@@ -92,7 +92,9 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
       >
         <TouchableWithoutFeedback onPress={() => setIsModalVisible(false)}>
           <View style={styles.modalBackdrop}>
-            <View style={[styles.modalContent, { backgroundColor: modal }]}>
+            <View
+              style={[styles.modalContent, { backgroundColor: colormode2 }]}
+            >
               {periodOptions.map((option) => (
                 <TouchableOpacity
                   key={option}
@@ -103,7 +105,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
                     style={[
                       styles.modalOptionText,
                       {
-                        color: titlecolor,
+                        color: colormode1,
                       },
                     ]}
                   >
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(59, 59, 59, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
