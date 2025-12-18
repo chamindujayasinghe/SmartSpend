@@ -16,15 +16,18 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import {
-  ACCOUNT_TYPES,
-  EXPENSE_CATEGORIES,
-  INCOME_CATEGORIES,
+  saveNewItem,
+  getAccountTypes,
+  getIncomeCategories,
+  getExpenseCategories,
+  deleteCustomItem, // <-- NEW: Imported deletion function
 } from "../../data/TransactionData";
 import SelectionModal from "./SelectionModal";
 import TransactionTypeTabs from "./TransactionTypeTabs";
 import { saveTransaction, deleteTransaction } from "../../../utilities/storage";
 import { useThemeColors } from "../../../config/theme/colorMode";
 import AddNewModal from "./transaction/AddTransactionData";
+import RemoveTransactionModal from "./transaction/removetransactionmodal";
 
 const validationSchema = Yup.object().shape({
   activeTab: Yup.string(),
@@ -57,15 +60,24 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const [modalType, setModalType] = useState<"category" | "account" | null>(
     null
   );
+  // State to hold the fetched list for the SelectionModal
+  const [selectionModalItems, setSelectionModalItems] = useState<string[]>([]);
 
   const [addNewModalVisible, setAddNewModalVisible] = useState(false);
 
-  const [isCameraPressed, setIsCameraPressed] = useState(false);
+  // State for the removal modal
+  const [removeModalVisible, setRemoveModalVisible] = useState(false);
 
   const isEditing = !!transaction;
 
   const handleAddNew = () => {
-    setAddNewModalVisible(true);
+    setModalVisible(false); // Close the selection modal
+    setAddNewModalVisible(true); // Open the add new item modal
+  };
+
+  const handleOpenRemoveModal = () => {
+    setModalVisible(false); // Close selection modal
+    setRemoveModalVisible(true); // Open remove modal
   };
 
   const initialDate = (() => {
@@ -97,7 +109,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
         isEditing ? "Transaction updated!" : "Transaction saved!"
       );
       console.log("Form Submitted and Saved:", transactionData);
-      resetForm();
 
       navigation.goBack();
     } catch (error) {
@@ -109,7 +120,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
     }
   };
 
-  // Add delete function
   const handleDelete = async () => {
     if (!transaction?.id) return;
 
@@ -186,11 +196,90 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
           touched,
           resetForm,
         }) => {
-          // Move handleSaveNewItem inside Formik render function
-          const handleSaveNewItem = (value: string) => {
-            if (modalType && value.trim()) {
-              setFieldValue(modalType, value);
-              console.log(`New ${modalType} added:`, value);
+          // Function to fetch items and open the SelectionModal
+          const fetchAndOpenSelectionModal = async (
+            type: "category" | "account"
+          ) => {
+            setModalType(type);
+            let items: string[] = [];
+
+            if (type === "account") {
+              items = await getAccountTypes("account");
+            } else if (type === "category") {
+              items =
+                values.activeTab === "Income"
+                  ? await getIncomeCategories("income")
+                  : await getExpenseCategories("expense");
+            }
+
+            // Set the fetched items to state for the modal to display
+            setSelectionModalItems(items);
+            setModalVisible(true);
+          };
+
+          // Handler for saving a new category/account
+          const handleSaveNewItem = async (value: string) => {
+            if (!modalType || value.trim().length === 0) return;
+
+            const trimmedValue = value.trim();
+
+            try {
+              let categoryType: "account" | "income" | "expense" = "account";
+
+              if (modalType === "account") {
+                categoryType = "account";
+              } else if (modalType === "category") {
+                categoryType =
+                  values.activeTab === "Income" ? "income" : "expense";
+              }
+
+              await saveNewItem(categoryType, trimmedValue);
+
+              // After saving successfully, set the new item as the selected value
+              setFieldValue(modalType, trimmedValue);
+
+              // Crucially, re-fetch and update the selectionModalItems state
+              // This is needed so the next time a modal opens, it has the new item.
+              await fetchAndOpenSelectionModal(modalType);
+            } catch (error) {
+              console.error("Error saving new item:", error);
+            }
+          };
+
+          // Handler for removing a category/account
+          const handleRemoveItem = async (itemToDelete: string) => {
+            if (!modalType) return;
+
+            try {
+              let categoryType: "account" | "income" | "expense" = "account";
+
+              if (modalType === "account") {
+                categoryType = "account";
+              } else if (modalType === "category") {
+                categoryType =
+                  values.activeTab === "Income" ? "income" : "expense";
+              }
+
+              // Call the storage deletion function
+              await deleteCustomItem(categoryType, itemToDelete);
+
+              // Check if the deleted item was currently selected in the form
+              if (values[modalType] === itemToDelete) {
+                setFieldValue(modalType, ""); // Clear the field if the selected item is deleted
+              }
+
+              // Re-fetch the list to update the Removal Modal/Form
+              // This update is crucial for the RemoveTransactionModal to show the removal visually.
+              const updatedItems =
+                modalType === "account"
+                  ? await getAccountTypes("account")
+                  : values.activeTab === "Income"
+                  ? await getIncomeCategories("income")
+                  : await getExpenseCategories("expense");
+
+              setSelectionModalItems(updatedItems);
+            } catch (error) {
+              console.error("Error removing item:", error);
             }
           };
 
@@ -199,18 +288,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
             if (selectedDate) {
               setFieldValue("date", selectedDate);
             }
-          };
-
-          const getModalItems = () => {
-            if (modalType === "account") {
-              return ACCOUNT_TYPES;
-            }
-            if (modalType === "category") {
-              return values.activeTab === "Income"
-                ? INCOME_CATEGORIES
-                : EXPENSE_CATEGORIES;
-            }
-            return [];
           };
 
           const getModalTitle = () => {
@@ -223,6 +300,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
             if (modalType) {
               setFieldValue(modalType, item);
             }
+            setModalVisible(false);
           };
 
           return (
@@ -264,7 +342,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                     <MaterialCommunityIcons
                       name="reload"
                       size={16}
-                      color={colors.light}
+                      color={secondarycolormode}
                       style={{ marginLeft: 5 }}
                     />
                   </TouchableOpacity>
@@ -326,10 +404,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                       </AppText>
                       <TouchableOpacity
                         style={styles.fieldValueContainer}
-                        onPress={() => {
-                          setModalType("category");
-                          setModalVisible(true);
-                        }}
+                        onPress={() => fetchAndOpenSelectionModal("category")}
                       >
                         <AppText
                           style={[
@@ -351,7 +426,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                         </AppText>
                         <MaterialCommunityIcons
                           name="chevron-down"
-                          color={colors.light}
+                          color={secondarycolormode}
                           size={16}
                           style={{ marginLeft: 10 }}
                         />
@@ -377,10 +452,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   </AppText>
                   <TouchableOpacity
                     style={styles.fieldValueContainer}
-                    onPress={() => {
-                      setModalType("account");
-                      setModalVisible(true);
-                    }}
+                    onPress={() => fetchAndOpenSelectionModal("account")}
                   >
                     <AppText
                       style={[
@@ -395,7 +467,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                     </AppText>
                     <MaterialCommunityIcons
                       name="chevron-down"
-                      color={colors.light}
+                      color={secondarycolormode}
                       size={16}
                       style={{ marginLeft: 10 }}
                     />
@@ -474,7 +546,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                 )}
 
                 <TouchableOpacity
-                  style={[styles.button, styles.saveButton]}
+                  style={[
+                    styles.button,
+                    styles.saveButton,
+                    { flex: isEditing ? 1.5 : 2.5 },
+                  ]}
                   onPress={() => handleSubmit()}
                 >
                   <AppText style={styles.buttonText}>
@@ -488,6 +564,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                     styles.clearButton,
                     {
                       backgroundColor: secondarycolormode,
+                      flex: 1,
                     },
                   ]}
                   onPress={() => resetForm()}
@@ -501,10 +578,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
               <SelectionModal
                 isVisible={modalVisible}
                 title={getModalTitle()}
-                items={getModalItems()}
+                items={selectionModalItems}
                 onSelectItem={handleSelectItem}
                 onClose={() => setModalVisible(false)}
                 onAddPress={handleAddNew}
+                onDeletePress={handleOpenRemoveModal}
               />
               <AddNewModal
                 visible={addNewModalVisible}
@@ -513,6 +591,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                 title={`Add New ${
                   modalType === "category" ? "Category" : "Account"
                 }`}
+              />
+              <RemoveTransactionModal
+                visible={removeModalVisible}
+                onClose={() => setRemoveModalVisible(false)}
+                onRemove={handleRemoveItem} // Pass the removal logic
+                title={`Remove ${
+                  modalType === "category" ? "Category" : "Account"
+                }s`}
+                items={selectionModalItems}
+                modalType={modalType}
+                activeTab={values.activeTab}
               />
             </>
           );
@@ -605,7 +694,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: colors.danger,
-    flex: 0.5,
+    flex: 1,
   },
   saveButton: {
     backgroundColor: colors.secondary,

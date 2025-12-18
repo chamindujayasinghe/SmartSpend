@@ -33,3 +33,13 @@ export type TransactionFormProps = NativeStackScreenProps<
   AppStackParamList,
   "TransactionForm"
 >;
+
+export type BudgetSettingScreenProps = NativeStackScreenProps<
+  AppStackParamList,
+  "BudgetSetting"
+>;
+
+export type BudgetEditScreenProps = NativeStackScreenProps<
+  AppStackParamList,
+  "BudgetEdit"
+>;

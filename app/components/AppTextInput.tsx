@@ -23,7 +23,7 @@ const AppTextInput: React.FC<AppTextInputProps> = ({
   ...otherProps
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const { colormode2, colormode1 } = useThemeColors();
+  const { colormode1 } = useThemeColors();
 
   return (
     <View style={[styles.container, style]}>

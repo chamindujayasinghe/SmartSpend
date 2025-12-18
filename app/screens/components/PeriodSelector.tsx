@@ -57,13 +57,13 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         style={[styles.periodSelector, { backgroundColor: secondarycolormode }]}
         onPress={() => setIsModalVisible(true)}
       >
-        <AppText style={[styles.periodText, { color: colormode2 }]}>
+        <AppText style={[styles.periodText, { color: colors.secondary }]}>
           {getPeriodInitial(selectedPeriod)}
         </AppText>
         <MaterialCommunityIcons
           name="chevron-down"
           size={20}
-          color={colormode2}
+          color={colors.secondary}
         />
       </TouchableOpacity>
 
