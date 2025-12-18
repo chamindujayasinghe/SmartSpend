@@ -3,14 +3,28 @@ import React from "react";
 import colors from "../../../../config/colors";
 import AppText from "../../../components/AppText";
 import { useThemeColors } from "../../../../config/theme/colorMode";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { AppStackParamList } from "../../../navigation/AppNavigator";
 
-interface headerprops {
+interface HeaderProps {
   selectedPeriod: string;
+  selectedTab: "incomes" | "expenses";
 }
 
-const BudgetHeader = ({ selectedPeriod }: headerprops) => {
-  const { titlecolor, secondarycolormode, colormode2, colormode1 } =
-    useThemeColors();
+const BudgetHeader = ({ selectedPeriod, selectedTab }: HeaderProps) => {
+  const { secondarycolormode, colormode2 } = useThemeColors();
+
+  const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+
+  const handleBudgetSettingPress = () => {
+    const initialType = selectedTab === "incomes" ? "Income" : "Expense";
+
+    navigation.navigate("BudgetSetting", {
+      selectedPeriod: selectedPeriod,
+      initialType: initialType,
+    });
+  };
+
   return (
     <View style={[styles.header, { backgroundColor: secondarycolormode }]}>
       <View style={styles.budgetRow}>
@@ -21,6 +35,7 @@ const BudgetHeader = ({ selectedPeriod }: headerprops) => {
           <AppText style={styles.remainingtxt}>0.00</AppText>
         </View>
         <TouchableOpacity
+          onPress={handleBudgetSettingPress}
           style={[styles.budgetBtn, { borderColor: colormode2 }]}
         >
           <AppText style={[styles.budgetsettingtxt, { color: colormode2 }]}>
@@ -60,6 +75,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
+    marginBottom: 20,
   },
   remainingContainer: {
     alignItems: "flex-start",

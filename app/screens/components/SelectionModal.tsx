@@ -10,7 +10,6 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
-import { useTheme } from "../../../config/theme/ThemeProvider";
 import { useThemeColors } from "../../../config/theme/colorMode";
 
 interface Props {
@@ -20,6 +19,8 @@ interface Props {
   onSelectItem: (item: string) => void;
   onClose: () => void;
   onAddPress: () => void;
+  // NEW PROP: Handler for the Delete button press
+  onDeletePress: () => void;
 }
 
 const SelectionModal: React.FC<Props> = ({
@@ -29,6 +30,7 @@ const SelectionModal: React.FC<Props> = ({
   onSelectItem,
   onClose,
   onAddPress,
+  onDeletePress, // Destructure the new prop
 }) => {
   const { colormode1, colormode2 } = useThemeColors();
 
@@ -67,19 +69,39 @@ const SelectionModal: React.FC<Props> = ({
             </TouchableOpacity>
           )}
         />
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => {
-            onClose();
-            onAddPress();
-          }}
-        >
-          <MaterialCommunityIcons
-            name="plus-circle"
-            size={30}
-            color={colors.white}
-          />
-        </TouchableOpacity>
+
+        {/* NEW BUTTON CONTAINER: For Add and Delete buttons */}
+        <View style={styles.bottomButtonContainer}>
+          {/* DELETE Button */}
+          <TouchableOpacity
+            style={[styles.deleteButton, { backgroundColor: colors.danger }]}
+            onPress={() => {
+              onClose();
+              onDeletePress(); // Call the new delete handler
+            }}
+          >
+            <MaterialCommunityIcons
+              name="trash-can-outline"
+              size={24}
+              color={colors.white}
+            />
+          </TouchableOpacity>
+
+          {/* ADD Button */}
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              onClose();
+              onAddPress();
+            }}
+          >
+            <MaterialCommunityIcons
+              name="plus-circle"
+              size={30}
+              color={colors.white}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </Modal>
   );
@@ -118,20 +140,33 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 16,
   },
+  // NEW STYLE: Container for Add/Delete buttons
+  bottomButtonContainer: {
+    flexDirection: "row",
+    marginTop: 10,
+    gap: 10, // Add space between buttons
+  },
+  // ADD Button style (now takes up remaining space)
   addButton: {
+    flex: 3, // Takes up more space
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     padding: 10,
     borderRadius: 10,
     backgroundColor: colors.dark,
-    marginTop: 5,
+    minHeight: 50,
   },
-  addButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: "bold",
+  // NEW STYLE: Delete Button style
+  deleteButton: {
+    flex: 1, // Takes up less space
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    borderRadius: 10,
+    minHeight: 50,
   },
+  // Removed unused addButtonText style
 });
 
 export default SelectionModal;
