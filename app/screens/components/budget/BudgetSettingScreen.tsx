@@ -51,6 +51,7 @@ const BudgetSettingScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"Income" | "Expense">(initialType);
   const [modalItem, setModalItem] = useState<BudgetItem | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleResetDate = () => {
     setSelectedPeriod("Monthly");
@@ -104,7 +105,7 @@ const BudgetSettingScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedPeriod]);
+  }, [selectedPeriod, refreshKey]);
 
   useEffect(() => {
     setActiveTab(initialType);
@@ -136,7 +137,7 @@ const BudgetSettingScreen: React.FC = () => {
           : item
       )
     );
-
+    setRefreshKey((prev) => prev + 1);
     setModalItem(null);
   };
 
