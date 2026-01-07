@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import PeriodSelector, { Period } from "../PeriodSelector";
 import AppText from "../../../components/AppText";
@@ -9,14 +9,30 @@ import { useThemeColors } from "../../../../config/theme/colorMode";
 import BudgetHeader from "./BudgetHeader";
 import BudgetLists from "./BudgetList";
 import BudgetInputModal from "./BudgetInputModal";
+import { useFocusEffect } from "@react-navigation/native";
+import { getTransactions } from "../../../../utilities/storage";
+import { getAllBudgets } from "../../../../utilities/BudgetStorage";
 
 export type DateRange = {
   start: Date | null;
   end: Date | null;
 };
 
+type EnhancedBudgetItem = {
+  category: string;
+  type: "Income" | "Expense";
+  items: any[];
+  dateContext: {
+    currentDate: Date;
+    selectedPeriod: string;
+    dateRange: { start: Date | null; end: Date | null };
+  };
+};
+
 const BudgetAddScreen: React.FC = () => {
   const { titlecolor, secondarycolormode } = useThemeColors();
+
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTab, setSelectedTab] = useState<"incomes" | "expenses">(
@@ -29,13 +45,124 @@ const BudgetAddScreen: React.FC = () => {
     end: null,
   });
 
+  const [totalBudget, setTotalBudget] = useState(0);
+  const [totalSpent, setTotalSpent] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, [])
+  );
+
   const [isRangePickerVisible, setIsRangePickerVisible] = useState(false);
 
   // 🔹 Budget modal
-  const [selectedBudgetItem, setSelectedBudgetItem] = useState<{
-    category: string;
-    type: "Income" | "Expense";
-  } | null>(null);
+  const [selectedBudgetItem, setSelectedBudgetItem] =
+    useState<EnhancedBudgetItem | null>(null);
+
+  const normalize = (v: string) => v.toLowerCase().replace(/s$/, "");
+
+  const createDateSpecificPeriod = (
+    period: string,
+    currentDate: Date,
+    dateRange?: { start: Date | null; end: Date | null }
+  ) => {
+    if (period === "Monthly") {
+      return `Monthly-${currentDate.getFullYear()}-${
+        currentDate.getMonth() + 1
+      }`;
+    }
+    if (period === "Annually") {
+      return `Annually-${currentDate.getFullYear()}`;
+    }
+    return period;
+  };
+
+  useEffect(() => {
+    const calculateHeaderTotals = async () => {
+      const budgets = await getAllBudgets();
+      const transactions = await getTransactions();
+
+      const type = selectedTab === "incomes" ? "Income" : "Expense";
+
+      const dateSpecificPeriod = createDateSpecificPeriod(
+        selectedPeriod,
+        currentDate,
+        dateRange
+      );
+
+      // 🔹 1. Filter transactions for selected period
+      const filteredTransactions = transactions.filter((tx) => {
+        if (normalize(tx.activeTab) !== normalize(selectedTab)) return false;
+
+        const d = new Date(tx.date);
+
+        switch (selectedPeriod) {
+          case "Monthly":
+            return (
+              d.getMonth() === currentDate.getMonth() &&
+              d.getFullYear() === currentDate.getFullYear()
+            );
+          case "Annually":
+            return d.getFullYear() === currentDate.getFullYear();
+          case "Period":
+            if (!dateRange.start || !dateRange.end) return false;
+            return d >= dateRange.start && d <= dateRange.end;
+          default:
+            return true;
+        }
+      });
+
+      // 🔹 2. Categories that actually have transactions
+      const activeCategories = new Set(
+        filteredTransactions.map((tx) => tx.category)
+      );
+
+      // 🔹 3. Resolve budgets (generic + date-specific override)
+      const resolvedBudgetMap = new Map<string, number>();
+
+      // generic budgets
+      budgets.forEach((b) => {
+        if (
+          b.type === type &&
+          b.period === selectedPeriod &&
+          b.budget > 0 &&
+          activeCategories.has(b.category)
+        ) {
+          resolvedBudgetMap.set(b.category, Number(b.budget));
+        }
+      });
+
+      // date-specific override
+      budgets.forEach((b) => {
+        if (
+          b.type === type &&
+          b.period === dateSpecificPeriod &&
+          b.budget > 0 &&
+          activeCategories.has(b.category)
+        ) {
+          resolvedBudgetMap.set(b.category, Number(b.budget));
+        }
+      });
+
+      const totalBudget = Array.from(resolvedBudgetMap.values()).reduce(
+        (sum, v) => sum + v,
+        0
+      );
+
+      const totalSpent = filteredTransactions
+        .filter((tx) => resolvedBudgetMap.has(tx.category))
+        .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+
+      setTotalBudget(totalBudget);
+      setTotalSpent(totalSpent);
+
+      setTotalBudget(totalBudget);
+      setTotalSpent(totalSpent);
+    };
+
+    calculateHeaderTotals();
+  }, [selectedTab, selectedPeriod, currentDate, dateRange, refreshKey]);
 
   // 🔹 Date navigation
   const handleNavigate = (direction: "previous" | "next") => {
@@ -79,11 +206,8 @@ const BudgetAddScreen: React.FC = () => {
   };
 
   // 🔹 When user taps a category
-  const handleBudgetPress = (item: { category: string }) => {
-    setSelectedBudgetItem({
-      category: item.category,
-      type: selectedTab === "incomes" ? "Income" : "Expense",
-    });
+  const handleBudgetPress = (item: EnhancedBudgetItem) => {
+    setSelectedBudgetItem(item);
   };
 
   return (
@@ -139,7 +263,12 @@ const BudgetAddScreen: React.FC = () => {
       </View>
 
       {/* SUMMARY HEADER */}
-      <BudgetHeader selectedPeriod={selectedPeriod} selectedTab={selectedTab} />
+      <BudgetHeader
+        selectedPeriod={selectedPeriod}
+        selectedTab={selectedTab}
+        totalBudget={totalBudget}
+        totalSpent={totalSpent}
+      />
 
       {/* LIST */}
       <BudgetLists
@@ -148,6 +277,7 @@ const BudgetAddScreen: React.FC = () => {
         dateRange={dateRange}
         currentDate={currentDate}
         onItemPress={handleBudgetPress}
+        refreshKey={refreshKey}
       />
 
       {/* DATE RANGE MODAL */}
@@ -159,7 +289,6 @@ const BudgetAddScreen: React.FC = () => {
         endDate={dateRange.end || new Date()}
       />
 
-      {/* BUDGET INPUT MODAL */}
       <BudgetInputModal
         isVisible={!!selectedBudgetItem}
         item={
@@ -168,12 +297,16 @@ const BudgetAddScreen: React.FC = () => {
                 category: selectedBudgetItem.category,
                 type: selectedBudgetItem.type,
                 budget: 0,
+                dateContext: selectedBudgetItem.dateContext,
               }
             : null
         }
         period={selectedPeriod}
         onClose={() => setSelectedBudgetItem(null)}
-        onSave={() => setSelectedBudgetItem(null)}
+        onSave={() => {
+          setRefreshKey((prev) => prev + 1);
+          setSelectedBudgetItem(null);
+        }}
       />
     </View>
   );

@@ -7,10 +7,10 @@ export interface BudgetEntry {
   type: "Income" | "Expense";
   period: string;
   budget: number;
+  dateKey?: string;
 }
 
 const getDynamicBudgetKey = async (): Promise<string | null> => {
-  // Assuming supabase is imported and configured in storage.ts
   const { data: { session } } = await supabase.auth.getSession(); 
   if (!session?.user?.id) {
     console.warn("No user session found for budget storage.");

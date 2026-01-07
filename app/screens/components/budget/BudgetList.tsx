@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   FlatList,
@@ -11,6 +11,7 @@ import colors from "../../../../config/colors";
 import { useThemeColors } from "../../../../config/theme/colorMode";
 import { getAllBudgets } from "../../../../utilities/BudgetStorage";
 import { getTransactions } from "../../../../utilities/storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 interface Props {
   selectedTab: "incomes" | "expenses";
@@ -18,6 +19,7 @@ interface Props {
   currentDate: Date;
   dateRange: { start: Date | null; end: Date | null };
   onItemPress: (item: any) => void;
+  refreshKey: number;
 }
 
 interface GroupedItem {
@@ -26,12 +28,52 @@ interface GroupedItem {
   items: any[];
 }
 
+// Helper function to create date-specific period identifier
+const createDateSpecificPeriod = (
+  period: string,
+  currentDate: Date,
+  dateRange?: { start: Date | null; end: Date | null }
+): string => {
+  if (period === "Monthly") {
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+    return `Monthly-${year}-${month}`;
+  } else if (period === "Weekly") {
+    const weekNumber = getWeekNumber(currentDate);
+    const year = currentDate.getFullYear();
+    return `Weekly-${year}-${weekNumber}`;
+  } else if (period === "Annually") {
+    const year = currentDate.getFullYear();
+    return `Annually-${year}`;
+  } else if (period === "Daily") {
+    const dateStr = currentDate.toISOString().split("T")[0];
+    return `Daily-${dateStr}`;
+  } else if (period === "Period" && dateRange?.start && dateRange?.end) {
+    const startStr = dateRange.start.toISOString().split("T")[0];
+    const endStr = dateRange.end.toISOString().split("T")[0];
+    return `Period-${startStr}-${endStr}`;
+  }
+  return period;
+};
+
+const getWeekNumber = (date: Date): number => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+  const yearStart = new Date(d.getFullYear(), 0, 1);
+  const weekNo = Math.ceil(
+    ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
+  );
+  return weekNo;
+};
+
 const BudgetLists: React.FC<Props> = ({
   selectedTab,
   selectedPeriod,
   currentDate,
   dateRange,
   onItemPress,
+  refreshKey,
 }) => {
   const { colormode2, secondarycolormode, textinputcolor } = useThemeColors();
 
@@ -41,7 +83,13 @@ const BudgetLists: React.FC<Props> = ({
 
   useEffect(() => {
     loadData();
-  }, [selectedTab, selectedPeriod, currentDate, dateRange]);
+  }, [selectedTab, selectedPeriod, currentDate, dateRange, refreshKey]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [selectedTab, selectedPeriod, currentDate, dateRange])
+  );
 
   const normalize = (v: string) => v.toLowerCase().replace(/s$/, "");
 
@@ -93,22 +141,29 @@ const BudgetLists: React.FC<Props> = ({
       }, {})
     ) as GroupedItem[];
 
-    // --- START SORTING LOGIC ---
     const type = selectedTab === "incomes" ? "Income" : "Expense";
 
     const sortedData = grouped.sort((a, b) => {
+      const dateSpecificPeriod = createDateSpecificPeriod(
+        selectedPeriod,
+        currentDate,
+        dateRange
+      );
+
       const hasBudgetA = allBudgets.some(
         (bug) =>
           bug.category === a.category &&
           bug.type === type &&
-          bug.period === selectedPeriod &&
+          (bug.period === selectedPeriod ||
+            bug.period === dateSpecificPeriod) &&
           bug.budget > 0
       );
       const hasBudgetB = allBudgets.some(
         (bug) =>
           bug.category === b.category &&
           bug.type === type &&
-          bug.period === selectedPeriod &&
+          (bug.period === selectedPeriod ||
+            bug.period === dateSpecificPeriod) &&
           bug.budget > 0
       );
 
@@ -123,12 +178,49 @@ const BudgetLists: React.FC<Props> = ({
 
   const getBudget = (category: string) => {
     const type = selectedTab === "incomes" ? "Income" : "Expense";
+
+    // Create date-specific period for lookup
+    const dateSpecificPeriod = createDateSpecificPeriod(
+      selectedPeriod,
+      currentDate,
+      dateRange
+    );
+
+    // First, try to find date-specific budget
+    const dateSpecificBudget = budgets.find(
+      (b: any) =>
+        b.category === category &&
+        b.type === type &&
+        b.period === dateSpecificPeriod
+    );
+
+    // If not found, fall back to generic period budget
+    if (dateSpecificBudget) {
+      return dateSpecificBudget;
+    }
+
     return budgets.find(
       (b: any) =>
         b.category === category &&
         b.type === type &&
         b.period === selectedPeriod
     );
+  };
+
+  const handleItemPress = (item: GroupedItem) => {
+    const enhancedItem = {
+      category: item.category,
+      type:
+        selectedTab === "incomes" ? ("Income" as const) : ("Expense" as const),
+      items: item.items,
+      dateContext: {
+        currentDate,
+        selectedPeriod,
+        dateRange,
+      },
+    };
+
+    onItemPress(enhancedItem);
   };
 
   const renderItem = ({ item }: { item: GroupedItem }) => {
@@ -140,7 +232,7 @@ const BudgetLists: React.FC<Props> = ({
 
       return (
         <TouchableOpacity
-          onPress={() => onItemPress(item.items[0])}
+          onPress={() => handleItemPress(item)}
           style={[styles.simpleCard, { backgroundColor: secondarycolormode }]}
         >
           <AppText style={[styles.category, { color: colormode2 }]}>
@@ -159,7 +251,7 @@ const BudgetLists: React.FC<Props> = ({
     const percent = Math.min((spent / budget) * 100, 100);
     return (
       <TouchableOpacity
-        onPress={() => onItemPress(item.items[0])}
+        onPress={() => handleItemPress(item)}
         style={[
           styles.budgetCard,
           { backgroundColor: secondarycolormode, borderColor: textinputcolor },
@@ -199,7 +291,7 @@ const BudgetLists: React.FC<Props> = ({
                 {isExpense ? (
                   <AppText style={styles.amountRowtxt}>Expense</AppText>
                 ) : (
-                  <AppText>Income</AppText>
+                  <AppText style={styles.amountRowtxt}>Income</AppText>
                 )}
                 <AppText style={[styles.amountText, { color: colormode2 }]}>
                   {spent.toFixed(2)}
@@ -265,8 +357,9 @@ const styles = StyleSheet.create({
   },
   left: {
     marginRight: 15,
+    width: 80,
   },
-  right: { flex: 2 },
+  right: { flex: 1 },
   category: {
     fontSize: 16,
     fontWeight: "bold",
@@ -276,7 +369,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   progressBg: {
-    height: 26,
+    height: 20,
     borderRadius: 15,
     overflow: "hidden",
     justifyContent: "center",

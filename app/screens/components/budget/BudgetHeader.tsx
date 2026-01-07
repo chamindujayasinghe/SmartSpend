@@ -9,12 +9,22 @@ import { AppStackParamList } from "../../../navigation/AppNavigator";
 interface HeaderProps {
   selectedPeriod: string;
   selectedTab: "incomes" | "expenses";
+  totalBudget: number;
+  totalSpent: number;
 }
 
-const BudgetHeader = ({ selectedPeriod, selectedTab }: HeaderProps) => {
-  const { secondarycolormode, colormode2 } = useThemeColors();
+const BudgetHeader = ({
+  selectedPeriod,
+  selectedTab,
+  totalBudget,
+  totalSpent,
+}: HeaderProps) => {
+  const { secondarycolormode, colormode2, textinputcolor } = useThemeColors();
 
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
+
+  const percent =
+    totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
 
   const handleBudgetSettingPress = () => {
     const initialType = selectedTab === "incomes" ? "Income" : "Expense";
@@ -32,7 +42,9 @@ const BudgetHeader = ({ selectedPeriod, selectedTab }: HeaderProps) => {
           <AppText style={[styles.remainingtxt, { color: colormode2 }]}>
             Remaining ({selectedPeriod})
           </AppText>
-          <AppText style={styles.remainingtxt}>0.00</AppText>
+          <AppText style={styles.remainingtxt}>
+            {(totalBudget - totalSpent).toFixed(2)}
+          </AppText>
         </View>
         <TouchableOpacity
           onPress={handleBudgetSettingPress}
@@ -48,19 +60,26 @@ const BudgetHeader = ({ selectedPeriod, selectedTab }: HeaderProps) => {
           <AppText style={[styles.spendedTxt, { color: colormode2 }]}>
             {selectedPeriod}
           </AppText>
-          <AppText style={styles.spendedTxt}>0.00</AppText>
+          <AppText style={styles.spendedTxt}>{totalBudget.toFixed(2)}</AppText>
         </View>
         <View style={styles.progressBarWrapper}>
-          <View style={styles.progressBarBackground}>
-            <View style={styles.progressBarFill} />
-            <AppText style={styles.progressPercentText}>50%</AppText>
+          <View
+            style={[
+              styles.progressBarBackground,
+              { backgroundColor: textinputcolor },
+            ]}
+          >
+            <View style={[styles.progressBarFill, { width: `${percent}%` }]} />
+            <AppText style={styles.progressPercentText}>
+              {percent.toFixed(0)}%
+            </AppText>
           </View>
           <View style={styles.bottomValuesRow}>
             <AppText style={[styles.bottomValueText, { color: colormode2 }]}>
-              0.00
+              {totalSpent.toFixed(2)}
             </AppText>
             <AppText style={[styles.bottomValueText, { color: colormode2 }]}>
-              0.00
+              {(totalBudget - totalSpent).toFixed(2)}
             </AppText>
           </View>
         </View>
@@ -119,7 +138,6 @@ const styles = StyleSheet.create({
     height: 25,
     overflow: "hidden",
     borderRadius: 5,
-    backgroundColor: "#555",
     marginBottom: 3,
     justifyContent: "center",
   },

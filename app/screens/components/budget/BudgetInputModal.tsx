@@ -25,6 +25,11 @@ interface BudgetItem {
   category: string;
   type: "Income" | "Expense";
   budget: number;
+  dateContext?: {
+    currentDate: Date;
+    selectedPeriod: string;
+    dateRange: { start: Date | null; end: Date | null };
+  };
 }
 
 interface BudgetInputModalProps {
@@ -73,18 +78,50 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
       return;
     }
 
+    // Determine the period based on the source
+    let budgetPeriod = period;
+
+    // If coming from BudgetAddScreen with date context, handle specific period
+    if (item.dateContext) {
+      const { selectedPeriod, currentDate, dateRange } = item.dateContext;
+
+      // For Monthly budgets from BudgetAddScreen, create specific month-year identifier
+      if (selectedPeriod === "Monthly") {
+        const month = currentDate.getMonth() + 1; // 0-indexed to 1-indexed
+        const year = currentDate.getFullYear();
+        budgetPeriod = `Monthly-${year}-${month}`; // e.g., "Monthly-2025-11"
+      } else if (selectedPeriod === "Weekly") {
+        // For weekly, you might want to store week number or date range
+        const weekNumber = getWeekNumber(currentDate);
+        const year = currentDate.getFullYear();
+        budgetPeriod = `Weekly-${year}-${weekNumber}`; // e.g., "Weekly-2025-45"
+      } else if (selectedPeriod === "Annually") {
+        const year = currentDate.getFullYear();
+        budgetPeriod = `Annually-${year}`; // e.g., "Annually-2025"
+      } else if (selectedPeriod === "Daily") {
+        const dateStr = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD
+        budgetPeriod = `Daily-${dateStr}`;
+      } else if (
+        selectedPeriod === "Period" &&
+        dateRange.start &&
+        dateRange.end
+      ) {
+        // For custom date range
+        const startStr = dateRange.start.toISOString().split("T")[0];
+        const endStr = dateRange.end.toISOString().split("T")[0];
+        budgetPeriod = `Period-${startStr}-${endStr}`;
+      }
+    }
+
     const newEntry: BudgetEntry = {
       category: item.category,
       type: item.type,
-      period: period,
+      period: budgetPeriod, // Use the determined period
       budget: numericAmount,
     };
 
     try {
-      // 1. Save to persistent storage
       await saveBudgetEntry(newEntry);
-
-      // 2. Notify the parent screen (BudgetSettingScreen) to update its list
       onSave(newEntry);
 
       Alert.alert("Success", `Budget for ${item.category} saved!`);
@@ -93,6 +130,18 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
       console.error("Budget save error:", e);
       Alert.alert("Error", "Could not save budget.");
     }
+  };
+
+  // Helper function to get week number
+  const getWeekNumber = (date: Date): number => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil(
+      ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
+    );
+    return weekNo;
   };
 
   if (!item) return null;

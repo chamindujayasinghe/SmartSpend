@@ -37,6 +37,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = ({ user }) => {
         component={TransactionForm}
         options={{ animation: "none" }}
       />
+
       <Stack.Screen
         name="BudgetSetting"
         component={BudgetSettingScreen}
