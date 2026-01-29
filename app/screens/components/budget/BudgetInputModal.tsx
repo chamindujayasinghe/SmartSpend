@@ -18,9 +18,9 @@ import colors from "../../../../config/colors";
 import {
   BudgetEntry,
   saveBudgetEntry,
+  getAllBudgets,
 } from "../../../../utilities/BudgetStorage";
 
-// Define the structure for the budget item used by the modal
 interface BudgetItem {
   category: string;
   type: "Income" | "Expense";
@@ -37,7 +37,6 @@ interface BudgetInputModalProps {
   item: BudgetItem | null;
   period: string;
   onClose: () => void;
-  // Change onSave to accept the full entry data
   onSave: (entry: BudgetEntry) => void;
 }
 
@@ -55,17 +54,70 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
     secondarycolormode,
     textinputcolor,
   } = useThemeColors();
+
   const [amount, setAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (item && isVisible) {
-      if (item.budget === 0) {
-        setAmount("");
-      } else {
-        setAmount(item.budget.toFixed(2));
-      }
+      setError(null);
+      loadExistingBudget();
     }
   }, [item, isVisible]);
+
+  const getWeekNumber = (date: Date): number => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil(
+      ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+    );
+    return weekNo;
+  };
+
+  const calculatePeriodKey = () => {
+    if (!item?.dateContext) return period;
+
+    const { selectedPeriod, currentDate, dateRange } = item.dateContext;
+    if (selectedPeriod === "Monthly") {
+      return `Monthly-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`;
+    } else if (selectedPeriod === "Weekly") {
+      return `Weekly-${currentDate.getFullYear()}-${getWeekNumber(currentDate)}`;
+    } else if (selectedPeriod === "Annually") {
+      return `Annually-${currentDate.getFullYear()}`;
+    } else if (selectedPeriod === "Daily") {
+      return `Daily-${currentDate.toISOString().split("T")[0]}`;
+    } else if (
+      selectedPeriod === "Period" &&
+      dateRange.start &&
+      dateRange.end
+    ) {
+      const startStr = dateRange.start.toISOString().split("T")[0];
+      const endStr = dateRange.end.toISOString().split("T")[0];
+      return `Period-${startStr}-${endStr}`;
+    }
+    return selectedPeriod;
+  };
+
+  const loadExistingBudget = async () => {
+    if (!item) return;
+    const targetPeriod = calculatePeriodKey();
+    const allBudgets = await getAllBudgets();
+
+    const existingEntry = allBudgets.find(
+      (b: any) =>
+        b.category === item.category &&
+        b.type === item.type &&
+        b.period === targetPeriod,
+    );
+
+    if (existingEntry && existingEntry.budget > 0) {
+      setAmount(existingEntry.budget.toString());
+    } else {
+      setAmount("");
+    }
+  };
 
   const handleSavePress = async () => {
     if (!item) return;
@@ -73,75 +125,29 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
     const sanitizedAmount = amount.replace(/[^0-9.]/g, "") || "0";
     const numericAmount = parseFloat(sanitizedAmount);
 
-    if (isNaN(numericAmount) || numericAmount < 0) {
-      alert("Please enter a valid positive number.");
+    // Strict Validation: Must be a number and greater than 0
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      setError("Please enter a budget greater than 0");
       return;
     }
 
-    // Determine the period based on the source
-    let budgetPeriod = period;
-
-    // If coming from BudgetAddScreen with date context, handle specific period
-    if (item.dateContext) {
-      const { selectedPeriod, currentDate, dateRange } = item.dateContext;
-
-      // For Monthly budgets from BudgetAddScreen, create specific month-year identifier
-      if (selectedPeriod === "Monthly") {
-        const month = currentDate.getMonth() + 1; // 0-indexed to 1-indexed
-        const year = currentDate.getFullYear();
-        budgetPeriod = `Monthly-${year}-${month}`; // e.g., "Monthly-2025-11"
-      } else if (selectedPeriod === "Weekly") {
-        // For weekly, you might want to store week number or date range
-        const weekNumber = getWeekNumber(currentDate);
-        const year = currentDate.getFullYear();
-        budgetPeriod = `Weekly-${year}-${weekNumber}`; // e.g., "Weekly-2025-45"
-      } else if (selectedPeriod === "Annually") {
-        const year = currentDate.getFullYear();
-        budgetPeriod = `Annually-${year}`; // e.g., "Annually-2025"
-      } else if (selectedPeriod === "Daily") {
-        const dateStr = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD
-        budgetPeriod = `Daily-${dateStr}`;
-      } else if (
-        selectedPeriod === "Period" &&
-        dateRange.start &&
-        dateRange.end
-      ) {
-        // For custom date range
-        const startStr = dateRange.start.toISOString().split("T")[0];
-        const endStr = dateRange.end.toISOString().split("T")[0];
-        budgetPeriod = `Period-${startStr}-${endStr}`;
-      }
-    }
+    const budgetPeriod = calculatePeriodKey();
 
     const newEntry: BudgetEntry = {
       category: item.category,
       type: item.type,
-      period: budgetPeriod, // Use the determined period
+      period: budgetPeriod,
       budget: numericAmount,
     };
 
     try {
       await saveBudgetEntry(newEntry);
       onSave(newEntry);
-
-      Alert.alert("Success", `Budget for ${item.category} saved!`);
       onClose();
     } catch (e) {
       console.error("Budget save error:", e);
-      Alert.alert("Error", "Could not save budget.");
+      setError("Could not save budget. Please try again.");
     }
-  };
-
-  // Helper function to get week number
-  const getWeekNumber = (date: Date): number => {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    const yearStart = new Date(d.getFullYear(), 0, 1);
-    const weekNo = Math.ceil(
-      ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
-    );
-    return weekNo;
   };
 
   if (!item) return null;
@@ -174,13 +180,21 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
               style={[
                 styles.input,
                 { backgroundColor: textinputcolor, color: colormode1 },
+                error
+                  ? { borderBottomColor: colors.danger, borderBottomWidth: 1 }
+                  : null,
               ]}
               placeholder="0.00"
               placeholderTextColor={secondarycolormode}
               keyboardType="numeric"
               value={amount}
-              onChangeText={setAmount}
+              onChangeText={(text) => {
+                setAmount(text);
+                if (error) setError(null);
+              }}
             />
+
+            {error && <AppText style={styles.errorText}>{error}</AppText>}
 
             <TouchableOpacity
               style={[styles.saveButton, { backgroundColor: colors.secondary }]}
@@ -227,8 +241,14 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 18,
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 10, // Reduced to accommodate error text
     minHeight: 50,
+  },
+  errorText: {
+    color: colors.danger,
+    fontSize: 12,
+    textAlign: "center",
+    marginBottom: 15,
   },
   saveButton: {
     padding: 15,
