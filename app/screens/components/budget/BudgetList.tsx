@@ -32,7 +32,7 @@ interface GroupedItem {
 const createDateSpecificPeriod = (
   period: string,
   currentDate: Date,
-  dateRange?: { start: Date | null; end: Date | null }
+  dateRange?: { start: Date | null; end: Date | null },
 ): string => {
   if (period === "Monthly") {
     const month = currentDate.getMonth() + 1;
@@ -62,7 +62,7 @@ const getWeekNumber = (date: Date): number => {
   d.setDate(d.getDate() + 4 - (d.getDay() || 7));
   const yearStart = new Date(d.getFullYear(), 0, 1);
   const weekNo = Math.ceil(
-    ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7
+    ((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
   );
   return weekNo;
 };
@@ -88,7 +88,7 @@ const BudgetLists: React.FC<Props> = ({
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [selectedTab, selectedPeriod, currentDate, dateRange])
+    }, [selectedTab, selectedPeriod, currentDate, dateRange]),
   );
 
   const normalize = (v: string) => v.toLowerCase().replace(/s$/, "");
@@ -138,7 +138,7 @@ const BudgetLists: React.FC<Props> = ({
         acc[tx.category].total += Number(tx.amount);
         acc[tx.category].items.push(tx);
         return acc;
-      }, {})
+      }, {}),
     ) as GroupedItem[];
 
     const type = selectedTab === "incomes" ? "Income" : "Expense";
@@ -147,7 +147,7 @@ const BudgetLists: React.FC<Props> = ({
       const dateSpecificPeriod = createDateSpecificPeriod(
         selectedPeriod,
         currentDate,
-        dateRange
+        dateRange,
       );
 
       const hasBudgetA = allBudgets.some(
@@ -156,7 +156,7 @@ const BudgetLists: React.FC<Props> = ({
           bug.type === type &&
           (bug.period === selectedPeriod ||
             bug.period === dateSpecificPeriod) &&
-          bug.budget > 0
+          bug.budget > 0,
       );
       const hasBudgetB = allBudgets.some(
         (bug) =>
@@ -164,7 +164,7 @@ const BudgetLists: React.FC<Props> = ({
           bug.type === type &&
           (bug.period === selectedPeriod ||
             bug.period === dateSpecificPeriod) &&
-          bug.budget > 0
+          bug.budget > 0,
       );
 
       if (hasBudgetA && !hasBudgetB) return -1;
@@ -183,7 +183,7 @@ const BudgetLists: React.FC<Props> = ({
     const dateSpecificPeriod = createDateSpecificPeriod(
       selectedPeriod,
       currentDate,
-      dateRange
+      dateRange,
     );
 
     // First, try to find date-specific budget
@@ -191,7 +191,7 @@ const BudgetLists: React.FC<Props> = ({
       (b: any) =>
         b.category === category &&
         b.type === type &&
-        b.period === dateSpecificPeriod
+        b.period === dateSpecificPeriod,
     );
 
     // If not found, fall back to generic period budget
@@ -203,7 +203,7 @@ const BudgetLists: React.FC<Props> = ({
       (b: any) =>
         b.category === category &&
         b.type === type &&
-        b.period === selectedPeriod
+        b.period === selectedPeriod,
     );
   };
 
@@ -289,16 +289,22 @@ const BudgetLists: React.FC<Props> = ({
             <View style={styles.amountRow}>
               <View>
                 {isExpense ? (
-                  <AppText style={styles.amountRowtxt}>Expense</AppText>
+                  <AppText style={[styles.amountRowtxt, { color: colormode2 }]}>
+                    Expense
+                  </AppText>
                 ) : (
-                  <AppText style={styles.amountRowtxt}>Income</AppText>
+                  <AppText style={[styles.amountRowtxt, { color: colormode2 }]}>
+                    Income
+                  </AppText>
                 )}
                 <AppText style={[styles.amountText, { color: colormode2 }]}>
                   {spent.toFixed(2)}
                 </AppText>
               </View>
               <View>
-                <AppText style={styles.amountRowtxt}>Remaining</AppText>
+                <AppText style={[styles.amountRowtxt, { color: colormode2 }]}>
+                  Remaining
+                </AppText>
                 <AppText
                   style={[
                     styles.amountText,

@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextProps>({
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [isLightMode, setIsLightMode] = useState(true);
+  const [isLightMode, setIsLightMode] = useState(false);
 
   const toggleTheme = () => setIsLightMode((prev) => !prev);
 

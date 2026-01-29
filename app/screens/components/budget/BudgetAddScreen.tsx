@@ -36,7 +36,7 @@ const BudgetAddScreen: React.FC = () => {
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTab, setSelectedTab] = useState<"incomes" | "expenses">(
-    "expenses"
+    "expenses",
   );
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("Monthly");
 
@@ -51,7 +51,7 @@ const BudgetAddScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       setRefreshKey((prev) => prev + 1);
-    }, [])
+    }, []),
   );
 
   const [isRangePickerVisible, setIsRangePickerVisible] = useState(false);
@@ -65,7 +65,7 @@ const BudgetAddScreen: React.FC = () => {
   const createDateSpecificPeriod = (
     period: string,
     currentDate: Date,
-    dateRange?: { start: Date | null; end: Date | null }
+    dateRange?: { start: Date | null; end: Date | null },
   ) => {
     if (period === "Monthly") {
       return `Monthly-${currentDate.getFullYear()}-${
@@ -88,7 +88,7 @@ const BudgetAddScreen: React.FC = () => {
       const dateSpecificPeriod = createDateSpecificPeriod(
         selectedPeriod,
         currentDate,
-        dateRange
+        dateRange,
       );
 
       // 🔹 1. Filter transactions for selected period
@@ -115,7 +115,7 @@ const BudgetAddScreen: React.FC = () => {
 
       // 🔹 2. Categories that actually have transactions
       const activeCategories = new Set(
-        filteredTransactions.map((tx) => tx.category)
+        filteredTransactions.map((tx) => tx.category),
       );
 
       // 🔹 3. Resolve budgets (generic + date-specific override)
@@ -147,7 +147,7 @@ const BudgetAddScreen: React.FC = () => {
 
       const totalBudget = Array.from(resolvedBudgetMap.values()).reduce(
         (sum, v) => sum + v,
-        0
+        0,
       );
 
       const totalSpent = filteredTransactions
@@ -296,7 +296,7 @@ const BudgetAddScreen: React.FC = () => {
             ? {
                 category: selectedBudgetItem.category,
                 type: selectedBudgetItem.type,
-                budget: 0,
+                budget: selectedBudgetItem.items.length >= 0 ? 0 : 0,
                 dateContext: selectedBudgetItem.dateContext,
               }
             : null
