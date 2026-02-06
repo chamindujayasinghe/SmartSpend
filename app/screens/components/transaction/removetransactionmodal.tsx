@@ -13,7 +13,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AppText from "../../../components/AppText";
 import { useThemeColors } from "../../../../config/theme/colorMode";
 import colors from "../../../../config/colors";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   DEFAULT_ACCOUNT_TYPES,
   DEFAULT_EXPENSE_CATEGORIES,
@@ -36,7 +35,7 @@ interface Props {
 const isDefaultItem = (
   item: string,
   type: "category" | "account",
-  activeTab: string
+  activeTab: string,
 ) => {
   let defaultList: string[] = [];
   if (type === "account") {
@@ -97,7 +96,7 @@ const RemoveTransactionModal: React.FC<Props> = ({
             // The user must manually close the modal.
           },
         },
-      ]
+      ],
     );
   };
 

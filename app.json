@@ -14,7 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.chamindu.smartspend"
+      "bundleIdentifier": "com.chamindu.smartspend",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,6 +33,11 @@
     },
     "plugins": [
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "717715b4-79b6-4552-adf8-9897a98a17cb"
+      }
+    }
   }
 }
