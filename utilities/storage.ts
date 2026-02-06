@@ -38,9 +38,11 @@ export const getTransactions = async (): Promise<Transaction[]> => {
   }
 };
 
-export const updateTransaction = async (transaction: Transaction): Promise<void> => {
+export const updateTransaction = async (
+  transaction: Transaction,
+): Promise<void> => {
   const TRANSACTIONS_KEY = await getDynamicTransactionsKey();
-  
+
   if (!TRANSACTIONS_KEY) {
     Alert.alert("Error", "User not signed in. Cannot update transaction.");
     return;
@@ -49,10 +51,10 @@ export const updateTransaction = async (transaction: Transaction): Promise<void>
   try {
     const existingTransactions = await getTransactions();
 
-    const updatedTransactions = existingTransactions.map(tx => 
+    const updatedTransactions = existingTransactions.map((tx) =>
       tx.id === transaction.id ? transaction : tx
     );
-    
+
     const jsonValue = JSON.stringify(updatedTransactions);
     await AsyncStorage.setItem(TRANSACTIONS_KEY, jsonValue);
   } catch (e) {
@@ -62,7 +64,7 @@ export const updateTransaction = async (transaction: Transaction): Promise<void>
 };
 
 export const saveTransaction = async (
-  transaction: TransactionData | Transaction
+  transaction: TransactionData | Transaction,
 ): Promise<void> => {
   const TRANSACTIONS_KEY = await getDynamicTransactionsKey();
 
@@ -74,17 +76,14 @@ export const saveTransaction = async (
   try {
     const existingTransactions = await getTransactions();
 
-
-    if ('id' in transaction && transaction.id) {
-
-      const updatedTransactions = existingTransactions.map(tx => 
+    if ("id" in transaction && transaction.id) {
+      const updatedTransactions = existingTransactions.map((tx) =>
         tx.id === transaction.id ? transaction as Transaction : tx
       );
-      
+
       const jsonValue = JSON.stringify(updatedTransactions);
       await AsyncStorage.setItem(TRANSACTIONS_KEY, jsonValue);
     } else {
-
       const transactionToAdd: Transaction = {
         ...transaction,
         id: uuidv4(),
@@ -101,9 +100,11 @@ export const saveTransaction = async (
 };
 
 // Add this to your storage.ts file
-export const deleteTransaction = async (transactionId: string): Promise<void> => {
+export const deleteTransaction = async (
+  transactionId: string,
+): Promise<void> => {
   const TRANSACTIONS_KEY = await getDynamicTransactionsKey();
-  
+
   if (!TRANSACTIONS_KEY) {
     Alert.alert("Error", "User not signed in. Cannot delete transaction.");
     return;
@@ -111,12 +112,12 @@ export const deleteTransaction = async (transactionId: string): Promise<void> =>
 
   try {
     const existingTransactions = await getTransactions();
-    
+
     // Filter out the transaction to delete
     const updatedTransactions = existingTransactions.filter(
-      tx => tx.id !== transactionId
+      (tx) => tx.id !== transactionId,
     );
-    
+
     const jsonValue = JSON.stringify(updatedTransactions);
     await AsyncStorage.setItem(TRANSACTIONS_KEY, jsonValue);
   } catch (e) {

@@ -28,6 +28,8 @@ import { saveTransaction, deleteTransaction } from "../../../utilities/storage";
 import { useThemeColors } from "../../../config/theme/colorMode";
 import AddNewModal from "./transaction/AddTransactionData";
 import RemoveTransactionModal from "./transaction/removetransactionmodal";
+import * as ImagePicker from "expo-image-picker";
+import { supabase } from "../../../lib/Supabase-client-config";
 
 const validationSchema = Yup.object().shape({
   activeTab: Yup.string(),
@@ -45,10 +47,6 @@ const validationSchema = Yup.object().shape({
   description: Yup.string().label("Description"),
 });
 
-const handleCameraButtonPress = () => {
-  Alert.alert("Camera", "Open camera or gallery to attach an image.");
-};
-
 const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const navigation = useNavigation();
   const { dateString, transaction } = route.params;
@@ -58,7 +56,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const [showPicker, setShowPicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<"category" | "account" | null>(
-    null
+    null,
   );
   // State to hold the fetched list for the SelectionModal
   const [selectionModalItems, setSelectionModalItems] = useState<string[]>([]);
@@ -106,7 +104,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
 
       Alert.alert(
         "Success",
-        isEditing ? "Transaction updated!" : "Transaction saved!"
+        isEditing ? "Transaction updated!" : "Transaction saved!",
       );
       console.log("Form Submitted and Saved:", transactionData);
 
@@ -115,7 +113,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
       console.error("Error saving transaction:", error);
       Alert.alert(
         "Error",
-        `Could not ${isEditing ? "update" : "save"} transaction.`
+        `Could not ${isEditing ? "update" : "save"} transaction.`,
       );
     }
   };
@@ -145,7 +143,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -196,9 +194,73 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
           touched,
           resetForm,
         }) => {
+          const handleCameraButtonPress = async () => {
+            const { granted } =
+              await ImagePicker.requestCameraPermissionsAsync();
+
+            if (!granted) {
+              Alert.alert("Camera permission required");
+              return;
+            }
+
+            const result = await ImagePicker.launchCameraAsync({
+              quality: 0.1,
+              allowsEditing: true,
+              base64: true,
+            });
+
+            if (result.canceled) return;
+
+            const base64Image = result.assets[0].base64;
+
+            // Get categories to help the AI categorize accurately
+            const userCategories = await getExpenseCategories("expense");
+
+            try {
+              const { data, error } = await supabase.functions.invoke("ocr", {
+                body: {
+                  imageBase64: base64Image,
+                  userCategories: userCategories,
+                },
+              });
+
+              if (error) {
+                console.error("OCR error:", error);
+                Alert.alert("OCR failed", "Could not process the receipt.");
+                return;
+              }
+
+              if (
+                !data.success ||
+                !data.products ||
+                data.products.length === 0
+              ) {
+                Alert.alert(
+                  "No items found",
+                  "The AI couldn't detect clear products. Try a clearer photo.",
+                );
+                return;
+              }
+
+              console.log("🧾 AI RESULT:", data.products);
+
+              // Navigate to the new BillTransactionForm with the scanned data
+              // We cast navigation as any or use the proper type to avoid TS errors
+              (navigation as any).navigate("BillTransactionForm", {
+                scannedItems: data.products,
+              });
+            } catch (err) {
+              console.error("OCR exception:", err);
+              Alert.alert(
+                "Error",
+                "An unexpected error occurred during scanning.",
+              );
+            }
+          };
+
           // Function to fetch items and open the SelectionModal
           const fetchAndOpenSelectionModal = async (
-            type: "category" | "account"
+            type: "category" | "account",
           ) => {
             setModalType(type);
             let items: string[] = [];
@@ -212,12 +274,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   : await getExpenseCategories("expense");
             }
 
-            // Set the fetched items to state for the modal to display
             setSelectionModalItems(items);
             setModalVisible(true);
           };
 
-          // Handler for saving a new category/account
           const handleSaveNewItem = async (value: string) => {
             if (!modalType || value.trim().length === 0) return;
 
@@ -235,18 +295,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
 
               await saveNewItem(categoryType, trimmedValue);
 
-              // After saving successfully, set the new item as the selected value
               setFieldValue(modalType, trimmedValue);
 
-              // Crucially, re-fetch and update the selectionModalItems state
-              // This is needed so the next time a modal opens, it has the new item.
               await fetchAndOpenSelectionModal(modalType);
             } catch (error) {
               console.error("Error saving new item:", error);
             }
           };
 
-          // Handler for removing a category/account
           const handleRemoveItem = async (itemToDelete: string) => {
             if (!modalType) return;
 
@@ -260,22 +316,18 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   values.activeTab === "Income" ? "income" : "expense";
               }
 
-              // Call the storage deletion function
               await deleteCustomItem(categoryType, itemToDelete);
 
-              // Check if the deleted item was currently selected in the form
               if (values[modalType] === itemToDelete) {
-                setFieldValue(modalType, ""); // Clear the field if the selected item is deleted
+                setFieldValue(modalType, "");
               }
 
-              // Re-fetch the list to update the Removal Modal/Form
-              // This update is crucial for the RemoveTransactionModal to show the removal visually.
               const updatedItems =
                 modalType === "account"
                   ? await getAccountTypes("account")
                   : values.activeTab === "Income"
-                  ? await getIncomeCategories("income")
-                  : await getExpenseCategories("expense");
+                    ? await getIncomeCategories("income")
+                    : await getExpenseCategories("expense");
 
               setSelectionModalItems(updatedItems);
             } catch (error) {
