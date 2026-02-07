@@ -3,15 +3,16 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { User } from "@supabase/supabase-js";
 
 import MainTabNavigator from "./MainTabNavigator";
-import TransactionForm from "../screens/components/TransactionForm";
+
 import { Transaction } from "../../utilities/storage";
 import BudgetSettingScreen from "../screens/components/budget/BudgetSettingScreen";
 import BillTransactionForm from "../screens/components/transaction/billTransactionForm";
+import TransactionForm from "../screens/components/transaction/TransactionForm";
 
 export type AppStackParamList = {
   MainTabs: { user: User };
   TransactionForm: { dateString?: string; transaction?: Transaction };
-  BillTransactionForm: { scannedItems: any[] };
+  BillTransactionForm: { scannedItems: any[]; selectedDate?: string };
   BudgetSetting: { selectedPeriod: string; initialType: "Income" | "Expense" };
   BudgetEdit: {
     category: string;
@@ -49,7 +50,7 @@ const AppNavigator: React.FC<AppNavigatorProps> = ({ user }) => {
       <Stack.Screen
         name="BillTransactionForm"
         component={BillTransactionForm}
-        options={{ animation: "slide_from_bottom", headerShown: false }}
+        options={{ animation: "none", headerShown: false }}
       />
     </Stack.Navigator>
   );

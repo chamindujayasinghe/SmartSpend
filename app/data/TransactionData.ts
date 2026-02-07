@@ -3,7 +3,12 @@ import { Alert } from "react-native";
 
 // --- Default Data ---
 export const DEFAULT_ACCOUNT_TYPES = ["Bank Accounts", "Card", "Cash"];
-export const DEFAULT_INCOME_CATEGORIES = ["Allowance", "Salary", "Bonus", "Petty Cash"];
+export const DEFAULT_INCOME_CATEGORIES = [
+  "Allowance",
+  "Salary",
+  "Bonus",
+  "Petty Cash",
+];
 export const DEFAULT_EXPENSE_CATEGORIES = [
   "Food",
   "Transport",
@@ -11,6 +16,7 @@ export const DEFAULT_EXPENSE_CATEGORIES = [
   "Clothes",
   "Groceries",
   "Sports",
+  "Others",
 ];
 
 const CUSTOM_ACCOUNTS_KEY = "@custom_accounts";
@@ -30,18 +36,16 @@ const getCustomDataKey = (type: "account" | "income" | "expense"): string => {
   }
 };
 
-
 export const getItems = async (
-  type: "account" | "income" | "expense"
+  type: "account" | "income" | "expense",
 ): Promise<string[]> => {
   try {
     const KEY = getCustomDataKey(type);
-    const defaultItems =
-      type === "account"
-        ? DEFAULT_ACCOUNT_TYPES
-        : type === "income"
-        ? DEFAULT_INCOME_CATEGORIES
-        : DEFAULT_EXPENSE_CATEGORIES;
+    const defaultItems = type === "account"
+      ? DEFAULT_ACCOUNT_TYPES
+      : type === "income"
+      ? DEFAULT_INCOME_CATEGORIES
+      : DEFAULT_EXPENSE_CATEGORIES;
 
     const jsonValue = await AsyncStorage.getItem(KEY);
     const customItems: string[] = jsonValue ? JSON.parse(jsonValue) : [];
@@ -67,30 +71,33 @@ export const getItems = async (
  */
 export const saveNewItem = async (
   type: "account" | "income" | "expense",
-  newItem: string
+  newItem: string,
 ): Promise<void> => {
   try {
     const KEY = getCustomDataKey(type);
-    
+
     // Fetch all current items (defaults + custom). We only update custom list in storage.
-    const currentItems = await getItems(type); 
-    
+    const currentItems = await getItems(type);
+
     // Check for duplicates before saving.
-    if (currentItems.map(item => item.toLowerCase()).includes(newItem.toLowerCase())) {
-        Alert.alert("Duplicate Item", `${newItem} already exists.`);
-        return;
+    if (
+      currentItems.map((item) => item.toLowerCase()).includes(
+        newItem.toLowerCase(),
+      )
+    ) {
+      Alert.alert("Duplicate Item", `${newItem} already exists.`);
+      return;
     }
-    
+
     // Get only the *custom* items list (which is stored in AsyncStorage)
     const jsonValue = await AsyncStorage.getItem(KEY);
     const customItems: string[] = jsonValue ? JSON.parse(jsonValue) : [];
-    
+
     const updatedCustomItems = [...customItems, newItem];
     const newJsonValue = JSON.stringify(updatedCustomItems);
-    
+
     await AsyncStorage.setItem(KEY, newJsonValue);
     Alert.alert("Success", `${newItem} saved successfully!`);
-
   } catch (e) {
     console.error(`Failed to save new ${type} item`, e);
     Alert.alert("Error", `Failed to save ${newItem}.`);
@@ -98,27 +105,26 @@ export const saveNewItem = async (
 };
 export const deleteCustomItem = async (
   type: "account" | "income" | "expense",
-  itemToDelete: string
+  itemToDelete: string,
 ): Promise<void> => {
   try {
     const KEY = getCustomDataKey(type); // Assuming getCustomDataKey exists from previous step
-    
+
     // 1. Fetch the custom items (stored list)
     const jsonValue = await AsyncStorage.getItem(KEY);
     // Assume customItems only contains custom entries, NOT the defaults
-    const customItems: string[] = jsonValue ? JSON.parse(jsonValue) : []; 
+    const customItems: string[] = jsonValue ? JSON.parse(jsonValue) : [];
 
     // 2. Filter out the item to delete (case-insensitive check)
     const updatedCustomItems = customItems.filter(
-      (item) => item.toLowerCase() !== itemToDelete.toLowerCase()
+      (item) => item.toLowerCase() !== itemToDelete.toLowerCase(),
     );
 
     // 3. Save the updated list
     const newJsonValue = JSON.stringify(updatedCustomItems);
     await AsyncStorage.setItem(KEY, newJsonValue);
-    
-    Alert.alert("Success", `${itemToDelete} removed successfully!`);
 
+    Alert.alert("Success", `${itemToDelete} removed successfully!`);
   } catch (e) {
     console.error(`Failed to delete ${type} item`, e);
     Alert.alert("Error", `Failed to delete ${itemToDelete}.`);
@@ -129,6 +135,6 @@ export const deleteCustomItem = async (
 // The component will use getItems/saveNewItem instead of the static arrays
 export {
   getItems as getAccountTypes,
-  getItems as getIncomeCategories,
   getItems as getExpenseCategories,
+  getItems as getIncomeCategories,
 };

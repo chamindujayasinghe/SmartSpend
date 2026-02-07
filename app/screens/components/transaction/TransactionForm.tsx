@@ -7,11 +7,13 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
-import AppText from "../../components/AppText";
-import colors from "../../../config/colors";
+import AppText from "../../../components/AppText";
+import colors from "../../../../config/colors";
 import { useNavigation } from "@react-navigation/native";
-import { TransactionFormProps } from "../../navigation/NavigationTypes";
+import { TransactionFormProps } from "../../../navigation/NavigationTypes";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -21,15 +23,19 @@ import {
   getIncomeCategories,
   getExpenseCategories,
   deleteCustomItem, // <-- NEW: Imported deletion function
-} from "../../data/TransactionData";
-import SelectionModal from "./SelectionModal";
-import TransactionTypeTabs from "./TransactionTypeTabs";
-import { saveTransaction, deleteTransaction } from "../../../utilities/storage";
-import { useThemeColors } from "../../../config/theme/colorMode";
-import AddNewModal from "./transaction/AddTransactionData";
-import RemoveTransactionModal from "./transaction/removetransactionmodal";
+} from "../../../data/TransactionData";
+import SelectionModal from "../SelectionModal";
+import TransactionTypeTabs from "../TransactionTypeTabs";
+import {
+  saveTransaction,
+  deleteTransaction,
+} from "../../../../utilities/storage";
+import { useThemeColors } from "../../../../config/theme/colorMode";
+import AddNewModal from "./AddTransactionData";
+import RemoveTransactionModal from "./removetransactionmodal";
 import * as ImagePicker from "expo-image-picker";
-import { supabase } from "../../../lib/Supabase-client-config";
+import { supabase } from "../../../../lib/Supabase-client-config";
+import CameraLayout from "./cameraLayout";
 
 const validationSchema = Yup.object().shape({
   activeTab: Yup.string(),
@@ -52,6 +58,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const { dateString, transaction } = route.params;
   const { titlecolor, textinputcolor, secondarycolormode, colormode2 } =
     useThemeColors();
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
 
   const [showPicker, setShowPicker] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -62,11 +69,50 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const [selectionModalItems, setSelectionModalItems] = useState<string[]>([]);
 
   const [addNewModalVisible, setAddNewModalVisible] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // State for the removal modal
   const [removeModalVisible, setRemoveModalVisible] = useState(false);
+  const initialDate = (() => {
+    if (transaction?.date) {
+      return new Date(transaction.date);
+    }
+    if (dateString) {
+      return new Date(dateString);
+    }
+    return new Date();
+  })();
+  const [currentDate, setCurrentDate] = useState(initialDate);
 
   const isEditing = !!transaction;
+
+  const processOCR = async (base64Images: string[], selectedDate: Date) => {
+    setIsAnalyzing(true);
+    try {
+      const userCategories = await getExpenseCategories("expense");
+      const { data, error } = await supabase.functions.invoke("ocr", {
+        body: {
+          images: base64Images,
+          userCategories: userCategories,
+        },
+      });
+
+      if (error || !data.success) {
+        Alert.alert("OCR failed", "Could not process the receipt.");
+        setIsAnalyzing(false);
+        return;
+      }
+      setIsAnalyzing(false);
+
+      (navigation as any).navigate("BillTransactionForm", {
+        scannedItems: data.products,
+        selectedDate: selectedDate.toISOString(),
+      });
+    } catch (err) {
+      setIsAnalyzing(false);
+      Alert.alert("Error", "An unexpected error occurred.");
+    }
+  };
 
   const handleAddNew = () => {
     setModalVisible(false); // Close the selection modal
@@ -77,16 +123,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
     setModalVisible(false); // Close selection modal
     setRemoveModalVisible(true); // Open remove modal
   };
-
-  const initialDate = (() => {
-    if (transaction?.date) {
-      return new Date(transaction.date);
-    }
-    if (dateString) {
-      return new Date(dateString);
-    }
-    return new Date();
-  })();
 
   const handleSave = async (values: any, { resetForm }: any) => {
     try {
@@ -157,6 +193,25 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <Modal transparent={true} visible={isAnalyzing} animationType="fade">
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.secondary} />
+            <AppText style={styles.loadingText}>Analyzing...</AppText>
+          </View>
+        </View>
+      </Modal>
+      {isCameraOpen && (
+        <View style={[StyleSheet.absoluteFill, { zIndex: 10 }]}>
+          <CameraLayout
+            onClose={() => setIsCameraOpen(false)}
+            onPhotoCaptured={async (base64Array) => {
+              setIsCameraOpen(false);
+              await processOCR(base64Array, currentDate);
+            }}
+          />
+        </View>
+      )}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons
@@ -194,71 +249,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
           touched,
           resetForm,
         }) => {
-          const handleCameraButtonPress = async () => {
-            const { granted } =
-              await ImagePicker.requestCameraPermissionsAsync();
-
-            if (!granted) {
-              Alert.alert("Camera permission required");
-              return;
-            }
-
-            const result = await ImagePicker.launchCameraAsync({
-              quality: 0.1,
-              allowsEditing: true,
-              base64: true,
-            });
-
-            if (result.canceled) return;
-
-            const base64Image = result.assets[0].base64;
-
-            // Get categories to help the AI categorize accurately
-            const userCategories = await getExpenseCategories("expense");
-
-            try {
-              const { data, error } = await supabase.functions.invoke("ocr", {
-                body: {
-                  imageBase64: base64Image,
-                  userCategories: userCategories,
-                },
-              });
-
-              if (error) {
-                console.error("OCR error:", error);
-                Alert.alert("OCR failed", "Could not process the receipt.");
-                return;
-              }
-
-              if (
-                !data.success ||
-                !data.products ||
-                data.products.length === 0
-              ) {
-                Alert.alert(
-                  "No items found",
-                  "The AI couldn't detect clear products. Try a clearer photo.",
-                );
-                return;
-              }
-
-              console.log("🧾 AI RESULT:", data.products);
-
-              // Navigate to the new BillTransactionForm with the scanned data
-              // We cast navigation as any or use the proper type to avoid TS errors
-              (navigation as any).navigate("BillTransactionForm", {
-                scannedItems: data.products,
-              });
-            } catch (err) {
-              console.error("OCR exception:", err);
-              Alert.alert(
-                "Error",
-                "An unexpected error occurred during scanning.",
-              );
-            }
+          const handleCameraButtonPress = () => {
+            setIsCameraOpen(true);
           };
 
-          // Function to fetch items and open the SelectionModal
           const fetchAndOpenSelectionModal = async (
             type: "category" | "account",
           ) => {
@@ -765,6 +759,29 @@ const styles = StyleSheet.create({
     marginTop: 1,
     marginBottom: 10,
     textAlign: "right",
+  },
+  loadingOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)", // Darkens the background
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContainer: {
+    backgroundColor: colors.dark, // Use your app's dark theme color
+    padding: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  loadingText: {
+    color: colors.white,
+    marginTop: 15,
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
