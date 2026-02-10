@@ -39,10 +39,15 @@ const BudgetHeader = ({
     <View style={[styles.header, { backgroundColor: secondarycolormode }]}>
       <View style={styles.budgetRow}>
         <View style={styles.remainingContainer}>
-          <AppText style={[styles.remainingtxt, { color: colormode2 }]}>
+          <AppText
+            style={[
+              styles.remainingtxt,
+              { color: colormode2, fontWeight: "500" },
+            ]}
+          >
             Remaining ({selectedPeriod})
           </AppText>
-          <AppText style={styles.remainingtxt}>
+          <AppText style={[styles.remainingtxt, { color: colormode2 }]}>
             {(totalBudget - totalSpent).toFixed(2)}
           </AppText>
         </View>
@@ -50,17 +55,29 @@ const BudgetHeader = ({
           onPress={handleBudgetSettingPress}
           style={[styles.budgetBtn, { borderColor: colormode2 }]}
         >
-          <AppText style={[styles.budgetsettingtxt, { color: colormode2 }]}>
+          <AppText
+            style={[
+              styles.budgetsettingtxt,
+              { color: colormode2, fontWeight: "500" },
+            ]}
+          >
             Budget Setting
           </AppText>
         </TouchableOpacity>
       </View>
       <View style={[styles.budgetRow, { marginTop: 25 }]}>
         <View style={styles.progressContainer}>
-          <AppText style={[styles.spendedTxt, { color: colormode2 }]}>
+          <AppText
+            style={[
+              styles.spendedTxt,
+              { color: colormode2, fontWeight: "500" },
+            ]}
+          >
             {selectedPeriod}
           </AppText>
-          <AppText style={styles.spendedTxt}>{totalBudget.toFixed(2)}</AppText>
+          <AppText style={[styles.spendedTxt, { color: colormode2 }]}>
+            {totalBudget.toFixed(2)}
+          </AppText>
         </View>
         <View style={styles.progressBarWrapper}>
           <View
@@ -101,7 +118,7 @@ const styles = StyleSheet.create({
   },
   remainingtxt: {
     fontSize: 15,
-    fontWeight: "500",
+    color: colors.secondary,
   },
   budgetRow: {
     flexDirection: "row",

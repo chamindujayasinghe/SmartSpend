@@ -9,6 +9,5 @@ export const PIE_CHART_COLORS = [
   "#FF6384",
   "#9966FF",
   "#918a33ff",
-  "#c06c3cff"
-
+  "#c06c3cff",
 ];

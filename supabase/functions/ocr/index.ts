@@ -39,10 +39,9 @@ Deno.serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("Gemini API key missing");
 
-    // 1. Process all images through Google Vision OCR
+
     let combinedExtractedText = "";
 
-    // We use Promise.all to process images in parallel for better speed
     const ocrPromises = images.map(async (base64: string, index: number) => {
       const visionRes = await fetch(
         `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_API_KEY}`,
@@ -74,7 +73,6 @@ Deno.serve(async (req) => {
 
     console.log(`OCR extracted text from ${images.length} images.`);
 
-    // 2. Send the aggregated text to Gemini AI
     const prompt = `
       You are a receipt analysis assistant. 
       The provided text may come from multiple photos of the same receipt or multiple different receipts.
