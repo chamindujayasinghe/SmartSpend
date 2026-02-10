@@ -10,7 +10,6 @@ export const useThemeColors = () => {
   const secondarycolormode = isLightMode ? colors.dark : colors.light;
   const titlecolor = isLightMode ? colors.black : colors.white;
 
-  // auth colors
   const textinputcolor = isLightMode ? colors.light : colors.dark;
   const placeholder = isLightMode ? colors.darkPrimary : colors.light;
 
