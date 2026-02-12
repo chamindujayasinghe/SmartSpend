@@ -36,6 +36,8 @@ import RemoveTransactionModal from "./removetransactionmodal";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../../../../lib/Supabase-client-config";
 import CameraLayout from "./cameraLayout";
+import CurrencySelector from "../CurrencySelector";
+import { useCurrency } from "../../../../config/currencyProvider";
 
 const validationSchema = Yup.object().shape({
   activeTab: Yup.string(),
@@ -70,6 +72,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
 
   const [addNewModalVisible, setAddNewModalVisible] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { currency, setCurrency } = useCurrency();
 
   // State for the removal modal
   const [removeModalVisible, setRemoveModalVisible] = useState(false);
@@ -115,19 +118,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   };
 
   const handleAddNew = () => {
-    setModalVisible(false); // Close the selection modal
-    setAddNewModalVisible(true); // Open the add new item modal
+    setModalVisible(false);
+    setAddNewModalVisible(true);
   };
 
   const handleOpenRemoveModal = () => {
-    setModalVisible(false); // Close selection modal
-    setRemoveModalVisible(true); // Open remove modal
+    setModalVisible(false);
+    setRemoveModalVisible(true);
   };
 
-  const handleSave = async (values: any, { resetForm }: any) => {
+  const handleSave = async (values: any) => {
     try {
       const transactionData = {
         ...values,
+        currency: values.currency.toUpperCase(),
         date: values.date,
       };
 
@@ -234,6 +238,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
           category: transaction?.category || "",
           account: transaction?.account || "",
           description: transaction?.description || "",
+          currency: transaction?.currency || currency,
           id: transaction?.id,
         }}
         validationSchema={validationSchema}
@@ -357,6 +362,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   onTabPress={(tab) => {
                     setFieldValue("activeTab", tab);
                     setFieldValue("category", "");
+                  }}
+                />
+                <CurrencySelector
+                  value={values.currency}
+                  onSelect={(selectedCurrency) => {
+                    setCurrency(selectedCurrency);
+                    setFieldValue("currency", selectedCurrency);
                   }}
                 />
                 {/* date */}
@@ -571,7 +583,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
               </ScrollView>
 
               <View style={styles.buttonContainer}>
-                {/* Delete Button - Only show when editing */}
                 {isEditing && (
                   <TouchableOpacity
                     style={[
@@ -604,21 +615,23 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                   </AppText>
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[
-                    styles.button,
-                    styles.clearButton,
-                    {
-                      backgroundColor: secondarycolormode,
-                      flex: 1,
-                    },
-                  ]}
-                  onPress={() => resetForm()}
-                >
-                  <AppText style={[styles.buttonText, { color: colormode2 }]}>
-                    Clear
-                  </AppText>
-                </TouchableOpacity>
+                {!isEditing && (
+                  <TouchableOpacity
+                    style={[
+                      styles.button,
+                      styles.clearButton,
+                      {
+                        backgroundColor: secondarycolormode,
+                        flex: 1,
+                      },
+                    ]}
+                    onPress={() => resetForm()}
+                  >
+                    <AppText style={[styles.buttonText, { color: colormode2 }]}>
+                      Clear
+                    </AppText>
+                  </TouchableOpacity>
+                )}
               </View>
 
               <SelectionModal
@@ -666,7 +679,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 10,
-    paddingBottom: 15,
+    marginBottom: 15,
     paddingHorizontal: 15,
   },
   backIcon: {
@@ -684,7 +697,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 20,
+    paddingVertical: 15,
     borderBottomWidth: 1,
   },
   fieldLabel: {

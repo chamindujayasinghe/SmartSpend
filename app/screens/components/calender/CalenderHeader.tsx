@@ -3,6 +3,7 @@ import { View, StyleSheet } from "react-native";
 import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
 import { useThemeColors } from "../../../../config/theme/colorMode";
+import { useCurrency } from "../../../../config/currencyProvider";
 
 interface Props {
   income: number;
@@ -12,6 +13,8 @@ interface Props {
 
 const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
   const { colormode2, secondarycolormode } = useThemeColors();
+  const { currency } = useCurrency();
+
   return (
     <View
       style={[
@@ -24,7 +27,7 @@ const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
       <View style={styles.column}>
         <AppText style={[styles.title, { color: colormode2 }]}>Income</AppText>
         <AppText style={[styles.amount, { color: colors.secondary }]}>
-          $ {income.toFixed(2)}
+          {currency} {income.toFixed(2)}
         </AppText>
       </View>
       <View style={styles.column}>
@@ -32,13 +35,13 @@ const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
           Expenses
         </AppText>
         <AppText style={[styles.amount, styles.expense]}>
-          $ {expenses.toFixed(2)}
+          {currency} {expenses.toFixed(2)}
         </AppText>
       </View>
       <View style={styles.column}>
         <AppText style={[styles.title, { color: colormode2 }]}>Total</AppText>
         <AppText style={[styles.amount, { color: colormode2 }]}>
-          $ {total.toFixed(2)}
+          {currency} {total.toFixed(2)}
         </AppText>
       </View>
     </View>

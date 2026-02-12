@@ -20,6 +20,7 @@ import SelectionModal from "../SelectionModal";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import colors from "../../../../config/colors";
 import { BillTransactionFormProps } from "../../../navigation/NavigationTypes";
+import { useCurrency } from "../../../../config/currencyProvider";
 
 interface ScannedItem {
   product_name: string;
@@ -50,6 +51,7 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalItems, setModalItems] = useState<string[]>([]);
   const [activeItemIndex, setActiveItemIndex] = useState<number | null>(null);
+  const { currency } = useCurrency();
 
   const handleUpdateItem = (
     index: number,
@@ -73,8 +75,8 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
   };
 
   const handleConfirm = async () => {
-    if (!account) return Alert.alert("Error", "Please select an account");
-    if (items.length === 0) return Alert.alert("Error", "No items to save");
+    if (!account) return Alert.alert("", "Please select an account");
+    if (items.length === 0) return Alert.alert("", "No items to save");
 
     try {
       for (const item of items) {
@@ -85,6 +87,7 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
           account: account,
           description: item.product_name,
           activeTab: "Expense",
+          currency: currency,
         });
       }
       Alert.alert("Success", "All items saved!");

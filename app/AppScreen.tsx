@@ -1,8 +1,8 @@
 import React from "react";
 import { User } from "@supabase/supabase-js";
-import { useAppScreenLogic } from "../../Hooks/useAppScreen";
-import SuccessOverlay from "../components/SuccessOverlay";
-import AppNavigator from "../navigation/AppNavigator";
+import { useAppScreenLogic } from "../Hooks/useAppScreen";
+import SuccessOverlay from "./components/SuccessOverlay";
+import AppNavigator from "./navigation/AppNavigator";
 
 interface AppScreenProps {
   user: User;
@@ -15,7 +15,7 @@ const AppScreen: React.FC<AppScreenProps> = ({
 }) => {
   const { showSuccessMessage, fullName } = useAppScreenLogic(
     user,
-    isInitialLogin
+    isInitialLogin,
   );
 
   if (showSuccessMessage) {

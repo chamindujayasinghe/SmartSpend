@@ -21,6 +21,13 @@ import {
   getAllBudgets,
 } from "../../../../utilities/BudgetStorage";
 
+// --- NEW IMPORTS ---
+import { useCurrency } from "../../../../config/currencyProvider";
+import {
+  convertToCurrency,
+  getExchangeRates,
+} from "../../../../Hooks/Currency";
+
 interface BudgetItem {
   category: string;
   type: "Income" | "Expense";
@@ -54,6 +61,9 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
     secondarycolormode,
     textinputcolor,
   } = useThemeColors();
+
+  // --- CURRENCY HOOK ---
+  const { currency } = useCurrency(); // Current App Currency
 
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +113,12 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
   const loadExistingBudget = async () => {
     if (!item) return;
     const targetPeriod = calculatePeriodKey();
-    const allBudgets = await getAllBudgets();
+
+    // Fetch Budgets AND Rates
+    const [allBudgets, rates] = await Promise.all([
+      getAllBudgets(),
+      getExchangeRates(),
+    ]);
 
     const existingEntry = allBudgets.find(
       (b: any) =>
@@ -113,7 +128,16 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
     );
 
     if (existingEntry && existingEntry.budget > 0) {
-      setAmount(existingEntry.budget.toString());
+      // --- CONVERSION LOGIC ---
+      // If budget is in USD (e.g. 100), convert to LKR (e.g. 30,000) for display
+      const convertedBudget = convertToCurrency(
+        existingEntry.budget,
+        existingEntry.currency || currency,
+        currency, // Target is current app currency
+        rates,
+      );
+
+      setAmount(convertedBudget.toFixed(2)); // Show nicely formatted number
     } else {
       setAmount("");
     }
@@ -122,8 +146,16 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
   const handleSavePress = async () => {
     if (!item) return;
 
-    const sanitizedAmount = amount.replace(/[^0-9.]/g, "") || "0";
-    const numericAmount = parseFloat(sanitizedAmount);
+    // Basic cleaning of input
+    let cleanAmount = amount.replace(/[^0-9.]/g, "");
+
+    // Prevent multiple decimals
+    if ((cleanAmount.match(/\./g) || []).length > 1) {
+      setError("Invalid amount format");
+      return;
+    }
+
+    const numericAmount = parseFloat(cleanAmount);
 
     // Strict Validation: Must be a number and greater than 0
     if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -138,6 +170,7 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
       type: item.type,
       period: budgetPeriod,
       budget: numericAmount,
+      currency: currency, // <--- IMPORTANT: Save with current currency tag
     };
 
     try {
@@ -176,23 +209,31 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
               {period} Budget
             </AppText>
 
-            <TextInput
-              style={[
-                styles.input,
-                { backgroundColor: textinputcolor, color: colormode1 },
-                error
-                  ? { borderBottomColor: colors.danger, borderBottomWidth: 1 }
-                  : null,
-              ]}
-              placeholder="0.00"
-              placeholderTextColor={secondarycolormode}
-              keyboardType="numeric"
-              value={amount}
-              onChangeText={(text) => {
-                setAmount(text);
-                if (error) setError(null);
-              }}
-            />
+            <View style={styles.inputWrapper}>
+              {/* Display Currency Symbol in Input */}
+              <AppText
+                style={[styles.currencyPrefix, { color: secondarycolormode }]}
+              >
+                {currency}
+              </AppText>
+              <TextInput
+                style={[
+                  styles.input,
+                  { backgroundColor: textinputcolor, color: colormode1 },
+                  error
+                    ? { borderBottomColor: colors.danger, borderBottomWidth: 1 }
+                    : null,
+                ]}
+                placeholder="0.00"
+                placeholderTextColor={secondarycolormode}
+                keyboardType="numeric"
+                value={amount}
+                onChangeText={(text) => {
+                  setAmount(text);
+                  if (error) setError(null);
+                }}
+              />
+            </View>
 
             {error && <AppText style={styles.errorText}>{error}</AppText>}
 
@@ -236,12 +277,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
   },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  currencyPrefix: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginRight: 10,
+  },
   input: {
+    flex: 1,
     borderRadius: 8,
     padding: 12,
     fontSize: 18,
     textAlign: "center",
-    marginBottom: 10, // Reduced to accommodate error text
     minHeight: 50,
   },
   errorText: {

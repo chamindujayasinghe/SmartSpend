@@ -16,6 +16,7 @@ export const DEFAULT_EXPENSE_CATEGORIES = [
   "Clothes",
   "Groceries",
   "Sports",
+  "Drinks",
   "Others",
 ];
 

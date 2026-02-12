@@ -13,6 +13,12 @@ import { getAllBudgets } from "../../../../utilities/BudgetStorage";
 import { getTransactions } from "../../../../utilities/storage";
 import { useFocusEffect } from "@react-navigation/native";
 
+import { useCurrency } from "../../../../config/currencyProvider";
+import {
+  convertToCurrency,
+  getExchangeRates,
+} from "../../../../Hooks/Currency";
+
 interface Props {
   selectedTab: "incomes" | "expenses";
   selectedPeriod: string;
@@ -28,7 +34,7 @@ interface GroupedItem {
   items: any[];
 }
 
-// Helper function to create date-specific period identifier
+// ... (Helper functions createDateSpecificPeriod and getWeekNumber remain the same) ...
 const createDateSpecificPeriod = (
   period: string,
   currentDate: Date,
@@ -77,27 +83,43 @@ const BudgetLists: React.FC<Props> = ({
 }) => {
   const { colormode2, secondarycolormode, textinputcolor } = useThemeColors();
 
+  const { currency } = useCurrency();
   const [data, setData] = useState<GroupedItem[]>([]);
   const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 1. ADD STATE FOR RATES
+  const [rates, setRates] = useState<any>(null);
+
   useEffect(() => {
     loadData();
-  }, [selectedTab, selectedPeriod, currentDate, dateRange, refreshKey]);
+  }, [
+    selectedTab,
+    selectedPeriod,
+    currentDate,
+    dateRange,
+    refreshKey,
+    currency,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [selectedTab, selectedPeriod, currentDate, dateRange]),
+    }, [selectedTab, selectedPeriod, currentDate, dateRange, currency]),
   );
 
   const normalize = (v: string) => v.toLowerCase().replace(/s$/, "");
 
   const loadData = async () => {
     setLoading(true);
-    const txs = await getTransactions();
-    const allBudgets = await getAllBudgets();
+    const [txs, allBudgets, latestRates] = await Promise.all([
+      getTransactions(),
+      getAllBudgets(),
+      getExchangeRates(),
+    ]);
+
     setBudgets(allBudgets);
+    setRates(latestRates); // 2. SAVE RATES TO STATE
 
     const now = currentDate;
 
@@ -135,7 +157,16 @@ const BudgetLists: React.FC<Props> = ({
         if (!acc[tx.category]) {
           acc[tx.category] = { category: tx.category, total: 0, items: [] };
         }
-        acc[tx.category].total += Number(tx.amount);
+
+        const rawAmount = Number(tx.amount);
+        const convertedAmount = convertToCurrency(
+          rawAmount,
+          tx.currency,
+          currency,
+          latestRates,
+        );
+
+        acc[tx.category].total += convertedAmount;
         acc[tx.category].items.push(tx);
         return acc;
       }, {}),
@@ -144,12 +175,12 @@ const BudgetLists: React.FC<Props> = ({
     const type = selectedTab === "incomes" ? "Income" : "Expense";
 
     const sortedData = grouped.sort((a, b) => {
+      // Sorting logic remains the same...
       const dateSpecificPeriod = createDateSpecificPeriod(
         selectedPeriod,
         currentDate,
         dateRange,
       );
-
       const hasBudgetA = allBudgets.some(
         (bug) =>
           bug.category === a.category &&
@@ -166,7 +197,6 @@ const BudgetLists: React.FC<Props> = ({
             bug.period === dateSpecificPeriod) &&
           bug.budget > 0,
       );
-
       if (hasBudgetA && !hasBudgetB) return -1;
       if (!hasBudgetA && hasBudgetB) return 1;
       return 0;
@@ -178,15 +208,12 @@ const BudgetLists: React.FC<Props> = ({
 
   const getBudget = (category: string) => {
     const type = selectedTab === "incomes" ? "Income" : "Expense";
-
-    // Create date-specific period for lookup
     const dateSpecificPeriod = createDateSpecificPeriod(
       selectedPeriod,
       currentDate,
       dateRange,
     );
 
-    // First, try to find date-specific budget
     const dateSpecificBudget = budgets.find(
       (b: any) =>
         b.category === category &&
@@ -194,7 +221,6 @@ const BudgetLists: React.FC<Props> = ({
         b.period === dateSpecificPeriod,
     );
 
-    // If not found, fall back to generic period budget
     if (dateSpecificBudget) {
       return dateSpecificBudget;
     }
@@ -208,6 +234,7 @@ const BudgetLists: React.FC<Props> = ({
   };
 
   const handleItemPress = (item: GroupedItem) => {
+    // ... same as before
     const enhancedItem = {
       category: item.category,
       type:
@@ -219,15 +246,27 @@ const BudgetLists: React.FC<Props> = ({
         dateRange,
       },
     };
-
     onItemPress(enhancedItem);
   };
 
   const renderItem = ({ item }: { item: GroupedItem }) => {
     const budgetEntry = getBudget(item.category);
-    const spent = item.total;
+    const spent = item.total; // This is already converted in loadData
 
-    if (!budgetEntry || !budgetEntry.budget || budgetEntry.budget === 0) {
+    // 3. CONVERT THE BUDGET AMOUNT
+    let convertedBudget = 0;
+
+    if (budgetEntry && budgetEntry.budget > 0) {
+      convertedBudget = convertToCurrency(
+        budgetEntry.budget,
+        budgetEntry.currency || currency, // Use stored currency or fallback
+        currency, // Target app currency
+        rates, // Rates from state
+      );
+    }
+
+    // Use 'convertedBudget' instead of 'budgetEntry.budget' for logic below
+    if (convertedBudget === 0) {
       if (spent === 0) return null;
 
       return (
@@ -239,16 +278,17 @@ const BudgetLists: React.FC<Props> = ({
             {item.category}
           </AppText>
           <AppText style={[styles.amountText, { color: colormode2 }]}>
-            {spent.toFixed(2)}
+            {currency} {spent.toFixed(2)}
           </AppText>
         </TouchableOpacity>
       );
     }
 
-    const budget = budgetEntry.budget;
+    const budget = convertedBudget; // Use the converted value
     const remaining = budget - spent;
     const isExpense = selectedTab === "expenses";
     const percent = Math.min((spent / budget) * 100, 100);
+
     return (
       <TouchableOpacity
         onPress={() => handleItemPress(item)}
@@ -263,7 +303,7 @@ const BudgetLists: React.FC<Props> = ({
               {item.category}
             </AppText>
             <AppText style={[styles.amountText, { color: colormode2 }]}>
-              {budget.toFixed(2)}
+              {currency} {budget.toFixed(2)}
             </AppText>
           </View>
 
@@ -298,7 +338,7 @@ const BudgetLists: React.FC<Props> = ({
                   </AppText>
                 )}
                 <AppText style={[styles.amountText, { color: colormode2 }]}>
-                  {spent.toFixed(2)}
+                  {currency} {spent.toFixed(2)}
                 </AppText>
               </View>
               <View>
@@ -314,7 +354,7 @@ const BudgetLists: React.FC<Props> = ({
                     },
                   ]}
                 >
-                  {remaining.toFixed(2)}
+                  {currency} {remaining.toFixed(2)}
                 </AppText>
               </View>
             </View>

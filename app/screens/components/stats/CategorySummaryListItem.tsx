@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { PIE_CHART_COLORS } from "../../../../config/piechartcolors";
+import { PIE_CHART_COLORS } from "../../../../config/theme/piechartcolors";
 import AppText from "../../../components/AppText";
 
 import { useThemeColors } from "../../../../config/theme/colorMode";
@@ -15,12 +15,14 @@ interface CategorySummaryListItemProps {
   item: AggregatedCategory;
   index: number;
   totalAmount?: number;
+  currency: string;
 }
 
 const CategorySummaryListItem: React.FC<CategorySummaryListItemProps> = ({
   item,
   index,
   totalAmount,
+  currency,
 }) => {
   const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
   const dotColor = PIE_CHART_COLORS[index % PIE_CHART_COLORS.length];
@@ -42,7 +44,7 @@ const CategorySummaryListItem: React.FC<CategorySummaryListItemProps> = ({
         </AppText>
       </View>
       <AppText style={[styles.amountText, { color: amountColor }]}>
-        {item.totalAmount.toFixed(2)}
+        {currency} {item.totalAmount.toFixed(2)}
       </AppText>
     </View>
   );

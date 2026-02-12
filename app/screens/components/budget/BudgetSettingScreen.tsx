@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   useNavigation,
@@ -18,8 +24,17 @@ import BudgetInputModal from "./BudgetInputModal";
 import {
   BudgetEntry,
   getAllBudgets,
+  saveBudgetEntry,
+  deleteBudgetEntry, // <--- Import the delete function
 } from "../../../../utilities/BudgetStorage";
 import PeriodSelector, { Period } from "../PeriodSelector";
+
+// --- CURRENCY IMPORTS ---
+import { useCurrency } from "../../../../config/currencyProvider";
+import {
+  convertToCurrency,
+  getExchangeRates,
+} from "../../../../Hooks/Currency";
 
 type BudgetSettingRouteParams = {
   selectedPeriod: Period;
@@ -45,8 +60,11 @@ const BudgetSettingScreen: React.FC = () => {
   const { titlecolor, colormode1, textinputcolor, secondarycolormode } =
     useThemeColors();
 
-  const [selectedPeriod, setSelectedPeriod] = useState<Period>(initialPeriod);
+  // --- CURRENCY HOOKS ---
+  const { currency } = useCurrency();
+  const [rates, setRates] = useState<any>(null);
 
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>(initialPeriod);
   const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"Income" | "Expense">(initialType);
@@ -66,10 +84,15 @@ const BudgetSettingScreen: React.FC = () => {
     const currentPeriod = selectedPeriod;
 
     try {
-      const incomeCategories = await getIncomeCategories("income");
-      const expenseCategories = await getExpenseCategories("expense");
+      const [incomeCategories, expenseCategories, savedBudgets, latestRates] =
+        await Promise.all([
+          getIncomeCategories("income"),
+          getExpenseCategories("expense"),
+          getAllBudgets(),
+          getExchangeRates(),
+        ]);
 
-      const savedBudgets = await getAllBudgets();
+      setRates(latestRates);
 
       const baseItems: BudgetItem[] = [
         ...incomeCategories.map((cat) => ({
@@ -77,12 +100,14 @@ const BudgetSettingScreen: React.FC = () => {
           type: "Income" as const,
           period: currentPeriod,
           budget: 0.0,
+          currency: currency,
         })),
         ...expenseCategories.map((cat) => ({
           category: cat,
           type: "Expense" as const,
           period: currentPeriod,
           budget: 0.0,
+          currency: currency,
         })),
       ];
 
@@ -91,12 +116,25 @@ const BudgetSettingScreen: React.FC = () => {
           (b) =>
             b.category === baseItem.category &&
             b.type === baseItem.type &&
-            b.period === currentPeriod
+            b.period === currentPeriod,
         );
 
-        return savedBudget
-          ? { ...baseItem, budget: savedBudget.budget }
-          : baseItem;
+        if (savedBudget) {
+          const convertedAmount = convertToCurrency(
+            savedBudget.budget,
+            savedBudget.currency || currency,
+            currency,
+            latestRates,
+          );
+
+          return {
+            ...baseItem,
+            budget: convertedAmount,
+            currency: currency,
+          };
+        }
+
+        return baseItem;
       });
 
       setBudgetItems(updatedItems);
@@ -105,7 +143,7 @@ const BudgetSettingScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedPeriod, refreshKey]);
+  }, [selectedPeriod, refreshKey, currency]);
 
   useEffect(() => {
     setActiveTab(initialType);
@@ -115,30 +153,70 @@ const BudgetSettingScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       loadCategoriesAndBudgets();
-    }, [loadCategoriesAndBudgets])
+    }, [loadCategoriesAndBudgets]),
   );
 
   const handleOpenBudgetModal = (item: BudgetItem) => {
     const currentItem =
       budgetItems.find(
-        (i) => i.category === item.category && i.type === item.type
+        (i) => i.category === item.category && i.type === item.type,
       ) || item;
 
     setModalItem({ ...currentItem, period: selectedPeriod });
   };
 
-  const handleSaveBudget = (savedEntry: BudgetEntry) => {
+  const handleSaveBudget = async (savedEntry: BudgetEntry) => {
+    const entryWithCurrency = {
+      ...savedEntry,
+      currency: currency,
+    };
+
+    await saveBudgetEntry(entryWithCurrency);
+
     setBudgetItems((prevItems) =>
       prevItems.map((item) =>
         item.category === savedEntry.category &&
         item.type === savedEntry.type &&
         item.period === savedEntry.period
-          ? { ...item, budget: savedEntry.budget }
-          : item
-      )
+          ? { ...item, budget: savedEntry.budget, currency: currency }
+          : item,
+      ),
     );
+
     setRefreshKey((prev) => prev + 1);
     setModalItem(null);
+  };
+
+  // --- DELETE HANDLER ---
+  const handleDeleteBudget = (item: BudgetItem) => {
+    Alert.alert(
+      "Delete Budget",
+      `Are you sure you want to remove the budget for ${item.category}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            // 1. Delete from storage
+            await deleteBudgetEntry(item.category, item.type, item.period);
+
+            // 2. Update local state (Reset to 0.00 instead of removing the row)
+            setBudgetItems((prevItems) =>
+              prevItems.map((i) =>
+                i.category === item.category &&
+                i.type === item.type &&
+                i.period === item.period
+                  ? { ...i, budget: 0.0 } // Reset visually to 0
+                  : i,
+              ),
+            );
+
+            setRefreshKey((prev) => prev + 1);
+          },
+        },
+      ],
+    );
   };
 
   const filteredItems = budgetItems.filter((item) => item.type === activeTab);
@@ -148,15 +226,34 @@ const BudgetSettingScreen: React.FC = () => {
       style={[styles.itemContainer, { borderBottomColor: textinputcolor }]}
       onPress={() => handleOpenBudgetModal(item)}
     >
-      <View style={styles.leftContent}>
-        <AppText style={[styles.itemCategory, { color: colormode1 }]}>
-          {item.category}
-        </AppText>
+      <View style={styles.leftWrapper}>
+        {/* DELETE ICON - Only shows if there is a budget > 0 */}
+        {item.budget > 0 ? (
+          <TouchableOpacity
+            onPress={() => handleDeleteBudget(item)}
+            style={styles.deleteIcon}
+          >
+            <MaterialCommunityIcons
+              name="trash-can-outline"
+              size={20}
+              color={colors.danger}
+            />
+          </TouchableOpacity>
+        ) : (
+          // Spacer to keep alignment consistent even if no delete icon
+          <View style={styles.deleteIconPlaceholder} />
+        )}
+
+        <View style={styles.leftContent}>
+          <AppText style={[styles.itemCategory, { color: colormode1 }]}>
+            {item.category}
+          </AppText>
+        </View>
       </View>
 
       <View style={styles.rightContent}>
         <AppText style={[styles.budgetAmount, { color: colormode1 }]}>
-          $ {item.budget.toFixed(2)} / {selectedPeriod.substring(0, 1)}
+          {currency} {item.budget.toFixed(2)} / {selectedPeriod.substring(0, 1)}
         </AppText>
         <MaterialCommunityIcons
           name="chevron-right"
@@ -169,6 +266,7 @@ const BudgetSettingScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* HEADER */}
       <View style={[styles.headerBar, { borderBottomColor: textinputcolor }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons
@@ -189,6 +287,7 @@ const BudgetSettingScreen: React.FC = () => {
         />
       </View>
 
+      {/* TABS */}
       <View
         style={[styles.tabsContainer, { borderBottomColor: textinputcolor }]}
       >
@@ -342,6 +441,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderBottomWidth: 1,
+  },
+  leftWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  deleteIcon: {
+    marginRight: 15,
+    padding: 5,
+  },
+  deleteIconPlaceholder: {
+    width: 30, // Approximate width of delete icon + margin + padding
+    marginRight: 15,
   },
   leftContent: {
     flex: 1,
