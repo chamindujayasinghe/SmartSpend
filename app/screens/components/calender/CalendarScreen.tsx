@@ -1,28 +1,43 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
 import CalendarHeader from "./CalenderHeader";
 import DayDetailsModal from "./DayDetailsModal";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AppStackParamList } from "../../../navigation/AppNavigator";
 import DayCell from "./DayCell";
+
+import { AppStackParamList } from "../../../navigation/AppNavigator";
 import { CalendarCell } from "../../../../Hooks/calenderTypes";
 import { getTransactions, Transaction } from "../../../../utilities/storage";
 import { useThemeColors } from "../../../../config/theme/colorMode";
+import { useCurrency } from "../../../../config/currencyProvider";
+import {
+  convertToCurrency,
+  getExchangeRates,
+} from "../../../../Hooks/Currency";
 
 const today = new Date();
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 type NavigationProps = NativeStackNavigationProp<
   AppStackParamList,
   "TransactionForm"
 >;
 
+const formatMonthYear = (date: Date): string => {
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+};
+
 const generateCalendarGrid = (
   date: Date,
   clickedDate: Date | null,
-  dailyAggregates: Map<number, { income: number; expense: number }>
+  dailyAggregates: Map<number, { income: number; expense: number }>,
 ): CalendarCell[] => {
   const grid: CalendarCell[] = [];
   const year = date.getFullYear();
@@ -64,14 +79,14 @@ const generateCalendarGrid = (
       day,
       isSunday,
       isToday,
-      isClicked: false,
+      isClicked: isClicked,
       fullDate: cellDate,
-
       income: agg.income,
       expense: agg.expense,
     });
   }
 
+  // Fill remaining cells to complete the week row
   const totalCells = grid.length;
   const cellsToFill = 7 - (totalCells % 7);
   if (cellsToFill < 7) {
@@ -91,53 +106,46 @@ const generateCalendarGrid = (
   return grid;
 };
 
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const formatMonthYear = (date: Date): string => {
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-};
-
 const CalendarScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProps>();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [clickedDate, setClickedDate] = useState<Date | null>(today);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [rates, setRates] = useState<any>(null);
 
   const { titlecolor, secondarycolormode, textinputcolor } = useThemeColors();
+  const { currency } = useCurrency();
 
   useFocusEffect(
     useCallback(() => {
-      setClickedDate(today);
-      setSelectedDate(today);
-
       const fetchAllData = async () => {
         try {
-          const transactions = await getTransactions();
+          const [transactions, latestRates] = await Promise.all([
+            getTransactions(),
+            getExchangeRates(),
+          ]);
           setAllTransactions(transactions);
+          setRates(latestRates);
         } catch (e) {
-          console.error("Failed to fetch transactions", e);
+          console.error("Failed to fetch data", e);
         }
       };
-
       fetchAllData();
-    }, [])
+    }, [currency]),
   );
 
   const goToPreviousMonth = () => {
-    setSelectedDate((prevDate) => {
-      const newDate = new Date(prevDate);
+    setSelectedDate((prev) => {
+      const newDate = new Date(prev);
       newDate.setMonth(newDate.getMonth() - 1);
       return newDate;
     });
   };
 
   const goToNextMonth = () => {
-    setSelectedDate((prevDate) => {
-      const newDate = new Date(prevDate);
+    setSelectedDate((prev) => {
+      const newDate = new Date(prev);
       newDate.setMonth(newDate.getMonth() + 1);
       return newDate;
     });
@@ -149,12 +157,16 @@ const CalendarScreen: React.FC = () => {
       setIsModalVisible(true);
     }
   };
+
   const handleAddPress = () => {
     navigation.navigate("TransactionForm", { dateString: today.toISOString() });
   };
 
   const dailyAggregates = useMemo(() => {
     const aggregates = new Map<number, { income: number; expense: number }>();
+
+    if (allTransactions.length === 0) return aggregates;
+
     const currentYear = selectedDate.getFullYear();
     const currentMonth = selectedDate.getMonth();
 
@@ -168,7 +180,10 @@ const CalendarScreen: React.FC = () => {
 
     for (const tx of monthTransactions) {
       const day = new Date(tx.date).getDate();
-      const amount = parseFloat(tx.amount) || 0;
+      const rawAmount = parseFloat(tx.amount) || 0;
+
+      // Currency conversion logic
+      const amount = convertToCurrency(rawAmount, tx.currency, currency, rates);
 
       const dayAgg = aggregates.get(day) || { income: 0, expense: 0 };
 
@@ -177,12 +192,12 @@ const CalendarScreen: React.FC = () => {
       } else {
         dayAgg.expense += amount;
       }
-
       aggregates.set(day, dayAgg);
     }
 
     return aggregates;
-  }, [allTransactions, selectedDate]);
+  }, [allTransactions, selectedDate, rates, currency]);
+
   const monthlyTotals = useMemo(() => {
     let income = 0;
     let expense = 0;
@@ -190,17 +205,17 @@ const CalendarScreen: React.FC = () => {
       income += agg.income;
       expense += agg.expense;
     }
-    const total = income - expense;
-    return { income, expense, total };
+    return { income, expense, total: income - expense };
   }, [dailyAggregates]);
 
   const calendarGrid = useMemo(
     () => generateCalendarGrid(selectedDate, clickedDate, dailyAggregates),
-    [selectedDate, clickedDate, dailyAggregates]
+    [selectedDate, clickedDate, dailyAggregates],
   );
+
   const monthYearTitle = useMemo(
     () => formatMonthYear(selectedDate),
-    [selectedDate]
+    [selectedDate],
   );
 
   const calendarRows = useMemo(() => {
@@ -247,9 +262,11 @@ const CalendarScreen: React.FC = () => {
             {"<"}
           </AppText>
         </TouchableOpacity>
+
         <AppText style={[styles.monthTitle, { color: titlecolor }]}>
           {monthYearTitle}
         </AppText>
+
         <TouchableOpacity onPress={goToNextMonth} style={styles.arrowButton}>
           <AppText style={[styles.arrowText, { color: colors.secondary }]}>
             {">"}
@@ -268,6 +285,7 @@ const CalendarScreen: React.FC = () => {
           </View>
         ))}
       </View>
+
       <TouchableOpacity
         style={[
           styles.addButton,
@@ -278,7 +296,7 @@ const CalendarScreen: React.FC = () => {
         ]}
         onPress={handleAddPress}
       >
-        <AppText style={[styles.addButtonText]}>+</AppText>
+        <AppText style={styles.addButtonText}>+</AppText>
       </TouchableOpacity>
 
       <DayDetailsModal
@@ -327,19 +345,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderBottomWidth: 1,
     paddingHorizontal: 5,
-  },
-  clickedText: {
-    color: colors.white,
-    fontWeight: "bold",
-  },
-  clickedBackground: {
-    backgroundColor: colors.secondary,
-    height: 28,
-    width: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "flex-end",
   },
   dayHeaderText: {
     flex: 1,

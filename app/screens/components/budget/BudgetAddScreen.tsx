@@ -13,6 +13,13 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getTransactions } from "../../../../utilities/storage";
 import { getAllBudgets } from "../../../../utilities/BudgetStorage";
 
+// --- NEW IMPORTS ---
+import { useCurrency } from "../../../../config/currencyProvider";
+import {
+  convertToCurrency,
+  getExchangeRates,
+} from "../../../../Hooks/Currency";
+
 export type DateRange = {
   start: Date | null;
   end: Date | null;
@@ -31,6 +38,10 @@ type EnhancedBudgetItem = {
 
 const BudgetAddScreen: React.FC = () => {
   const { titlecolor, secondarycolormode } = useThemeColors();
+
+  // --- CURRENCY HOOKS ---
+  const { currency } = useCurrency();
+  const [rates, setRates] = useState<any>(null);
 
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -80,8 +91,14 @@ const BudgetAddScreen: React.FC = () => {
 
   useEffect(() => {
     const calculateHeaderTotals = async () => {
-      const budgets = await getAllBudgets();
-      const transactions = await getTransactions();
+      // Fetch transactions, budgets AND rates
+      const [budgets, transactions, latestRates] = await Promise.all([
+        getAllBudgets(),
+        getTransactions(),
+        getExchangeRates(),
+      ]);
+
+      setRates(latestRates);
 
       const type = selectedTab === "incomes" ? "Income" : "Expense";
 
@@ -150,19 +167,33 @@ const BudgetAddScreen: React.FC = () => {
         0,
       );
 
+      // --- CONVERSION LOGIC FOR TOTAL SPENT ---
       const totalSpent = filteredTransactions
         .filter((tx) => resolvedBudgetMap.has(tx.category))
-        .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
-
-      setTotalBudget(totalBudget);
-      setTotalSpent(totalSpent);
+        .reduce((sum, tx) => {
+          const rawAmount = Number(tx.amount || 0);
+          const converted = convertToCurrency(
+            rawAmount,
+            tx.currency,
+            currency,
+            latestRates,
+          );
+          return sum + converted;
+        }, 0);
 
       setTotalBudget(totalBudget);
       setTotalSpent(totalSpent);
     };
 
     calculateHeaderTotals();
-  }, [selectedTab, selectedPeriod, currentDate, dateRange, refreshKey]);
+  }, [
+    selectedTab,
+    selectedPeriod,
+    currentDate,
+    dateRange,
+    refreshKey,
+    currency,
+  ]); // Add currency dependency
 
   // 🔹 Date navigation
   const handleNavigate = (direction: "previous" | "next") => {

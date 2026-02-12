@@ -10,6 +10,7 @@ interface TransactionData {
   category: string;
   account: string;
   description: string;
+  currency: string;
 }
 
 export interface Transaction extends TransactionData {
@@ -99,7 +100,6 @@ export const saveTransaction = async (
   }
 };
 
-// Add this to your storage.ts file
 export const deleteTransaction = async (
   transactionId: string,
 ): Promise<void> => {
@@ -113,7 +113,6 @@ export const deleteTransaction = async (
   try {
     const existingTransactions = await getTransactions();
 
-    // Filter out the transaction to delete
     const updatedTransactions = existingTransactions.filter(
       (tx) => tx.id !== transactionId,
     );

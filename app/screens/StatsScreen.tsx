@@ -12,6 +12,8 @@ import CategorySummaryListItem, {
   AggregatedCategory,
 } from "./components/stats/CategorySummaryListItem";
 import { useThemeColors } from "../../config/theme/colorMode";
+import { useCurrency } from "../../config/currencyProvider";
+import { convertToCurrency, getExchangeRates } from "../../Hooks/Currency";
 
 export type DateRange = {
   start: Date | null;
@@ -36,7 +38,7 @@ const StatsScreen: React.FC = () => {
   const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTab, setSelectedTab] = useState<"incomes" | "expenses">(
-    "expenses"
+    "expenses",
   );
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("Monthly");
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -45,19 +47,26 @@ const StatsScreen: React.FC = () => {
   });
   const [isRangePickerVisible, setIsRangePickerVisible] = useState(false);
   const [aggregatedData, setAggregatedData] = useState<AggregatedCategory[]>(
-    []
+    [],
   );
+  const { currency } = useCurrency();
+  const [rates, setRates] = useState<any>(null);
   const isFocused = useIsFocused();
 
   const totalAmount = aggregatedData.reduce(
     (sum, item) => sum + item.totalAmount,
-    0
+    0,
   );
 
   useEffect(() => {
     const fetchAndAggregateTransactions = async () => {
       try {
-        const allTransactions = await getTransactions();
+        const [allTransactions, latestRates] = await Promise.all([
+          getTransactions(),
+          getExchangeRates(),
+        ]);
+
+        setRates(latestRates);
         const targetTab = selectedTab === "incomes" ? "Income" : "Expense";
 
         const filteredTransactions = allTransactions.filter((tx) => {
@@ -97,9 +106,18 @@ const StatsScreen: React.FC = () => {
 
         const categoryMap = new Map<string, number>();
         filteredTransactions.forEach((tx) => {
-          const amount = parseFloat(tx.amount);
+          const rawAmount = parseFloat(tx.amount);
+
+          // --- CONVERSION LOGIC APPLIED HERE ---
+          const convertedAmount = convertToCurrency(
+            rawAmount,
+            tx.currency, // Transaction currency
+            currency, // App/Selected currency
+            latestRates, // Use the rates we just fetched
+          );
+
           const currentTotal = categoryMap.get(tx.category) || 0;
-          categoryMap.set(tx.category, currentTotal + amount);
+          categoryMap.set(tx.category, currentTotal + convertedAmount);
         });
 
         const aggregatedArray = Array.from(
@@ -107,7 +125,7 @@ const StatsScreen: React.FC = () => {
           ([category, totalAmount]) => ({
             category,
             totalAmount,
-          })
+          }),
         ).sort((a, b) => b.totalAmount - a.totalAmount);
 
         setAggregatedData(aggregatedArray);
@@ -117,7 +135,14 @@ const StatsScreen: React.FC = () => {
     };
 
     if (isFocused) fetchAndAggregateTransactions();
-  }, [isFocused, currentDate, selectedPeriod, selectedTab, dateRange]);
+  }, [
+    isFocused,
+    currentDate,
+    selectedPeriod,
+    selectedTab,
+    dateRange,
+    currency,
+  ]);
 
   const handleNavigate = (direction: "previous" | "next") => {
     if (selectedPeriod === "Period") return;
@@ -241,6 +266,7 @@ const StatsScreen: React.FC = () => {
                 index={index}
                 item={item}
                 totalAmount={totalAmount}
+                currency={currency}
               />
             )}
             style={styles.list}

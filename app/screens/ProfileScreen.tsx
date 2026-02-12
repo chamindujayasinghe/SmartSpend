@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ActivityIndicator, Switch } from "react-native";
 import { User } from "@supabase/supabase-js";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
+
 import colors from "../../config/colors";
 import { useAppScreenLogic } from "../../Hooks/useAppScreen";
 import { useTheme } from "../../config/theme/ThemeProvider";
+import CurrencySelector from "./components/CurrencySelector";
+import { useThemeColors } from "../../config/theme/colorMode";
+import { useCurrency } from "../../config/currencyProvider";
 
 interface ProfileScreenProps {
   user: User;
@@ -15,19 +19,27 @@ interface ProfileScreenProps {
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
   const { isLightMode, toggleTheme } = useTheme();
   const { loading, handleSignOut } = useAppScreenLogic(user);
+  const { currency, setCurrency } = useCurrency();
+  const { titlecolor, secondarycolormode } = useThemeColors();
+  const { fullName } = useAppScreenLogic(user);
 
   return (
     <View style={styles.container}>
-      <AppText style={styles.title}>Profile</AppText>
+      <AppText style={[styles.title, { color: titlecolor }]}>Profile</AppText>
 
-      <AppText style={styles.emailLabel}>Logged in as:</AppText>
-      <AppText style={styles.emailText}>{user.email}</AppText>
+      <AppText style={[styles.emailLabel, { color: secondarycolormode }]}>
+        Logged in as
+      </AppText>
+      <AppText style={[styles.emailText, { color: secondarycolormode }]}>
+        {fullName}
+      </AppText>
+
+      <CurrencySelector value={currency} onSelect={setCurrency} />
 
       <View style={styles.toggleContainer}>
         <AppText style={styles.toggleLabel}>
           {isLightMode ? "Light Mode" : "Dark Mode"}
         </AppText>
-
         <Switch
           trackColor={{ false: colors.light, true: colors.secondary }}
           thumbColor={colors.white}
@@ -58,22 +70,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    backgroundColor: "transparent",
   },
   title: {
     fontWeight: "bold",
     fontSize: 28,
-    marginBottom: 40,
     color: colors.white,
   },
   emailLabel: {
     fontSize: 16,
+    fontWeight: "800",
     color: colors.light,
   },
   emailText: {
     fontSize: 18,
     color: colors.white,
-    marginBottom: 60,
   },
   toggleContainer: {
     flexDirection: "row",
@@ -81,15 +91,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "60%",
     marginBottom: 30,
-    paddingHorizontal: 10,
   },
   toggleLabel: {
     fontSize: 16,
     color: colors.white,
     fontWeight: "500",
-  },
-  toggleSwitch: {
-    transform: [{ scaleX: 1.1 }, { scaleY: 1.1 }],
   },
   signOutButton: {
     width: "60%",

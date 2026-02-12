@@ -1,3 +1,5 @@
+// utilities/BudgetStorage.ts
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 import { supabase } from "../lib/Supabase-client-config";
@@ -7,11 +9,12 @@ export interface BudgetEntry {
   type: "Income" | "Expense";
   period: string;
   budget: number;
+  currency: string;
   dateKey?: string;
 }
 
 const getDynamicBudgetKey = async (): Promise<string | null> => {
-  const { data: { session } } = await supabase.auth.getSession(); 
+  const { data: { session } } = await supabase.auth.getSession();
   if (!session?.user?.id) {
     console.warn("No user session found for budget storage.");
     return null;
@@ -32,9 +35,6 @@ export const getAllBudgets = async (): Promise<BudgetEntry[]> => {
   }
 };
 
-/**
- * Saves or updates a single budget entry for a category/period combination.
- */
 export const saveBudgetEntry = async (newEntry: BudgetEntry): Promise<void> => {
   const BUDGETS_KEY = await getDynamicBudgetKey();
 
@@ -45,34 +45,68 @@ export const saveBudgetEntry = async (newEntry: BudgetEntry): Promise<void> => {
 
   try {
     const existingBudgets = await getAllBudgets();
-
     let updatedBudgets: BudgetEntry[];
     let found = false;
 
-    // 1. Check if the entry already exists (same category, type, and period)
-    updatedBudgets = existingBudgets.map(entry => {
+    updatedBudgets = existingBudgets.map((entry) => {
       if (
         entry.category === newEntry.category &&
         entry.type === newEntry.type &&
         entry.period === newEntry.period
       ) {
         found = true;
-        return newEntry; // Update the existing entry
+        return {
+          ...entry,
+          budget: newEntry.budget,
+          currency: newEntry.currency,
+        };
       }
       return entry;
     });
 
-    // 2. If it's a new entry, add it to the array
     if (!found) {
       updatedBudgets = [...existingBudgets, newEntry];
     }
 
-    // 3. Save the full list back to AsyncStorage
     const jsonValue = JSON.stringify(updatedBudgets);
     await AsyncStorage.setItem(BUDGETS_KEY, jsonValue);
-
   } catch (e) {
     console.error("Failed to save budget entry", e);
     Alert.alert("Error", "Failed to save the budget.");
+  }
+};
+
+// --- NEW FUNCTION: DELETE BUDGET ENTRY ---
+export const deleteBudgetEntry = async (
+  category: string,
+  type: "Income" | "Expense",
+  period: string,
+): Promise<void> => {
+  const BUDGETS_KEY = await getDynamicBudgetKey();
+
+  if (!BUDGETS_KEY) {
+    Alert.alert("Error", "User not signed in. Cannot delete budget.");
+    return;
+  }
+
+  try {
+    const existingBudgets = await getAllBudgets();
+
+    // Filter OUT the entry we want to delete
+    const updatedBudgets = existingBudgets.filter(
+      (entry) =>
+        !(
+          entry.category === category &&
+          entry.type === type &&
+          entry.period === period
+        ),
+    );
+
+    const jsonValue = JSON.stringify(updatedBudgets);
+    await AsyncStorage.setItem(BUDGETS_KEY, jsonValue);
+    console.log(`Deleted budget for ${category} (${period})`);
+  } catch (e) {
+    console.error("Failed to delete budget entry", e);
+    Alert.alert("Error", "Failed to delete the budget.");
   }
 };

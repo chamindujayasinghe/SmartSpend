@@ -1,18 +1,16 @@
-// app/screens/AppContent.tsx
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAuthSession } from "../../Hooks/useAuthSession";
-import AuthNavigator from "../navigation/AuthNavigator";
+import { useAuthSession } from "../Hooks/useAuthSession";
+import AuthNavigator from "./navigation/AuthNavigator";
+import colors from "../config/colors";
 import AppScreen from "./AppScreen";
-import colors from "../../config/colors";
 
 export const AppContent = () => {
   const { session, isFreshLogin, loading: authLoading } = useAuthSession();
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [checkingResetState, setCheckingResetState] = useState(true);
 
-  // Check if we are in the middle of a password reset flow
   useEffect(() => {
     const checkResetStatus = async () => {
       const resetStatus = await AsyncStorage.getItem("is_resetting_password");
