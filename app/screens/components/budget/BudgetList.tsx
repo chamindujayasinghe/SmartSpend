@@ -81,7 +81,8 @@ const BudgetLists: React.FC<Props> = ({
   onItemPress,
   refreshKey,
 }) => {
-  const { colormode2, secondarycolormode, textinputcolor } = useThemeColors();
+  const { colormode2, secondarycolormode, textinputcolor, colormode1 } =
+    useThemeColors();
 
   const { currency } = useCurrency();
   const [data, setData] = useState<GroupedItem[]>([]);
@@ -251,40 +252,38 @@ const BudgetLists: React.FC<Props> = ({
 
   const renderItem = ({ item }: { item: GroupedItem }) => {
     const budgetEntry = getBudget(item.category);
-    const spent = item.total; // This is already converted in loadData
+    const spent = item.total;
 
-    // 3. CONVERT THE BUDGET AMOUNT
     let convertedBudget = 0;
 
     if (budgetEntry && budgetEntry.budget > 0) {
       convertedBudget = convertToCurrency(
         budgetEntry.budget,
-        budgetEntry.currency || currency, // Use stored currency or fallback
-        currency, // Target app currency
-        rates, // Rates from state
+        budgetEntry.currency || currency,
+        currency,
+        rates,
       );
     }
 
-    // Use 'convertedBudget' instead of 'budgetEntry.budget' for logic below
     if (convertedBudget === 0) {
       if (spent === 0) return null;
 
       return (
         <TouchableOpacity
           onPress={() => handleItemPress(item)}
-          style={[styles.simpleCard, { backgroundColor: secondarycolormode }]}
+          style={[styles.simpleCard, { borderColor: colormode1 }]}
         >
-          <AppText style={[styles.category, { color: colormode2 }]}>
+          <AppText style={[styles.category, { color: colormode1 }]}>
             {item.category}
           </AppText>
-          <AppText style={[styles.amountText, { color: colormode2 }]}>
+          <AppText style={[styles.amountText, { color: colormode1 }]}>
             {currency} {spent.toFixed(2)}
           </AppText>
         </TouchableOpacity>
       );
     }
 
-    const budget = convertedBudget; // Use the converted value
+    const budget = convertedBudget;
     const remaining = budget - spent;
     const isExpense = selectedTab === "expenses";
     const percent = Math.min((spent / budget) * 100, 100);
@@ -292,17 +291,14 @@ const BudgetLists: React.FC<Props> = ({
     return (
       <TouchableOpacity
         onPress={() => handleItemPress(item)}
-        style={[
-          styles.budgetCard,
-          { backgroundColor: secondarycolormode, borderColor: textinputcolor },
-        ]}
+        style={[styles.budgetCard, { borderColor: colormode1 }]}
       >
         <View style={styles.cardRow}>
           <View style={styles.left}>
-            <AppText style={[styles.category, { color: colormode2 }]}>
+            <AppText style={[styles.category, { color: colormode1 }]}>
               {item.category}
             </AppText>
-            <AppText style={[styles.amountText, { color: colormode2 }]}>
+            <AppText style={[styles.amountText, { color: colormode1 }]}>
               {currency} {budget.toFixed(2)}
             </AppText>
           </View>
@@ -329,20 +325,20 @@ const BudgetLists: React.FC<Props> = ({
             <View style={styles.amountRow}>
               <View>
                 {isExpense ? (
-                  <AppText style={[styles.amountRowtxt, { color: colormode2 }]}>
+                  <AppText style={[styles.amountRowtxt, { color: colormode1 }]}>
                     Expense
                   </AppText>
                 ) : (
-                  <AppText style={[styles.amountRowtxt, { color: colormode2 }]}>
+                  <AppText style={[styles.amountRowtxt, { color: colormode1 }]}>
                     Income
                   </AppText>
                 )}
-                <AppText style={[styles.amountText, { color: colormode2 }]}>
+                <AppText style={[styles.amountText, { color: colormode1 }]}>
                   {currency} {spent.toFixed(2)}
                 </AppText>
               </View>
               <View>
-                <AppText style={[styles.amountRowtxt, { color: colormode2 }]}>
+                <AppText style={[styles.amountRowtxt, { color: colormode1 }]}>
                   Remaining
                 </AppText>
                 <AppText
@@ -387,13 +383,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
+    borderWidth: 0.5,
+    borderBottomWidth: 2,
     alignItems: "center",
   },
   budgetCard: {
     paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 0.5,
+    borderBottomWidth: 2,
     marginBottom: 10,
   },
   cardRow: {

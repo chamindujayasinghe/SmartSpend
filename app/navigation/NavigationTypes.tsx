@@ -1,4 +1,7 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
 import { AppStackParamList } from "./AppNavigator";
 
 export type AuthStackParamList = {
@@ -47,4 +50,9 @@ export type BudgetEditScreenProps = NativeStackScreenProps<
 export type BillTransactionFormProps = NativeStackScreenProps<
   AppStackParamList,
   "BillTransactionForm"
+>;
+
+export type TransactionFormNavProps = NativeStackNavigationProp<
+  AppStackParamList,
+  "TransactionForm"
 >;

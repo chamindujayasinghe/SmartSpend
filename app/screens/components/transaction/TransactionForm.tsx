@@ -22,7 +22,7 @@ import {
   getAccountTypes,
   getIncomeCategories,
   getExpenseCategories,
-  deleteCustomItem, // <-- NEW: Imported deletion function
+  deleteCustomItem,
 } from "../../../data/TransactionData";
 import SelectionModal from "../SelectionModal";
 import TransactionTypeTabs from "../TransactionTypeTabs";
@@ -371,7 +371,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
                     setFieldValue("currency", selectedCurrency);
                   }}
                 />
-                {/* date */}
                 <View
                   style={[
                     styles.fieldContainer,
@@ -697,7 +696,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 15,
+    paddingVertical: 14,
     borderBottomWidth: 1,
   },
   fieldLabel: {

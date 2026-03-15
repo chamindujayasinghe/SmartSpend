@@ -110,3 +110,24 @@ export const deleteBudgetEntry = async (
     Alert.alert("Error", "Failed to delete the budget.");
   }
 };
+
+// Add this to the bottom of BudgetStorage.ts
+
+export const saveRestoredBudgets = async (
+  restoredBudgets: BudgetEntry[],
+): Promise<void> => {
+  const BUDGETS_KEY = await getDynamicBudgetKey();
+
+  if (!BUDGETS_KEY) {
+    console.warn("User not signed in. Cannot save restored budgets.");
+    return;
+  }
+
+  try {
+    const jsonValue = JSON.stringify(restoredBudgets);
+    await AsyncStorage.setItem(BUDGETS_KEY, jsonValue);
+    console.log("Successfully saved restored budgets to local storage.");
+  } catch (e) {
+    console.error("Failed to save restored budgets", e);
+  }
+};

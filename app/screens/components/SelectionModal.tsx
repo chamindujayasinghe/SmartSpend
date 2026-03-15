@@ -19,7 +19,6 @@ interface Props {
   onSelectItem: (item: string) => void;
   onClose: () => void;
   onAddPress: () => void;
-  // NEW PROP: Handler for the Delete button press
   onDeletePress: () => void;
 }
 
@@ -30,7 +29,7 @@ const SelectionModal: React.FC<Props> = ({
   onSelectItem,
   onClose,
   onAddPress,
-  onDeletePress, // Destructure the new prop
+  onDeletePress,
 }) => {
   const { colormode1, colormode2 } = useThemeColors();
 
@@ -70,14 +69,12 @@ const SelectionModal: React.FC<Props> = ({
           )}
         />
 
-        {/* NEW BUTTON CONTAINER: For Add and Delete buttons */}
         <View style={styles.bottomButtonContainer}>
-          {/* DELETE Button */}
           <TouchableOpacity
             style={[styles.deleteButton, { backgroundColor: colors.danger }]}
             onPress={() => {
               onClose();
-              onDeletePress(); // Call the new delete handler
+              onDeletePress();
             }}
           >
             <MaterialCommunityIcons
@@ -87,7 +84,6 @@ const SelectionModal: React.FC<Props> = ({
             />
           </TouchableOpacity>
 
-          {/* ADD Button */}
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => {
@@ -140,15 +136,13 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 16,
   },
-  // NEW STYLE: Container for Add/Delete buttons
   bottomButtonContainer: {
     flexDirection: "row",
     marginTop: 10,
-    gap: 10, // Add space between buttons
+    gap: 10,
   },
-  // ADD Button style (now takes up remaining space)
   addButton: {
-    flex: 3, // Takes up more space
+    flex: 3,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -157,16 +151,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.dark,
     minHeight: 50,
   },
-  // NEW STYLE: Delete Button style
   deleteButton: {
-    flex: 1, // Takes up less space
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 10,
     borderRadius: 10,
     minHeight: 50,
   },
-  // Removed unused addButtonText style
 });
 
 export default SelectionModal;

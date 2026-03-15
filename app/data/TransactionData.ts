@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
 
-// --- Default Data ---
 export const DEFAULT_ACCOUNT_TYPES = ["Bank Accounts", "Card", "Cash"];
 export const DEFAULT_INCOME_CATEGORIES = [
   "Allowance",
@@ -51,12 +50,10 @@ export const getItems = async (
     const jsonValue = await AsyncStorage.getItem(KEY);
     const customItems: string[] = jsonValue ? JSON.parse(jsonValue) : [];
 
-    // Combine default items and custom items, ensuring no duplicates
     const combinedSet = new Set([...defaultItems, ...customItems]);
     return Array.from(combinedSet);
   } catch (e) {
     console.error(`Failed to fetch ${type} items`, e);
-    // Fallback to only default items on error
     return type === "account"
       ? DEFAULT_ACCOUNT_TYPES
       : type === "income"
@@ -65,11 +62,6 @@ export const getItems = async (
   }
 };
 
-/**
- * Saves a new item (category or account) to AsyncStorage.
- * @param type The type of data to save ("account", "income", or "expense").
- * @param newItem The string value to save.
- */
 export const saveNewItem = async (
   type: "account" | "income" | "expense",
   newItem: string,
@@ -77,10 +69,8 @@ export const saveNewItem = async (
   try {
     const KEY = getCustomDataKey(type);
 
-    // Fetch all current items (defaults + custom). We only update custom list in storage.
     const currentItems = await getItems(type);
 
-    // Check for duplicates before saving.
     if (
       currentItems.map((item) => item.toLowerCase()).includes(
         newItem.toLowerCase(),
@@ -90,7 +80,6 @@ export const saveNewItem = async (
       return;
     }
 
-    // Get only the *custom* items list (which is stored in AsyncStorage)
     const jsonValue = await AsyncStorage.getItem(KEY);
     const customItems: string[] = jsonValue ? JSON.parse(jsonValue) : [];
 
@@ -109,19 +98,16 @@ export const deleteCustomItem = async (
   itemToDelete: string,
 ): Promise<void> => {
   try {
-    const KEY = getCustomDataKey(type); // Assuming getCustomDataKey exists from previous step
+    const KEY = getCustomDataKey(type);
 
-    // 1. Fetch the custom items (stored list)
     const jsonValue = await AsyncStorage.getItem(KEY);
-    // Assume customItems only contains custom entries, NOT the defaults
+
     const customItems: string[] = jsonValue ? JSON.parse(jsonValue) : [];
 
-    // 2. Filter out the item to delete (case-insensitive check)
     const updatedCustomItems = customItems.filter(
       (item) => item.toLowerCase() !== itemToDelete.toLowerCase(),
     );
 
-    // 3. Save the updated list
     const newJsonValue = JSON.stringify(updatedCustomItems);
     await AsyncStorage.setItem(KEY, newJsonValue);
 
@@ -132,8 +118,6 @@ export const deleteCustomItem = async (
   }
 };
 
-// Re-export the utility functions for use in the component
-// The component will use getItems/saveNewItem instead of the static arrays
 export {
   getItems as getAccountTypes,
   getItems as getExpenseCategories,

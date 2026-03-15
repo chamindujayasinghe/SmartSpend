@@ -135,10 +135,8 @@ const BudgetAddScreen: React.FC = () => {
         filteredTransactions.map((tx) => tx.category),
       );
 
-      // 🔹 3. Resolve budgets (generic + date-specific override)
       const resolvedBudgetMap = new Map<string, number>();
 
-      // generic budgets
       budgets.forEach((b) => {
         if (
           b.type === type &&
@@ -146,11 +144,16 @@ const BudgetAddScreen: React.FC = () => {
           b.budget > 0 &&
           activeCategories.has(b.category)
         ) {
-          resolvedBudgetMap.set(b.category, Number(b.budget));
+          const convertedBudget = convertToCurrency(
+            Number(b.budget),
+            b.currency || currency,
+            currency,
+            latestRates,
+          );
+          resolvedBudgetMap.set(b.category, convertedBudget);
         }
       });
 
-      // date-specific override
       budgets.forEach((b) => {
         if (
           b.type === type &&
@@ -158,7 +161,13 @@ const BudgetAddScreen: React.FC = () => {
           b.budget > 0 &&
           activeCategories.has(b.category)
         ) {
-          resolvedBudgetMap.set(b.category, Number(b.budget));
+          const convertedBudget = convertToCurrency(
+            Number(b.budget),
+            b.currency || currency,
+            currency,
+            latestRates,
+          );
+          resolvedBudgetMap.set(b.category, convertedBudget);
         }
       });
 
@@ -167,7 +176,6 @@ const BudgetAddScreen: React.FC = () => {
         0,
       );
 
-      // --- CONVERSION LOGIC FOR TOTAL SPENT ---
       const totalSpent = filteredTransactions
         .filter((tx) => resolvedBudgetMap.has(tx.category))
         .reduce((sum, tx) => {
@@ -193,7 +201,7 @@ const BudgetAddScreen: React.FC = () => {
     dateRange,
     refreshKey,
     currency,
-  ]); // Add currency dependency
+  ]);
 
   // 🔹 Date navigation
   const handleNavigate = (direction: "previous" | "next") => {

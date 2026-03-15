@@ -22,16 +22,13 @@ import {
 interface Props {
   visible: boolean;
   onClose: () => void;
-  // Handler passed from TransactionForm to call deleteCustomItem
   onRemove: (value: string) => Promise<void>;
   title: string;
-  // The full combined list (default + custom) currently fetched
   items: string[];
   modalType: "category" | "account" | null;
   activeTab: string;
 }
 
-// Function to check if an item is a default item
 const isDefaultItem = (
   item: string,
   type: "category" | "account",
@@ -47,7 +44,6 @@ const isDefaultItem = (
         : DEFAULT_EXPENSE_CATEGORIES;
   }
 
-  // Check if the item is present in the default list
   return defaultList.map((i) => i.toLowerCase()).includes(item.toLowerCase());
 };
 
@@ -62,10 +58,8 @@ const RemoveTransactionModal: React.FC<Props> = ({
 }) => {
   const { colormode1, colormode2, secondarycolormode } = useThemeColors();
 
-  // State to hold the list we display in the modal, mainly for refreshing after deletion
   const [listItems, setListItems] = useState<string[]>(items);
 
-  // Update list when props.items changes (when TransactionForm re-fetches data)
   useEffect(() => {
     setListItems(items);
   }, [items]);
@@ -73,7 +67,6 @@ const RemoveTransactionModal: React.FC<Props> = ({
   const handleRemove = async (item: string) => {
     if (!modalType) return;
 
-    // Safety check to confirm deletion
     Alert.alert(
       "Confirm Deletion",
       `Are you sure you want to permanently remove "${item}"?`,
@@ -86,14 +79,8 @@ const RemoveTransactionModal: React.FC<Props> = ({
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            // Call the external removal logic
             await onRemove(item);
-
-            // Optimistically update the local state list immediately for smooth UX
             setListItems((prevItems) => prevItems.filter((i) => i !== item));
-
-            // Note: onClose is NOT called here because the user might want to delete multiple items.
-            // The user must manually close the modal.
           },
         },
       ],
@@ -124,7 +111,6 @@ const RemoveTransactionModal: React.FC<Props> = ({
               keyExtractor={(item) => item}
               contentContainerStyle={{ paddingBottom: 20 }}
               renderItem={({ item }) => {
-                // Determine if the item is a default and should not be deletable
                 const isDefault = modalType
                   ? isDefaultItem(item, modalType, activeTab)
                   : false;
@@ -134,7 +120,6 @@ const RemoveTransactionModal: React.FC<Props> = ({
                     <AppText style={[styles.itemText, { color: colormode1 }]}>
                       {item}
                     </AppText>
-                    {/* Only show delete icon if it's NOT a default item */}
                     {!isDefault && (
                       <TouchableOpacity
                         style={styles.deleteIcon}
@@ -147,7 +132,6 @@ const RemoveTransactionModal: React.FC<Props> = ({
                         />
                       </TouchableOpacity>
                     )}
-                    {/* Optionally show a lock/info icon for default items */}
                     {isDefault && (
                       <MaterialCommunityIcons
                         name="lock"
@@ -195,11 +179,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 15,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.light, // Use a generic light color
+    borderBottomColor: colors.light,
   },
   itemText: {
     fontSize: 16,
-    flex: 1, // Allows text to take up space
+    flex: 1,
   },
   deleteIcon: {
     paddingLeft: 10,

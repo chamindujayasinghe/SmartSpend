@@ -1,17 +1,11 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import AppText from "../../components/AppText";
-import colors from "../../../config/colors";
-import { Transaction } from "../../../utilities/storage";
+import AppText from "../../../components/AppText";
+import colors from "../../../../config/colors";
+import { Transaction } from "../../../../utilities/storage";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AppStackParamList } from "../../navigation/AppNavigator";
-import { useThemeColors } from "../../../config/theme/colorMode";
-
-type NavigationProps = NativeStackNavigationProp<
-  AppStackParamList,
-  "TransactionForm"
->;
+import { useThemeColors } from "../../../../config/theme/colorMode";
+import { TransactionFormNavProps } from "../../../navigation/NavigationTypes";
 
 interface TransactionListItemProps {
   item: Transaction;
@@ -25,7 +19,7 @@ const TransactionListItem: React.FC<TransactionListItemProps> = ({
   const isIncome = item.activeTab === "Income";
   const amountColor = isIncome ? colors.secondary : colors.danger;
   const sign = isIncome ? "+" : "-";
-  const navigation = useNavigation<NavigationProps>();
+  const navigation = useNavigation<TransactionFormNavProps>();
 
   const { titlecolor, secondarycolormode, textinputcolor } = useThemeColors();
 
@@ -54,7 +48,7 @@ const TransactionListItem: React.FC<TransactionListItemProps> = ({
           </AppText>
         </View>
         <AppText style={[styles.amountText, { color: amountColor }]}>
-          {`${sign}${parseFloat(item.amount).toFixed(2)}`}
+          {`${sign} ${item.currency} ${parseFloat(item.amount).toFixed(2)}`}
         </AppText>
       </View>
     </TouchableOpacity>

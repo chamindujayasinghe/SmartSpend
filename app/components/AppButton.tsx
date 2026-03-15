@@ -13,20 +13,24 @@ interface AppButtonProps extends TouchableOpacityProps {
   iconName?: React.ComponentProps<typeof MaterialCommunityIcons>["name"];
   textColor?: string;
   iconComponent?: React.ReactNode;
+  fontSize?: number;
 }
 
 const AppButton: React.FC<AppButtonProps> = ({
   title,
   style,
   iconName,
-  textColor = colors.black,
+  textColor,
+  fontSize,
   iconComponent,
   ...otherProps
 }) => {
   return (
     <TouchableOpacity style={[styles.button, style]} {...otherProps}>
       {iconComponent && iconComponent}
-      <Text style={[styles.btnText, { color: textColor }]}>{title}</Text>
+      <Text style={[styles.btnText, { color: textColor, fontSize: fontSize }]}>
+        {title}
+      </Text>
       {iconName && (
         <MaterialCommunityIcons
           style={styles.icon}
@@ -61,7 +65,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   icon: {
-    marginLeft: 20,
+    marginLeft: 10,
   },
 });
 

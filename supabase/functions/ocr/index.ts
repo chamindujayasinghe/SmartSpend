@@ -130,7 +130,6 @@ Deno.serve(async (req) => {
 
     if (!aiText) throw new Error("Empty Gemini response");
 
-    // Robust parsing of JSON from AI response
     let products: Product[] = [];
     try {
       products = JSON.parse(aiText);
@@ -140,7 +139,6 @@ Deno.serve(async (req) => {
       else throw new Error("Invalid AI JSON format");
     }
 
-    // 3. Clean and validate products
     const cleanedProducts = products
       .filter((p) => p.product_name && p.amount)
       .map((p) => ({
