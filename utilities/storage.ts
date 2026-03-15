@@ -124,3 +124,24 @@ export const deleteTransaction = async (
     Alert.alert("Error", "Failed to delete the transaction.");
   }
 };
+
+// Add this to the bottom of storage.ts
+
+export const saveRestoredTransactions = async (
+  restoredTransactions: Transaction[],
+): Promise<void> => {
+  const TRANSACTIONS_KEY = await getDynamicTransactionsKey();
+
+  if (!TRANSACTIONS_KEY) {
+    console.warn("User not signed in. Cannot save restored transactions.");
+    return;
+  }
+
+  try {
+    const jsonValue = JSON.stringify(restoredTransactions);
+    await AsyncStorage.setItem(TRANSACTIONS_KEY, jsonValue);
+    console.log("Successfully saved restored transactions to local storage.");
+  } catch (e) {
+    console.error("Failed to save restored transactions", e);
+  }
+};

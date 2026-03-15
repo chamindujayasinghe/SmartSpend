@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../components/AppText";
 import colors from "../../config/colors";
-import NoteAddScreen from "./components/NoteAddScreen";
+
 import CalendarScreen from "./components/calender/CalendarScreen";
 import { useThemeColors } from "../../config/theme/colorMode";
+import NoteAddScreen from "./NoteAddScreen";
 
 type AddTab = "calender" | "note";
 

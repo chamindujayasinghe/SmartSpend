@@ -11,16 +11,10 @@ import AppText from "../../../components/AppText";
 import colors from "../../../../config/colors";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { AppStackParamList } from "../../../navigation/AppNavigator";
 import { getTransactions, Transaction } from "../../../../utilities/storage";
-import TransactionListItem from "../TransactionListItems";
 import { useThemeColors } from "../../../../config/theme/colorMode";
-
-type NavigationProps = NativeStackNavigationProp<
-  AppStackParamList,
-  "TransactionForm"
->;
+import TransactionListItem from "./TransactionListItems";
+import { TransactionFormNavProps } from "../../../navigation/NavigationTypes";
 
 interface DayDetailsModalProps {
   visible: boolean;
@@ -33,7 +27,7 @@ const DayDetailsModal: React.FC<DayDetailsModalProps> = ({
   onClose,
   date,
 }) => {
-  const navigation = useNavigation<NavigationProps>();
+  const navigation = useNavigation<TransactionFormNavProps>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const { colormode1, colormode2, secondarycolormode } = useThemeColors();

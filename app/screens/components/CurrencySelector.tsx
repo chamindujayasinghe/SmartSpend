@@ -5,6 +5,7 @@ import { getSupportedCurrencies } from "react-native-format-currency";
 import AppText from "../../components/AppText";
 import colors from "../../../config/colors";
 import { useThemeColors } from "../../../config/theme/colorMode";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface CurrencySelectorProps {
   value: string;
@@ -31,12 +32,20 @@ const CurrencySelector: React.FC<CurrencySelectorProps> = ({
         return a.fullName.localeCompare(b.fullName);
       });
   }, []);
+
   const { colormode1, secondarycolormode, colormode2 } = useThemeColors();
 
   return (
     <View style={styles.container}>
+      <AppText style={[styles.label, { color: colormode1 }]}>
+        Select Currency
+      </AppText>
+
       <Dropdown
-        style={[styles.dropdown, { borderColor: colormode1 }]}
+        style={[
+          styles.dropdown,
+          { borderBottomColor: colormode1, borderBottomWidth: 1 },
+        ]}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={[
           styles.selectedTextStyle,
@@ -59,6 +68,13 @@ const CurrencySelector: React.FC<CurrencySelectorProps> = ({
         value={value}
         onChange={(item) => onSelect(item.value)}
         dropdownPosition="bottom"
+        renderRightIcon={() => (
+          <MaterialCommunityIcons
+            name="chevron-down"
+            size={20}
+            color={colors.secondary}
+          />
+        )}
         renderItem={(item) => (
           <View style={styles.itemCustom}>
             <AppText style={[styles.itemTextCustom, { color: colormode2 }]}>
@@ -73,18 +89,19 @@ const CurrencySelector: React.FC<CurrencySelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: "center",
-    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
   },
+  label: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
   dropdown: {
-    height: 45,
+    height: 40,
     width: 120,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 10,
     justifyContent: "center",
   },
   selectedTextStyle: {
@@ -95,18 +112,13 @@ const styles = StyleSheet.create({
   listContainer: {
     borderRadius: 12,
     marginTop: 5,
-    width: 280,
-    marginLeft: -80,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    width: 250,
+    marginLeft: -130,
   },
   placeholderStyle: {
     color: colors.light,
     fontSize: 14,
-    textAlign: "center",
+    textAlign: "right",
   },
   inputSearchStyle: {
     height: 45,

@@ -11,7 +11,6 @@ export const getExchangeRates = async () => {
             const now = Date.now();
 
             if (now - timestamp < CACHE_EXPIRY) {
-                console.log("Using Cached Rates (Offline Mode)");
                 return rates;
             }
         }

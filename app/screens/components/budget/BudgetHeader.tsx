@@ -19,7 +19,8 @@ const BudgetHeader = ({
   totalBudget,
   totalSpent,
 }: HeaderProps) => {
-  const { secondarycolormode, colormode2, textinputcolor } = useThemeColors();
+  const { secondarycolormode, colormode2, textinputcolor, colormode1 } =
+    useThemeColors();
 
   const navigation = useNavigation<NavigationProp<AppStackParamList>>();
 
@@ -36,29 +37,29 @@ const BudgetHeader = ({
   };
 
   return (
-    <View style={[styles.header, { backgroundColor: secondarycolormode }]}>
+    <View style={[styles.header, { borderColor: secondarycolormode }]}>
       <View style={styles.budgetRow}>
         <View style={styles.remainingContainer}>
           <AppText
             style={[
               styles.remainingtxt,
-              { color: colormode2, fontWeight: "500" },
+              { color: colormode1, fontWeight: "500" },
             ]}
           >
             Remaining ({selectedPeriod})
           </AppText>
-          <AppText style={[styles.remainingtxt, { color: colormode2 }]}>
+          <AppText style={[styles.remainingtxt, { color: colormode1 }]}>
             {(totalBudget - totalSpent).toFixed(2)}
           </AppText>
         </View>
         <TouchableOpacity
           onPress={handleBudgetSettingPress}
-          style={[styles.budgetBtn, { borderColor: colormode2 }]}
+          style={[styles.budgetBtn, { borderColor: colormode1 }]}
         >
           <AppText
             style={[
               styles.budgetsettingtxt,
-              { color: colormode2, fontWeight: "500" },
+              { color: colormode1, fontWeight: "500" },
             ]}
           >
             Budget Setting
@@ -70,12 +71,12 @@ const BudgetHeader = ({
           <AppText
             style={[
               styles.spendedTxt,
-              { color: colormode2, fontWeight: "500" },
+              { color: colormode1, fontWeight: "500" },
             ]}
           >
             {selectedPeriod}
           </AppText>
-          <AppText style={[styles.spendedTxt, { color: colormode2 }]}>
+          <AppText style={[styles.spendedTxt, { color: colormode1 }]}>
             {totalBudget.toFixed(2)}
           </AppText>
         </View>
@@ -92,10 +93,10 @@ const BudgetHeader = ({
             </AppText>
           </View>
           <View style={styles.bottomValuesRow}>
-            <AppText style={[styles.bottomValueText, { color: colormode2 }]}>
+            <AppText style={[styles.bottomValueText, { color: colormode1 }]}>
               {totalSpent.toFixed(2)}
             </AppText>
-            <AppText style={[styles.bottomValueText, { color: colormode2 }]}>
+            <AppText style={[styles.bottomValueText, { color: colormode1 }]}>
               {(totalBudget - totalSpent).toFixed(2)}
             </AppText>
           </View>
@@ -109,6 +110,8 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 15,
     paddingVertical: 20,
+    borderWidth: 1.5,
+    borderBottomWidth: 4,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     marginBottom: 20,

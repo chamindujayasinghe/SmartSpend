@@ -20,7 +20,6 @@ export type DateRange = {
   end: Date | null;
 };
 
-// Utility to get week range (Monday → Sunday)
 const getWeekRange = (date: Date) => {
   const current = new Date(date);
   const day = current.getDay();
@@ -50,7 +49,6 @@ const StatsScreen: React.FC = () => {
     [],
   );
   const { currency } = useCurrency();
-  const [rates, setRates] = useState<any>(null);
   const isFocused = useIsFocused();
 
   const totalAmount = aggregatedData.reduce(
@@ -66,7 +64,6 @@ const StatsScreen: React.FC = () => {
           getExchangeRates(),
         ]);
 
-        setRates(latestRates);
         const targetTab = selectedTab === "incomes" ? "Income" : "Expense";
 
         const filteredTransactions = allTransactions.filter((tx) => {
@@ -76,29 +73,20 @@ const StatsScreen: React.FC = () => {
           switch (selectedPeriod) {
             case "Daily":
               return txDate.toDateString() === currentDate.toDateString();
-
             case "Weekly": {
               const { monday, sunday } = getWeekRange(currentDate);
               return txDate >= monday && txDate <= sunday;
             }
-
             case "Monthly":
               return (
                 txDate.getMonth() === currentDate.getMonth() &&
                 txDate.getFullYear() === currentDate.getFullYear()
               );
-
             case "Annually":
               return txDate.getFullYear() === currentDate.getFullYear();
-
             case "Period":
               if (!dateRange.start || !dateRange.end) return false;
-              const startDate = new Date(dateRange.start);
-              startDate.setHours(0, 0, 0, 0);
-              const endDate = new Date(dateRange.end);
-              endDate.setHours(23, 59, 59, 999);
-              return txDate >= startDate && txDate <= endDate;
-
+              return txDate >= dateRange.start && txDate <= dateRange.end;
             default:
               return false;
           }
@@ -107,15 +95,12 @@ const StatsScreen: React.FC = () => {
         const categoryMap = new Map<string, number>();
         filteredTransactions.forEach((tx) => {
           const rawAmount = parseFloat(tx.amount);
-
-          // --- CONVERSION LOGIC APPLIED HERE ---
           const convertedAmount = convertToCurrency(
             rawAmount,
-            tx.currency, // Transaction currency
-            currency, // App/Selected currency
-            latestRates, // Use the rates we just fetched
+            tx.currency,
+            currency,
+            latestRates,
           );
-
           const currentTotal = categoryMap.get(tx.category) || 0;
           categoryMap.set(tx.category, currentTotal + convertedAmount);
         });
@@ -148,7 +133,6 @@ const StatsScreen: React.FC = () => {
     if (selectedPeriod === "Period") return;
     const newDate = new Date(currentDate);
     const amount = direction === "previous" ? -1 : 1;
-
     switch (selectedPeriod) {
       case "Daily":
         newDate.setDate(newDate.getDate() + amount);
@@ -163,7 +147,6 @@ const StatsScreen: React.FC = () => {
         newDate.setFullYear(newDate.getFullYear() + amount);
         break;
     }
-
     setCurrentDate(newDate);
   };
 
@@ -241,14 +224,27 @@ const StatsScreen: React.FC = () => {
       </View>
 
       <View style={styles.contentArea}>
+        {/* FIXED PIE CHART - Stays above the list and does not scroll */}
         {aggregatedData.length > 0 && (
           <PieChartComponent
             data={aggregatedData}
-            title={`${
-              selectedTab === "incomes" ? "Incomes" : "Expenses"
-            } Distribution`}
+            title={`${selectedTab === "incomes" ? "Incomes" : "Expenses"} Distribution`}
             height={240}
           />
+        )}
+
+        {/* ADDED CONDITION: Only show for Monthly or Annually */}
+        {(selectedPeriod === "Monthly" || selectedPeriod === "Annually") && (
+          <TouchableOpacity
+            style={[styles.downloadButton, { borderColor: textinputcolor }]}
+            onPress={() => console.log("Download pressed")}
+          >
+            <AppText
+              style={[styles.downloadButtonText, { color: secondarycolormode }]}
+            >
+              Download
+            </AppText>
+          </TouchableOpacity>
         )}
 
         {aggregatedData.length === 0 ? (
@@ -271,6 +267,10 @@ const StatsScreen: React.FC = () => {
             )}
             style={styles.list}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            removeClippedSubviews={true}
+            initialNumToRender={10}
+            windowSize={5}
           />
         )}
       </View>
@@ -312,10 +312,36 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 1.5,
   },
-  contentArea: { flex: 1 },
-  list: { width: "100%", marginTop: 10 },
-  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyText: { fontSize: 16, fontWeight: "500" },
+  contentArea: {
+    flex: 1,
+  },
+  list: {
+    flex: 1,
+    marginTop: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  downloadButton: {
+    alignSelf: "center",
+    backgroundColor: "transparent",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  downloadButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });
 
 export default StatsScreen;

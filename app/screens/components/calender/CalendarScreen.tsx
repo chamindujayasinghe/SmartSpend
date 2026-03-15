@@ -86,7 +86,6 @@ const generateCalendarGrid = (
     });
   }
 
-  // Fill remaining cells to complete the week row
   const totalCells = grid.length;
   const cellsToFill = 7 - (totalCells % 7);
   if (cellsToFill < 7) {

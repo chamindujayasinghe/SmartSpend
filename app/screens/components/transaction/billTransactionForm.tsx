@@ -13,6 +13,8 @@ import { useThemeColors } from "../../../../config/theme/colorMode";
 import {
   getAccountTypes,
   getExpenseCategories,
+  saveNewItem,
+  deleteCustomItem,
 } from "../../../data/TransactionData";
 import { saveTransaction } from "../../../../utilities/storage";
 import AppText from "../../../components/AppText";
@@ -21,6 +23,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import colors from "../../../../config/colors";
 import { BillTransactionFormProps } from "../../../navigation/NavigationTypes";
 import { useCurrency } from "../../../../config/currencyProvider";
+import AddNewModal from "./AddTransactionData";
+import RemoveTransactionModal from "./removetransactionmodal";
 
 interface ScannedItem {
   product_name: string;
@@ -39,6 +43,8 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [account, setAccount] = useState("");
+  // <-- NEW: State to track if there's an account error
+  const [accountError, setAccountError] = useState<string | null>(null);
 
   const [items, setItems] = useState<ScannedItem[]>(
     scannedItems?.map((item: any) => ({
@@ -51,6 +57,13 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalItems, setModalItems] = useState<string[]>([]);
   const [activeItemIndex, setActiveItemIndex] = useState<number | null>(null);
+
+  const [addNewModalVisible, setAddNewModalVisible] = useState(false);
+  const [removeModalVisible, setRemoveModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<"account" | "category" | null>(
+    null,
+  );
+
   const { currency } = useCurrency();
 
   const handleUpdateItem = (
@@ -71,11 +84,67 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
     const categories = await getExpenseCategories("expense");
     setModalItems(categories);
     setActiveItemIndex(index);
+    setModalType("category");
     setModalVisible(true);
   };
 
+  const handleSaveNewItem = async (value: string) => {
+    if (!modalType || value.trim().length === 0) return;
+    const trimmedValue = value.trim();
+
+    try {
+      const categoryType = modalType === "account" ? "account" : "expense";
+      await saveNewItem(categoryType, trimmedValue);
+
+      if (activeItemIndex !== null && modalType === "category") {
+        handleUpdateItem(activeItemIndex, "category", trimmedValue);
+      } else if (modalType === "account") {
+        setAccount(trimmedValue);
+        setAccountError(null); // <-- NEW: Clear error if an account is added and selected
+      }
+    } catch (error) {
+      console.error("Error saving new item:", error);
+      Alert.alert("Error", "Could not save the new item.");
+    }
+  };
+
+  const handleRemoveItem = async (itemToDelete: string) => {
+    if (!modalType) return;
+
+    try {
+      const categoryType = modalType === "account" ? "account" : "expense";
+      await deleteCustomItem(categoryType, itemToDelete);
+
+      const updatedItems =
+        modalType === "account"
+          ? await getAccountTypes("account")
+          : await getExpenseCategories("expense");
+      setModalItems(updatedItems);
+
+      if (modalType === "account" && account === itemToDelete) {
+        setAccount("");
+      } else if (modalType === "category") {
+        const updatedScannedItems = items.map((item) => {
+          if (item.category === itemToDelete) {
+            return { ...item, category: "others" };
+          }
+          return item;
+        });
+        setItems(updatedScannedItems);
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+      Alert.alert("Error", "Could not delete the item.");
+    }
+  };
+
   const handleConfirm = async () => {
-    if (!account) return Alert.alert("", "Please select an account");
+    // <-- NEW: Set error state instead of showing an alert
+    if (!account) {
+      setAccountError("Account is required");
+      return;
+    }
+
     if (items.length === 0) return Alert.alert("", "No items to save");
 
     try {
@@ -149,6 +218,7 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
             const accs = await getAccountTypes("account");
             setModalItems(accs);
             setActiveItemIndex(null);
+            setModalType("account");
             setModalVisible(true);
           }}
           style={[styles.selectorRow, { borderBottomColor: textinputcolor }]}
@@ -168,11 +238,14 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
             />
           </View>
         </TouchableOpacity>
+        {/* <-- NEW: Display the inline error text if accountError is set */}
+        {accountError && (
+          <AppText style={styles.errorText}>{accountError}</AppText>
+        )}
       </View>
       <ScrollView style={styles.content}>
         {items.map((item, index) => (
           <View key={index} style={styles.cardContainer}>
-            {/* Product Card */}
             <View
               style={[
                 styles.productCard,
@@ -214,7 +287,6 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
               </View>
             </View>
 
-            {/* Delete Button */}
             <TouchableOpacity
               style={styles.deleteAction}
               onPress={() => removeItem(index)}
@@ -255,12 +327,36 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
             handleUpdateItem(activeItemIndex, "category", val);
           } else {
             setAccount(val);
+            setAccountError(null); // <-- NEW: Clear error when account is successfully selected
           }
           setModalVisible(false);
         }}
         onClose={() => setModalVisible(false)}
-        onAddPress={() => {}}
-        onDeletePress={() => {}}
+        onAddPress={() => {
+          setModalVisible(false);
+          setAddNewModalVisible(true);
+        }}
+        onDeletePress={() => {
+          setModalVisible(false);
+          setRemoveModalVisible(true);
+        }}
+      />
+
+      <AddNewModal
+        visible={addNewModalVisible}
+        onClose={() => setAddNewModalVisible(false)}
+        onSave={handleSaveNewItem}
+        title={`Add New ${modalType === "category" ? "Category" : "Account"}`}
+      />
+
+      <RemoveTransactionModal
+        visible={removeModalVisible}
+        onClose={() => setRemoveModalVisible(false)}
+        onRemove={handleRemoveItem}
+        title={`Remove ${modalType === "category" ? "Category" : "Account"}s`}
+        items={modalItems}
+        modalType={modalType}
+        activeTab="Expense"
       />
     </View>
   );
@@ -281,7 +377,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
-
   valueText: {
     fontSize: 15,
   },
@@ -294,6 +389,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 15,
     borderBottomWidth: 1,
+  },
+  // <-- NEW: Added error text styles
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 10,
+    textAlign: "right",
   },
   cardContainer: {
     flexDirection: "row",
