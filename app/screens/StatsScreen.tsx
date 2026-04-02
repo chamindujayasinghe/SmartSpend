@@ -14,6 +14,7 @@ import CategorySummaryListItem, {
 import { useThemeColors } from "../../config/theme/colorMode";
 import { useCurrency } from "../../config/currencyProvider";
 import { convertToCurrency, getExchangeRates } from "../../Hooks/Currency";
+import { handleReportDownload } from "../../Hooks/handleReportDownload";
 
 export type DateRange = {
   start: Date | null;
@@ -224,7 +225,6 @@ const StatsScreen: React.FC = () => {
       </View>
 
       <View style={styles.contentArea}>
-        {/* FIXED PIE CHART - Stays above the list and does not scroll */}
         {aggregatedData.length > 0 && (
           <PieChartComponent
             data={aggregatedData}
@@ -233,19 +233,31 @@ const StatsScreen: React.FC = () => {
           />
         )}
 
-        {/* ADDED CONDITION: Only show for Monthly or Annually */}
-        {(selectedPeriod === "Monthly" || selectedPeriod === "Annually") && (
-          <TouchableOpacity
-            style={[styles.downloadButton, { borderColor: textinputcolor }]}
-            onPress={() => console.log("Download pressed")}
-          >
-            <AppText
-              style={[styles.downloadButtonText, { color: secondarycolormode }]}
+        {(selectedPeriod === "Monthly" || selectedPeriod === "Annually") &&
+          aggregatedData.length > 0 && (
+            <TouchableOpacity
+              style={[styles.downloadButton, { borderColor: textinputcolor }]}
+              onPress={() =>
+                handleReportDownload({
+                  aggregatedData,
+                  totalAmount,
+                  selectedPeriod,
+                  currentDate,
+                  selectedTab,
+                  currency,
+                })
+              }
             >
-              Download
-            </AppText>
-          </TouchableOpacity>
-        )}
+              <AppText
+                style={[
+                  styles.downloadButtonText,
+                  { color: secondarycolormode },
+                ]}
+              >
+                Download
+              </AppText>
+            </TouchableOpacity>
+          )}
 
         {aggregatedData.length === 0 ? (
           <View style={styles.emptyContainer}>

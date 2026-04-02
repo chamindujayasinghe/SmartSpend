@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ActivityIndicator, Switch } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Switch,
+  TouchableOpacity,
+} from "react-native";
 import { User } from "@supabase/supabase-js";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import AppButton from "../components/AppButton";
 import AppText from "../components/AppText";
@@ -12,11 +19,13 @@ import CurrencySelector from "./components/CurrencySelector";
 import { useThemeColors } from "../../config/theme/colorMode";
 import { useCurrency } from "../../config/currencyProvider";
 
-// Import both backup and restore functions
 import {
   backupDataToCloud,
   restoreDataFromCloud,
 } from "../../Hooks/handleBackup";
+
+// Import your new modal (Adjust the path as needed!)
+import EditProfileModal from "./components/EditProfileModal";
 
 interface ProfileScreenProps {
   user: User;
@@ -27,10 +36,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
   const { loading, handleSignOut } = useAppScreenLogic(user);
   const { currency, setCurrency } = useCurrency();
   const { titlecolor, secondarycolormode } = useThemeColors();
+
+  // You might want to pull fullName from user.user_metadata if useAppScreenLogic doesn't auto-refresh
+  // when metadata changes, but for now we'll keep your hook.
   const { fullName } = useAppScreenLogic(user);
 
   const [isBackingUp, setIsBackingUp] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(false); // Add restoring state
+  const [isRestoring, setIsRestoring] = useState(false);
+
+  // NEW: State to handle modal visibility
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+
+  // Extract initial names from Supabase user metadata
+  const initialFirstName = user?.user_metadata?.first_name || "";
+  const initialLastName = user?.user_metadata?.last_name || "";
 
   const handleBackup = async () => {
     setIsBackingUp(true);
@@ -47,13 +66,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
   return (
     <View style={styles.container}>
       <AppText style={[styles.title, { color: titlecolor }]}>Profile</AppText>
-      <View style={styles.nameContainer}>
-        <AppText style={[styles.nameLabel, { color: titlecolor }]}>
-          Logged in as
-        </AppText>
-        <AppText style={[styles.nameText, { color: secondarycolormode }]}>
-          {fullName}
-        </AppText>
+
+      <TouchableOpacity
+        style={styles.editProfileButton}
+        onPress={() => setIsEditModalVisible(true)} // Open the modal
+      >
+        <MaterialCommunityIcons
+          name="pencil"
+          size={16}
+          color={colors.secondary}
+          style={styles.editIcon}
+        />
+        <AppText style={styles.editProfileText}>Edit Profile</AppText>
+      </TouchableOpacity>
+
+      {/* Profile Info Section */}
+      <View style={styles.profileHeaderContainer}>
+        <View style={styles.nameContainer}>
+          <AppText style={[styles.nameLabel, { color: titlecolor }]}>
+            Logged in as
+          </AppText>
+          <AppText style={[styles.nameText, { color: secondarycolormode }]}>
+            {fullName}
+          </AppText>
+        </View>
       </View>
 
       <CurrencySelector value={currency} onSelect={setCurrency} />
@@ -124,6 +160,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
           style={styles.signOutButton}
         />
       )}
+
+      <EditProfileModal
+        isVisible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+        initialFirstName={initialFirstName}
+        initialLastName={initialLastName}
+        onUpdateSuccess={() => {
+          setIsEditModalVisible(false);
+        }}
+      />
     </View>
   );
 };
@@ -139,13 +185,34 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 28,
     color: colors.white,
-    marginBottom: 30,
+    marginBottom: 5, // Reduced margin to bring the edit button closer
+  },
+  editProfileButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "rgba(158, 158, 158, 0.21)",
+    marginBottom: 25,
+  },
+  editIcon: {
+    marginRight: 5,
+  },
+  editProfileText: {
+    fontSize: 14,
+    color: colors.secondary,
+    fontWeight: "600",
+  },
+  profileHeaderContainer: {
+    width: "100%",
+    marginBottom: 20,
   },
   nameContainer: {
     justifyContent: "space-between",
     width: "100%",
     flexDirection: "row",
-    marginBottom: 15,
+    marginBottom: 5,
   },
   nameLabel: {
     fontSize: 16,

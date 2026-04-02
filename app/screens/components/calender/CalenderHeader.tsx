@@ -39,7 +39,9 @@ const CalendarHeader: React.FC<Props> = ({ income, expenses, total }) => {
         </AppText>
       </View>
       <View style={styles.column}>
-        <AppText style={[styles.title, { color: colormode2 }]}>Total</AppText>
+        <AppText style={[styles.title, { color: colormode2 }]}>
+          Total remaining
+        </AppText>
         <AppText style={[styles.amount, { color: colormode2 }]}>
           {currency} {total.toFixed(2)}
         </AppText>
