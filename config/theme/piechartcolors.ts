@@ -2,7 +2,7 @@ export const PIE_CHART_COLORS = [
   "#4BC0C0",
   "#79d358ff",
   "#6384FF",
-  "#36EBAF",
+  "#0d815a",
   "#FF63F7",
   "#c04b4b",
   "#36A2EB",
