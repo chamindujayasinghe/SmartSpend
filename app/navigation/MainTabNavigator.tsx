@@ -20,8 +20,10 @@ const Tab = createBottomTabNavigator();
 
 const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
   const { colormode1, colormode2, secondarycolormode } = useThemeColors();
+
   return (
     <Tab.Navigator
+      initialRouteName="Add" // ✅ Set default screen
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.secondary,
@@ -36,10 +38,14 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="Picks"
         options={{
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" color={color} size={size} />
+            <MaterialCommunityIcons
+              name="robot-outline"
+              color={color}
+              size={size}
+            />
           ),
         }}
       >
@@ -59,33 +65,38 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
           ),
         }}
       />
+
       <Tab.Screen
         name="Add"
         component={AddScreen}
         options={{
           tabBarLabel: () => null,
-          tabBarIcon: ({ focused, size }) => (
-            <View
-              style={{
-                position: "absolute",
-                top: -25,
-                width: size * 1.7,
-                height: size * 1.7,
-                borderRadius: (size * 2.2) / 2,
-                backgroundColor: focused ? colors.secondary : colormode1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <MaterialCommunityIcons
-                name="plus"
-                color={colormode2}
-                size={size * 1.5}
-              />
-            </View>
-          ),
+          tabBarIcon: ({ focused, size }) => {
+            if (focused) return null;
+            return (
+              <View
+                style={{
+                  position: "absolute",
+                  top: -25,
+                  width: size * 1.7,
+                  height: size * 1.7,
+                  borderRadius: (size * 2.2) / 2,
+                  backgroundColor: colormode1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="plus"
+                  color={colormode2}
+                  size={size * 1.5}
+                />
+              </View>
+            );
+          },
         }}
       />
+
       <Tab.Screen
         name="Budget"
         component={BudgetAddScreen}
@@ -95,6 +106,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
           ),
         }}
       />
+
       <Tab.Screen
         name="Profile"
         options={{
