@@ -9,7 +9,6 @@ import NewPasswordScreen from "../screens/NewPasswordScreen";
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
-// Accept a prop to control start screen
 const AuthNavigator = ({
   initialRouteName = "Login",
 }: {

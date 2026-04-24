@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Switch,
   TouchableOpacity,
+  ScrollView, // Added ScrollView in case the screen gets too tall
 } from "react-native";
 import { User } from "@supabase/supabase-js";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -24,8 +25,8 @@ import {
   restoreDataFromCloud,
 } from "../../Hooks/handleBackup";
 
-// Import your new modal (Adjust the path as needed!)
 import EditProfileModal from "./components/EditProfileModal";
+import CurrencyConverter from "./components/CurrencyConvertor";
 
 interface ProfileScreenProps {
   user: User;
@@ -36,18 +37,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
   const { loading, handleSignOut } = useAppScreenLogic(user);
   const { currency, setCurrency } = useCurrency();
   const { titlecolor, secondarycolormode } = useThemeColors();
-
-  // You might want to pull fullName from user.user_metadata if useAppScreenLogic doesn't auto-refresh
-  // when metadata changes, but for now we'll keep your hook.
   const { fullName } = useAppScreenLogic(user);
 
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-
-  // NEW: State to handle modal visibility
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
-  // Extract initial names from Supabase user metadata
   const initialFirstName = user?.user_metadata?.first_name || "";
   const initialLastName = user?.user_metadata?.last_name || "";
 
@@ -64,117 +59,126 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <AppText style={[styles.title, { color: titlecolor }]}>Profile</AppText>
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      style={{ flex: 1, width: "100%" }}
+    >
+      <View style={styles.container}>
+        <AppText style={[styles.title, { color: titlecolor }]}>Profile</AppText>
 
-      <TouchableOpacity
-        style={styles.editProfileButton}
-        onPress={() => setIsEditModalVisible(true)} // Open the modal
-      >
-        <MaterialCommunityIcons
-          name="pencil"
-          size={16}
-          color={colors.secondary}
-          style={styles.editIcon}
-        />
-        <AppText style={styles.editProfileText}>Edit Profile</AppText>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.editProfileButton}
+          onPress={() => setIsEditModalVisible(true)}
+        >
+          <MaterialCommunityIcons
+            name="pencil"
+            size={16}
+            color={colors.secondary}
+            style={styles.editIcon}
+          />
+          <AppText style={styles.editProfileText}>Edit Profile</AppText>
+        </TouchableOpacity>
 
-      {/* Profile Info Section */}
-      <View style={styles.profileHeaderContainer}>
-        <View style={styles.nameContainer}>
-          <AppText style={[styles.nameLabel, { color: titlecolor }]}>
-            Logged in as
-          </AppText>
-          <AppText style={[styles.nameText, { color: secondarycolormode }]}>
-            {fullName}
-          </AppText>
+        <View style={styles.profileHeaderContainer}>
+          <View style={styles.nameContainer}>
+            <AppText style={[styles.nameLabel, { color: titlecolor }]}>
+              Logged in as
+            </AppText>
+            <AppText style={[styles.nameText, { color: secondarycolormode }]}>
+              {fullName}
+            </AppText>
+          </View>
         </View>
+
+        <CurrencySelector value={currency} onSelect={setCurrency} />
+
+        <View style={styles.toggleContainer}>
+          <AppText style={[styles.toggleLabel, { color: titlecolor }]}>
+            {isLightMode ? "Light Mode" : "Dark Mode"}
+          </AppText>
+          <Switch
+            trackColor={{ false: colors.light, true: colors.secondary }}
+            thumbColor={colors.white}
+            onValueChange={toggleTheme}
+            value={isLightMode}
+            style={{ transform: [{ scale: 0.9 }] }}
+          />
+        </View>
+
+        {/* -------------------------------------------------- */}
+        {/* ADD THE CURRENCY CONVERTER RIGHT HERE              */}
+        {/* -------------------------------------------------- */}
+        <CurrencyConverter />
+
+        {isBackingUp ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.secondary}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <AppButton
+            textColor={colors.white}
+            iconName="cloud-upload"
+            title="Backup"
+            style={styles.cloudbackupbtn}
+            onPress={handleBackup}
+            fontSize={14}
+          />
+        )}
+
+        {isRestoring ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.secondary}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <AppButton
+            textColor={colors.white}
+            iconName="cloud-download"
+            title="Restore"
+            style={styles.cloudbackupbtn}
+            onPress={handleRestore}
+            fontSize={14}
+          />
+        )}
+
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.danger}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <AppButton
+            textColor={colors.white}
+            fontSize={14}
+            iconName="logout"
+            title="Sign Out"
+            onPress={handleSignOut}
+            style={styles.signOutButton}
+          />
+        )}
+
+        <EditProfileModal
+          isVisible={isEditModalVisible}
+          onClose={() => setIsEditModalVisible(false)}
+          initialFirstName={initialFirstName}
+          initialLastName={initialLastName}
+          onUpdateSuccess={() => setIsEditModalVisible(false)}
+        />
       </View>
-
-      <CurrencySelector value={currency} onSelect={setCurrency} />
-
-      <View style={styles.toggleContainer}>
-        <AppText style={[styles.toggleLabel, { color: titlecolor }]}>
-          {isLightMode ? "Light Mode" : "Dark Mode"}
-        </AppText>
-        <Switch
-          trackColor={{ false: colors.light, true: colors.secondary }}
-          thumbColor={colors.white}
-          onValueChange={toggleTheme}
-          value={isLightMode}
-          style={{ transform: [{ scale: 0.9 }] }}
-        />
-      </View>
-
-      {/* Backup Button */}
-      {isBackingUp ? (
-        <ActivityIndicator
-          size="large"
-          color={colors.secondary}
-          style={{ marginTop: 20 }}
-        />
-      ) : (
-        <AppButton
-          textColor={colors.white}
-          iconName="cloud-upload"
-          title="Backup"
-          style={styles.cloudbackupbtn}
-          onPress={handleBackup}
-          fontSize={14}
-        />
-      )}
-
-      {/* Restore Button */}
-      {isRestoring ? (
-        <ActivityIndicator
-          size="large"
-          color={colors.secondary}
-          style={{ marginTop: 20 }}
-        />
-      ) : (
-        <AppButton
-          textColor={colors.white}
-          iconName="cloud-download"
-          title="Restore"
-          style={styles.cloudbackupbtn}
-          onPress={handleRestore}
-          fontSize={14}
-        />
-      )}
-
-      {/* Sign Out Button */}
-      {loading ? (
-        <ActivityIndicator
-          size="large"
-          color={colors.danger}
-          style={{ marginTop: 20 }}
-        />
-      ) : (
-        <AppButton
-          textColor={colors.white}
-          fontSize={14}
-          iconName="logout"
-          title="Sign Out"
-          onPress={handleSignOut}
-          style={styles.signOutButton}
-        />
-      )}
-
-      <EditProfileModal
-        isVisible={isEditModalVisible}
-        onClose={() => setIsEditModalVisible(false)}
-        initialFirstName={initialFirstName}
-        initialLastName={initialLastName}
-        onUpdateSuccess={() => {
-          setIsEditModalVisible(false);
-        }}
-      />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  // Added a scrollContainer to prevent items from being cut off on smaller screens
+  scrollContainer: {
+    flexGrow: 1,
+    alignItems: "center",
+  },
   container: {
     flex: 1,
     padding: 30,
@@ -185,7 +189,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 28,
     color: colors.white,
-    marginBottom: 5, // Reduced margin to bring the edit button closer
+    marginBottom: 5,
   },
   editProfileButton: {
     flexDirection: "row",

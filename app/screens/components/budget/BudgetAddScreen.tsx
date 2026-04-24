@@ -12,8 +12,6 @@ import BudgetInputModal from "./BudgetInputModal";
 import { useFocusEffect } from "@react-navigation/native";
 import { getTransactions } from "../../../../utilities/storage";
 import { getAllBudgets } from "../../../../utilities/BudgetStorage";
-
-// --- NEW IMPORTS ---
 import { useCurrency } from "../../../../config/currencyProvider";
 import {
   convertToCurrency,
@@ -108,7 +106,7 @@ const BudgetAddScreen: React.FC = () => {
         dateRange,
       );
 
-      // 🔹 1. Filter transactions for selected period
+      // 1. Filter transactions for selected period
       const filteredTransactions = transactions.filter((tx) => {
         if (normalize(tx.activeTab) !== normalize(selectedTab)) return false;
 
@@ -130,7 +128,7 @@ const BudgetAddScreen: React.FC = () => {
         }
       });
 
-      // 🔹 2. Categories that actually have transactions
+      // 2. Categories that actually have transactions
       const activeCategories = new Set(
         filteredTransactions.map((tx) => tx.category),
       );
@@ -203,7 +201,7 @@ const BudgetAddScreen: React.FC = () => {
     currency,
   ]);
 
-  // 🔹 Date navigation
+  // Date navigation
   const handleNavigate = (direction: "previous" | "next") => {
     if (selectedPeriod === "Period") return;
 
@@ -229,7 +227,7 @@ const BudgetAddScreen: React.FC = () => {
     setCurrentDate(newDate);
   };
 
-  // 🔹 Period range confirm
+  // Period range confirm
   const handleConfirmRange = (range: { start: Date; end: Date }) => {
     setDateRange(range);
     setSelectedPeriod("Period");
@@ -237,21 +235,20 @@ const BudgetAddScreen: React.FC = () => {
     setIsRangePickerVisible(false);
   };
 
-  // 🔹 Reset
+  // Reset
   const handleResetDate = () => {
     setCurrentDate(new Date());
     setDateRange({ start: null, end: null });
     setSelectedPeriod("Monthly");
   };
 
-  // 🔹 When user taps a category
+  // When user taps a category
   const handleBudgetPress = (item: EnhancedBudgetItem) => {
     setSelectedBudgetItem(item);
   };
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.header}>
         <AppText style={[styles.headerTitle, { color: titlecolor }]}>
           Budget
@@ -265,7 +262,6 @@ const BudgetAddScreen: React.FC = () => {
         />
       </View>
 
-      {/* DATE NAVIGATOR */}
       <DateNavigator
         currentDate={currentDate}
         selectedPeriod={selectedPeriod}
@@ -273,7 +269,6 @@ const BudgetAddScreen: React.FC = () => {
         dateRange={dateRange}
       />
 
-      {/* TABS */}
       <View
         style={[
           styles.tabsContainer,
@@ -301,7 +296,6 @@ const BudgetAddScreen: React.FC = () => {
         ))}
       </View>
 
-      {/* SUMMARY HEADER */}
       <BudgetHeader
         selectedPeriod={selectedPeriod}
         selectedTab={selectedTab}
@@ -309,7 +303,6 @@ const BudgetAddScreen: React.FC = () => {
         totalSpent={totalSpent}
       />
 
-      {/* LIST */}
       <BudgetLists
         selectedTab={selectedTab}
         selectedPeriod={selectedPeriod}
@@ -319,7 +312,6 @@ const BudgetAddScreen: React.FC = () => {
         refreshKey={refreshKey}
       />
 
-      {/* DATE RANGE MODAL */}
       <DateRangePickerModal
         isVisible={isRangePickerVisible}
         onClose={() => setIsRangePickerVisible(false)}
