@@ -17,13 +17,13 @@ import { useCurrency } from "../../config/currencyProvider";
 import { convertToCurrency, getExchangeRates } from "../../Hooks/Currency";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { supabase } from "../../lib/Supabase-client-config"; // Make sure this path is correct!
+import { supabase } from "../../lib/Supabase-client-config";
 
-interface HomeScreenProps {
+interface PicksScreenProps {
   user: User;
 }
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ user }) => {
+const PicksScreen: React.FC<PicksScreenProps> = ({ user }) => {
   const { fullName } = useAppScreenLogic(user);
   const { colormode1, secondarycolormode } = useThemeColors();
   const { currency: globalCurrency } = useCurrency();
@@ -62,20 +62,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ user }) => {
     }, [globalCurrency]),
   );
 
-  const getWeeklyBoundaries = () => {
-    const now = new Date();
-    const day = now.getDay();
-    const diffToThisMonday = now.getDate() - day + (day === 0 ? -6 : 1);
-
-    const thisMonday = new Date(now.setDate(diffToThisMonday));
-    thisMonday.setHours(0, 0, 0, 0);
-
-    const lastMonday = new Date(thisMonday);
-    lastMonday.setDate(lastMonday.getDate() - 7);
-
-    return { thisMonday, lastMonday };
-  };
-
   const checkAndFetchMonthlyInsight = async (
     transactions: Transaction[],
     rates: any,
@@ -83,7 +69,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ user }) => {
     try {
       const now = new Date();
 
-      // 1. Check if there are ANY transactions for the current month
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
       const hasCurrentMonthData = transactions.some((tx) => {
@@ -96,7 +81,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ user }) => {
         return;
       }
 
-      // 2. Identify the "Monday" of this week to use as a cache key
       const day = now.getDay();
       const diff = now.getDate() - day + (day === 0 ? -6 : 1);
       const thisMonday = new Date(now.setDate(diff))
@@ -106,13 +90,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ user }) => {
       const savedWeek = await AsyncStorage.getItem("@last_insight_monday");
       const savedText = await AsyncStorage.getItem("@weekly_ai_insight");
 
-      // If it's still the same week, use cached insight
       if (savedWeek === thisMonday && savedText) {
         setAiInsight(savedText);
         return;
       }
 
-      // 3. Prepare data for the last 2 months
       const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
       const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
@@ -384,4 +366,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default PicksScreen;

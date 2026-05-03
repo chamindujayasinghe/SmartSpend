@@ -146,52 +146,13 @@ const Login = ({ navigation }: LoginScreenProps) => {
                 ) : (
                   <AppButton
                     title="Login"
+                    fontSize={16}
                     onPress={() => handleSubmit()}
                     disabled={isSubmitting}
                     textColor={colors.white}
                   />
                 )}
-                <View style={styles.dividerContainer}>
-                  <View
-                    style={[
-                      styles.dividerLine,
-                      {
-                        backgroundColor: secondarycolormode,
-                      },
-                    ]}
-                  />
-                  <Text
-                    style={[styles.dividerText, { color: secondarycolormode }]}
-                  >
-                    OR
-                  </Text>
-                  <View
-                    style={[
-                      styles.dividerLine,
-                      {
-                        backgroundColor: secondarycolormode,
-                      },
-                    ]}
-                  />
-                </View>
 
-                <AppButton
-                  title="Continue with Google"
-                  style={{
-                    marginTop: 5,
-                    backgroundColor: colormode1,
-                    shadowColor: colors.white,
-                  }}
-                  textColor={colormode2}
-                  onPress={onGoogleButtonPress}
-                  disabled={isSubmitting || isGoogleLoading}
-                  iconComponent={
-                    <Image
-                      source={require("../../assets/google.png")}
-                      style={styles.googleImage}
-                    />
-                  }
-                />
                 <View style={styles.signupWrapper}>
                   <AppText
                     style={[styles.signupText, { color: secondarycolormode }]}
@@ -274,25 +235,6 @@ const styles = StyleSheet.create({
   },
   successText: {
     color: colors.success,
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: colors.light,
-    fontSize: 14,
-  },
-  googleImage: {
-    width: 20,
-    height: 20,
-    marginRight: 20,
   },
 });
 

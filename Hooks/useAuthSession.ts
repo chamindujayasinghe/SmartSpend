@@ -13,7 +13,7 @@ export const useAuthSession = () => {
   useEffect(() => {
     let mounted = true;
 
-    // 1️⃣ Validate session safely on app start
+    //  Validate session safely on app start
     const initSession = async () => {
       const { data, error } = await supabase.auth.getSession();
 
@@ -33,7 +33,7 @@ export const useAuthSession = () => {
 
     initSession();
 
-    // 2️⃣ Listen for auth changes
+    //  Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(

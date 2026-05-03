@@ -22,7 +22,6 @@ export const getNotes = async (): Promise<Note[]> => {
 };
 
 // Add a new note
-// CRITICAL: Ensure the order here matches the call in your screen
 export const saveNote = async (
     title: string,
     content: string,
@@ -36,9 +35,9 @@ export const saveNote = async (
 
         const newNote: Note = {
             id: Date.now().toString(),
-            title: title || "Untitled", // Fallback for title
+            title: title || "Untitled",
             content: content || "",
-            date: validDate.toISOString(), // validDate is guaranteed to be a Date object now
+            date: validDate.toISOString(),
             createdAt: Date.now(),
         };
 

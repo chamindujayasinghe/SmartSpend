@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { User } from "@supabase/supabase-js";
 
 import colors from "../../config/colors";
-import HomeScreen from "../screens/HomeScreen";
+import PicksScreen from "../screens/PicksScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import StatsScreen from "../screens/StatsScreen";
 import AddScreen from "../screens/AddScreen";
@@ -23,7 +23,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
 
   return (
     <Tab.Navigator
-      initialRouteName="Add" // ✅ Set default screen
+      initialRouteName="Add"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.secondary,
@@ -49,7 +49,7 @@ const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ user }) => {
           ),
         }}
       >
-        {(props) => <HomeScreen {...props} user={user} />}
+        {(props) => <PicksScreen {...props} user={user} />}
       </Tab.Screen>
 
       <Tab.Screen

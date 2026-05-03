@@ -177,6 +177,7 @@ const Signup = ({ navigation }: SignupScreenProps) => {
                   <AppButton
                     title="Signup"
                     onPress={() => handleSubmit()}
+                    fontSize={16}
                     disabled={isSubmitting}
                     textColor={colors.white}
                   />

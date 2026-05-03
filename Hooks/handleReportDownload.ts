@@ -101,7 +101,7 @@ export const handleReportDownload = async ({
             await Sharing.shareAsync(uri, {
                 mimeType: "application/pdf",
                 dialogTitle: "Download Financial Report",
-                UTI: "com.adobe.pdf", // iOS specific
+                UTI: "com.adobe.pdf",
             });
         } else {
             console.warn("Sharing is not available on this device");

@@ -1,5 +1,3 @@
-// utilities/handlebackup.ts
-
 import { Alert } from "react-native";
 import { supabase } from "../lib/Supabase-client-config";
 import {
@@ -7,11 +5,9 @@ import {
     saveRestoredTransactions,
 } from "../utilities/storage";
 import { getAllBudgets, saveRestoredBudgets } from "../utilities/BudgetStorage";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const backupDataToCloud = async (): Promise<boolean> => {
     try {
-        // 1. Verify user session
         const { data: { session }, error: sessionError } = await supabase.auth
             .getSession();
 
@@ -25,11 +21,9 @@ export const backupDataToCloud = async (): Promise<boolean> => {
 
         const userId = session.user.id;
 
-        // 2. Fetch local data from AsyncStorage
         const localTransactions = await getTransactions();
         const localBudgets = await getAllBudgets();
 
-        // 3. Format data for Supabase (attach the user_id)
         const transactionsToBackup = localTransactions.map((tx) => ({
             id: tx.id,
             user_id: userId,
@@ -52,7 +46,6 @@ export const backupDataToCloud = async (): Promise<boolean> => {
             dateKey: bg.dateKey || null,
         }));
 
-        // 4. Upload Transactions (Upsert handles both new inserts and existing updates)
         if (transactionsToBackup.length > 0) {
             const { error: txError } = await supabase
                 .from("transactions")
@@ -63,7 +56,6 @@ export const backupDataToCloud = async (): Promise<boolean> => {
             }
         }
 
-        // 5. Upload Budgets (Wipe existing cloud budgets for this user, then insert fresh)
         if (budgetsToBackup.length > 0) {
             const { error: deleteError } = await supabase
                 .from("budgets")
@@ -137,7 +129,7 @@ export const restoreDataFromCloud = async (): Promise<boolean> => {
         const localTransactions = (cloudTransactions || []).map((tx) => ({
             id: tx.id,
             activeTab: tx.activeTab,
-            date: tx.date, // Ensure your app handles stringified dates if needed
+            date: tx.date,
             amount: tx.amount,
             category: tx.category,
             account: tx.account,
