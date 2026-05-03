@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
   Switch,
   TouchableOpacity,
-  ScrollView, // Added ScrollView in case the screen gets too tall
+  ScrollView,
 } from "react-native";
 import { User } from "@supabase/supabase-js";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -105,9 +105,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
           />
         </View>
 
-        {/* -------------------------------------------------- */}
-        {/* ADD THE CURRENCY CONVERTER RIGHT HERE              */}
-        {/* -------------------------------------------------- */}
         <CurrencyConverter />
 
         {isBackingUp ? (
@@ -174,7 +171,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
 };
 
 const styles = StyleSheet.create({
-  // Added a scrollContainer to prevent items from being cut off on smaller screens
   scrollContainer: {
     flexGrow: 1,
     alignItems: "center",

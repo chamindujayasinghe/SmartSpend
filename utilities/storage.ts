@@ -125,8 +125,6 @@ export const deleteTransaction = async (
   }
 };
 
-// Add this to the bottom of storage.ts
-
 export const saveRestoredTransactions = async (
   restoredTransactions: Transaction[],
 ): Promise<void> => {

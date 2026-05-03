@@ -76,7 +76,7 @@ export const saveBudgetEntry = async (newEntry: BudgetEntry): Promise<void> => {
   }
 };
 
-// --- NEW FUNCTION: DELETE BUDGET ENTRY ---
+//  NEW FUNCTION: DELETE BUDGET ENTRY
 export const deleteBudgetEntry = async (
   category: string,
   type: "Income" | "Expense",
@@ -110,8 +110,6 @@ export const deleteBudgetEntry = async (
     Alert.alert("Error", "Failed to delete the budget.");
   }
 };
-
-// Add this to the bottom of BudgetStorage.ts
 
 export const saveRestoredBudgets = async (
   restoredBudgets: BudgetEntry[],

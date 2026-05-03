@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderBottomWidth: 1,
+    margin: 2,
   },
   categoryContainer: {
     flexDirection: "row",

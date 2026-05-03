@@ -25,17 +25,21 @@ const getWeekRange = (date: Date) => {
   const current = new Date(date);
   const day = current.getDay();
   const diffToMonday = day === 0 ? -6 : 1 - day;
+
   const monday = new Date(current);
   monday.setDate(current.getDate() + diffToMonday);
   monday.setHours(0, 0, 0, 0);
+
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
+
   return { monday, sunday };
 };
 
 const StatsScreen: React.FC = () => {
   const { titlecolor, textinputcolor, secondarycolormode } = useThemeColors();
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedTab, setSelectedTab] = useState<"incomes" | "expenses">(
     "expenses",
@@ -49,6 +53,7 @@ const StatsScreen: React.FC = () => {
   const [aggregatedData, setAggregatedData] = useState<AggregatedCategory[]>(
     [],
   );
+
   const { currency } = useCurrency();
   const isFocused = useIsFocused();
 
@@ -69,39 +74,48 @@ const StatsScreen: React.FC = () => {
 
         const filteredTransactions = allTransactions.filter((tx) => {
           if (tx.activeTab !== targetTab) return false;
+
           const txDate = new Date(tx.date);
 
           switch (selectedPeriod) {
             case "Daily":
               return txDate.toDateString() === currentDate.toDateString();
+
             case "Weekly": {
               const { monday, sunday } = getWeekRange(currentDate);
               return txDate >= monday && txDate <= sunday;
             }
+
             case "Monthly":
               return (
                 txDate.getMonth() === currentDate.getMonth() &&
                 txDate.getFullYear() === currentDate.getFullYear()
               );
+
             case "Annually":
               return txDate.getFullYear() === currentDate.getFullYear();
+
             case "Period":
               if (!dateRange.start || !dateRange.end) return false;
               return txDate >= dateRange.start && txDate <= dateRange.end;
+
             default:
               return false;
           }
         });
 
         const categoryMap = new Map<string, number>();
+
         filteredTransactions.forEach((tx) => {
           const rawAmount = parseFloat(tx.amount);
+
           const convertedAmount = convertToCurrency(
             rawAmount,
             tx.currency,
             currency,
             latestRates,
           );
+
           const currentTotal = categoryMap.get(tx.category) || 0;
           categoryMap.set(tx.category, currentTotal + convertedAmount);
         });
@@ -116,7 +130,7 @@ const StatsScreen: React.FC = () => {
 
         setAggregatedData(aggregatedArray);
       } catch (e) {
-        console.error("Failed to fetch or aggregate transactions", e);
+        console.error("Error loading stats", e);
       }
     };
 
@@ -132,8 +146,10 @@ const StatsScreen: React.FC = () => {
 
   const handleNavigate = (direction: "previous" | "next") => {
     if (selectedPeriod === "Period") return;
+
     const newDate = new Date(currentDate);
     const amount = direction === "previous" ? -1 : 1;
+
     switch (selectedPeriod) {
       case "Daily":
         newDate.setDate(newDate.getDate() + amount);
@@ -148,6 +164,7 @@ const StatsScreen: React.FC = () => {
         newDate.setFullYear(newDate.getFullYear() + amount);
         break;
     }
+
     setCurrentDate(newDate);
   };
 
@@ -166,10 +183,12 @@ const StatsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* HEADER */}
       <View style={styles.header}>
         <AppText style={[styles.headerTitle, { color: titlecolor }]}>
           Stats Page
         </AppText>
+
         <PeriodSelector
           selectedPeriod={selectedPeriod}
           onSelectPeriod={setSelectedPeriod}
@@ -178,6 +197,7 @@ const StatsScreen: React.FC = () => {
         />
       </View>
 
+      {/* DATE NAV */}
       <DateNavigator
         currentDate={currentDate}
         selectedPeriod={selectedPeriod}
@@ -185,6 +205,7 @@ const StatsScreen: React.FC = () => {
         dateRange={dateRange}
       />
 
+      {/* TABS */}
       <View
         style={[styles.tabsContainer, { borderBottomColor: textinputcolor }]}
       >
@@ -205,6 +226,7 @@ const StatsScreen: React.FC = () => {
             <View style={styles.activeTabIndicator} />
           )}
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.tabButton}
           onPress={() => setSelectedTab("expenses")}
@@ -224,12 +246,16 @@ const StatsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.contentArea}>
+      {/* CONTENT AREA */}
+      <View style={{ flex: 1 }}>
+        {/* FIXED TOP */}
         {aggregatedData.length > 0 && (
           <PieChartComponent
             data={aggregatedData}
-            title={`${selectedTab === "incomes" ? "Incomes" : "Expenses"} Distribution`}
-            height={240}
+            title={`${
+              selectedTab === "incomes" ? "Incomes" : "Expenses"
+            } Distribution`}
+            height={220}
           />
         )}
 
@@ -259,6 +285,7 @@ const StatsScreen: React.FC = () => {
             </TouchableOpacity>
           )}
 
+        {/* SCROLLABLE LIST ONLY */}
         {aggregatedData.length === 0 ? (
           <View style={styles.emptyContainer}>
             <AppText style={[styles.emptyText, { color: secondarycolormode }]}>
@@ -266,27 +293,26 @@ const StatsScreen: React.FC = () => {
             </AppText>
           </View>
         ) : (
-          <FlatList
-            data={aggregatedData}
-            keyExtractor={(item) => item.category}
-            renderItem={({ item, index }) => (
-              <CategorySummaryListItem
-                index={index}
-                item={item}
-                totalAmount={totalAmount}
-                currency={currency}
-              />
-            )}
-            style={styles.list}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40 }}
-            removeClippedSubviews={true}
-            initialNumToRender={10}
-            windowSize={5}
-          />
+          <View style={{ flex: 1 }}>
+            <FlatList
+              data={aggregatedData}
+              keyExtractor={(item) => item.category}
+              renderItem={({ item, index }) => (
+                <CategorySummaryListItem
+                  index={index}
+                  item={item}
+                  totalAmount={totalAmount}
+                  currency={currency}
+                />
+              )}
+              showsVerticalScrollIndicator={true}
+              contentContainerStyle={{ paddingBottom: 40 }}
+            />
+          </View>
         )}
       </View>
 
+      {/* DATE RANGE MODAL */}
       <DateRangePickerModal
         isVisible={isRangePickerVisible}
         onClose={() => setIsRangePickerVisible(false)}
@@ -298,8 +324,11 @@ const StatsScreen: React.FC = () => {
   );
 };
 
+export default StatsScreen;
+
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20 },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -307,15 +336,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 5,
   },
+
   headerTitle: { fontSize: 22, fontWeight: "bold" },
+
   tabsContainer: {
     flexDirection: "row",
     borderBottomWidth: 1,
     marginBottom: 10,
   },
-  tabButton: { flex: 1, alignItems: "center", paddingBottom: 10 },
+
+  tabButton: {
+    flex: 1,
+    alignItems: "center",
+    paddingBottom: 10,
+  },
+
   tabText: { fontSize: 18, fontWeight: "600" },
+
   activeTabText: { color: colors.secondary },
+
   activeTabIndicator: {
     height: 3,
     width: "70%",
@@ -324,22 +363,18 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 1.5,
   },
-  contentArea: {
-    flex: 1,
-  },
-  list: {
-    flex: 1,
-    marginTop: 10,
-  },
+
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+
   emptyText: {
     fontSize: 16,
     fontWeight: "500",
   },
+
   downloadButton: {
     alignSelf: "center",
     backgroundColor: "transparent",
@@ -350,10 +385,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 5,
   },
+
   downloadButtonText: {
     fontSize: 14,
     fontWeight: "600",
   },
 });
-
-export default StatsScreen;
