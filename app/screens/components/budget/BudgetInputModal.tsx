@@ -1,5 +1,3 @@
-// src/screens/budget/BudgetInputModal.tsx
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -9,7 +7,6 @@ import {
   TextInput,
   Keyboard,
   TouchableWithoutFeedback,
-  Alert,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useThemeColors } from "../../../../config/theme/colorMode";
@@ -20,8 +17,6 @@ import {
   saveBudgetEntry,
   getAllBudgets,
 } from "../../../../utilities/BudgetStorage";
-
-// --- NEW IMPORTS ---
 import { useCurrency } from "../../../../config/currencyProvider";
 import {
   convertToCurrency,
@@ -62,8 +57,7 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
     textinputcolor,
   } = useThemeColors();
 
-  // --- CURRENCY HOOK ---
-  const { currency } = useCurrency(); // Current App Currency
+  const { currency } = useCurrency();
 
   const [amount, setAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -128,16 +122,14 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
     );
 
     if (existingEntry && existingEntry.budget > 0) {
-      // --- CONVERSION LOGIC ---
-      // If budget is in USD (e.g. 100), convert to LKR (e.g. 30,000) for display
       const convertedBudget = convertToCurrency(
         existingEntry.budget,
         existingEntry.currency || currency,
-        currency, // Target is current app currency
+        currency,
         rates,
       );
 
-      setAmount(convertedBudget.toFixed(2)); // Show nicely formatted number
+      setAmount(convertedBudget.toFixed(2));
     } else {
       setAmount("");
     }
@@ -146,10 +138,8 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
   const handleSavePress = async () => {
     if (!item) return;
 
-    // Basic cleaning of input
     let cleanAmount = amount.replace(/[^0-9.]/g, "");
 
-    // Prevent multiple decimals
     if ((cleanAmount.match(/\./g) || []).length > 1) {
       setError("Invalid amount format");
       return;
@@ -157,7 +147,6 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
 
     const numericAmount = parseFloat(cleanAmount);
 
-    // Strict Validation: Must be a number and greater than 0
     if (isNaN(numericAmount) || numericAmount <= 0) {
       setError("Please enter a budget greater than 0");
       return;
@@ -170,7 +159,7 @@ const BudgetInputModal: React.FC<BudgetInputModalProps> = ({
       type: item.type,
       period: budgetPeriod,
       budget: numericAmount,
-      currency: currency, // <--- IMPORTANT: Save with current currency tag
+      currency: currency,
     };
 
     try {

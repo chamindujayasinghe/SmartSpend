@@ -5,7 +5,6 @@ import AppText from "../../../components/AppText";
 import { AggregatedCategory } from "./CategorySummaryListItem";
 import colors from "../../../../config/colors";
 import { PIE_CHART_COLORS } from "../../../../config/theme/piechartcolors";
-import { useTheme } from "../../../../config/theme/ThemeProvider";
 import { useThemeColors } from "../../../../config/theme/colorMode";
 
 interface PieChartComponentProps {

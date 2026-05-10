@@ -181,7 +181,6 @@ const CalendarScreen: React.FC = () => {
       const day = new Date(tx.date).getDate();
       const rawAmount = parseFloat(tx.amount) || 0;
 
-      // Currency conversion logic
       const amount = convertToCurrency(rawAmount, tx.currency, currency, rates);
 
       const dayAgg = aggregates.get(day) || { income: 0, expense: 0 };

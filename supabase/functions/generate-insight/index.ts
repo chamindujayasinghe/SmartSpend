@@ -14,8 +14,6 @@ Deno.serve(async (req) => {
     try {
         const {
             globalCurrency,
-            totalPrevIncome,
-            totalCurrentIncome,
             lastMonthExpenses,
             currentMonthExpenses,
         } = await req.json();
@@ -24,11 +22,6 @@ Deno.serve(async (req) => {
         if (!GEMINI_API_KEY) {
             throw new Error("Gemini API key missing in environment variables");
         }
-
-        // UPDATED PROMPT: Professional, analytical, and strictly under 20 words.
-        // Inside index.ts Edge Function
-
-        // ... inside Deno.serve ...
 
         const prompt = `
   You are a gamified financial coach. Compare this month's category spending to last month.
@@ -56,8 +49,8 @@ Deno.serve(async (req) => {
                 body: JSON.stringify({
                     contents: [{ role: "user", parts: [{ text: prompt }] }],
                     generationConfig: {
-                        temperature: 0.7, // Increased to allow for more descriptive natural language
-                        maxOutputTokens: 100, // Increased to ensure the sentence isn't cut off mid-way
+                        temperature: 0.7,
+                        maxOutputTokens: 100,
                         topP: 0.9,
                     },
                 }),

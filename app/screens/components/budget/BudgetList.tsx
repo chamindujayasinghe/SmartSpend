@@ -34,7 +34,6 @@ interface GroupedItem {
   items: any[];
 }
 
-// ... (Helper functions createDateSpecificPeriod and getWeekNumber remain the same) ...
 const createDateSpecificPeriod = (
   period: string,
   currentDate: Date,
@@ -81,15 +80,13 @@ const BudgetLists: React.FC<Props> = ({
   onItemPress,
   refreshKey,
 }) => {
-  const { colormode2, secondarycolormode, textinputcolor, colormode1 } =
-    useThemeColors();
+  const { textinputcolor, colormode1 } = useThemeColors();
 
   const { currency } = useCurrency();
   const [data, setData] = useState<GroupedItem[]>([]);
   const [budgets, setBudgets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. ADD STATE FOR RATES
   const [rates, setRates] = useState<any>(null);
 
   useEffect(() => {
@@ -120,7 +117,7 @@ const BudgetLists: React.FC<Props> = ({
     ]);
 
     setBudgets(allBudgets);
-    setRates(latestRates); // 2. SAVE RATES TO STATE
+    setRates(latestRates);
 
     const now = currentDate;
 
@@ -176,7 +173,6 @@ const BudgetLists: React.FC<Props> = ({
     const type = selectedTab === "incomes" ? "Income" : "Expense";
 
     const sortedData = grouped.sort((a, b) => {
-      // Sorting logic remains the same...
       const dateSpecificPeriod = createDateSpecificPeriod(
         selectedPeriod,
         currentDate,
@@ -235,7 +231,6 @@ const BudgetLists: React.FC<Props> = ({
   };
 
   const handleItemPress = (item: GroupedItem) => {
-    // ... same as before
     const enhancedItem = {
       category: item.category,
       type:

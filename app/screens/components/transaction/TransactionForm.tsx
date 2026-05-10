@@ -33,7 +33,6 @@ import {
 import { useThemeColors } from "../../../../config/theme/colorMode";
 import AddNewModal from "./AddTransactionData";
 import RemoveTransactionModal from "./removetransactionmodal";
-import * as ImagePicker from "expo-image-picker";
 import { supabase } from "../../../../lib/Supabase-client-config";
 import CameraLayout from "./cameraLayout";
 import CurrencySelector from "../CurrencySelector";
@@ -67,14 +66,12 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
   const [modalType, setModalType] = useState<"category" | "account" | null>(
     null,
   );
-  // State to hold the fetched list for the SelectionModal
   const [selectionModalItems, setSelectionModalItems] = useState<string[]>([]);
 
   const [addNewModalVisible, setAddNewModalVisible] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { currency, setCurrency } = useCurrency();
 
-  // State for the removal modal
   const [removeModalVisible, setRemoveModalVisible] = useState(false);
   const initialDate = (() => {
     if (transaction?.date) {
@@ -653,7 +650,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ route }) => {
               <RemoveTransactionModal
                 visible={removeModalVisible}
                 onClose={() => setRemoveModalVisible(false)}
-                onRemove={handleRemoveItem} // Pass the removal logic
+                onRemove={handleRemoveItem}
                 title={`Remove ${
                   modalType === "category" ? "Category" : "Account"
                 }s`}
@@ -774,12 +771,12 @@ const styles = StyleSheet.create({
   },
   loadingOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)", // Darkens the background
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "center",
     alignItems: "center",
   },
   loadingContainer: {
-    backgroundColor: colors.dark, // Use your app's dark theme color
+    backgroundColor: colors.dark,
     padding: 30,
     borderRadius: 15,
     alignItems: "center",

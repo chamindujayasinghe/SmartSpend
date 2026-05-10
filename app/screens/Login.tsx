@@ -21,7 +21,6 @@ import AppErrorText from "../components/AppErrorText";
 import { LoginScreenProps } from "../navigation/NavigationTypes";
 import { useState } from "react";
 import handleSignIn, { ServerStatus } from "../../Authentication/HandleSignIn";
-import handleSignInWithGoogle from "../../Authentication/HandleGoogleAuthenticattion";
 import { useThemeColors } from "../../config/theme/colorMode";
 
 const validationSchema = yup.object().shape({
@@ -37,22 +36,10 @@ const validationSchema = yup.object().shape({
 
 const Login = ({ navigation }: LoginScreenProps) => {
   const [status, setStatus] = useState<ServerStatus | null>(null);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const {
-    colormode1,
-    titlecolor,
-    secondarycolormode,
-    textinputcolor,
-    placeholder,
-    colormode2,
-  } = useThemeColors();
+  const { titlecolor, secondarycolormode, textinputcolor, placeholder } =
+    useThemeColors();
 
-  const onGoogleButtonPress = async () => {
-    setIsGoogleLoading(true);
-    await handleSignInWithGoogle();
-    setIsGoogleLoading(false);
-  };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
