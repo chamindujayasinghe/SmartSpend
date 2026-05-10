@@ -146,7 +146,7 @@ export const restoreDataFromCloud = async (): Promise<boolean> => {
             dateKey: bg.dateKey || undefined,
         }));
 
-        // 4. Save to local storage using your new helper functions!
+        // 4. Save to local storage using your new helper functions
         await saveRestoredTransactions(localTransactions);
         await saveRestoredBudgets(localBudgets);
 

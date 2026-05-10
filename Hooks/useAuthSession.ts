@@ -20,7 +20,6 @@ export const useAuthSession = () => {
       if (!mounted) return;
 
       if (error || !data.session) {
-        // token revoked / expired / multi-device login
         await supabase.auth.signOut({ scope: "local" });
         setSession(null);
       } else {

@@ -26,7 +26,6 @@ export type ForgotPasswordScreenProps = NativeStackScreenProps<
   "ForgotPassword"
 >;
 
-// Add this Prop Type for your NewPasswordScreen
 export type NewPasswordScreenProps = NativeStackScreenProps<
   AuthStackParamList,
   "NewPassword"

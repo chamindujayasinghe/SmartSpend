@@ -26,7 +26,7 @@ const CameraLayout: React.FC<CameraLayoutProps> = ({
   const [permission, requestPermission] = useCameraPermissions();
   const [capturedImages, setCapturedImages] = useState<string[]>([]);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [viewIndex, setViewIndex] = useState(0); // Track which image we are viewing
+  const [viewIndex, setViewIndex] = useState(0);
   const cameraRef = useRef<CameraView>(null);
 
   if (!permission) return <View />;
@@ -129,7 +129,6 @@ const CameraLayout: React.FC<CameraLayoutProps> = ({
           </View>
         </>
       ) : (
-        /* PREVIEW MODE UI */
         <View style={styles.previewContainer}>
           <Image
             source={{

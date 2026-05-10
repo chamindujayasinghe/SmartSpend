@@ -43,7 +43,6 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [account, setAccount] = useState("");
-  // <-- NEW: State to track if there's an account error
   const [accountError, setAccountError] = useState<string | null>(null);
 
   const [items, setItems] = useState<ScannedItem[]>(
@@ -100,7 +99,7 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
         handleUpdateItem(activeItemIndex, "category", trimmedValue);
       } else if (modalType === "account") {
         setAccount(trimmedValue);
-        setAccountError(null); // <-- NEW: Clear error if an account is added and selected
+        setAccountError(null);
       }
     } catch (error) {
       console.error("Error saving new item:", error);
@@ -139,7 +138,6 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
   };
 
   const handleConfirm = async () => {
-    // <-- NEW: Set error state instead of showing an alert
     if (!account) {
       setAccountError("Account is required");
       return;
@@ -238,7 +236,6 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
             />
           </View>
         </TouchableOpacity>
-        {/* <-- NEW: Display the inline error text if accountError is set */}
         {accountError && (
           <AppText style={styles.errorText}>{accountError}</AppText>
         )}
@@ -327,7 +324,7 @@ const BillTransactionForm: React.FC<BillTransactionFormProps> = ({ route }) => {
             handleUpdateItem(activeItemIndex, "category", val);
           } else {
             setAccount(val);
-            setAccountError(null); // <-- NEW: Clear error when account is successfully selected
+            setAccountError(null);
           }
           setModalVisible(false);
         }}
@@ -390,7 +387,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
   },
-  // <-- NEW: Added error text styles
   errorText: {
     color: "red",
     fontSize: 12,

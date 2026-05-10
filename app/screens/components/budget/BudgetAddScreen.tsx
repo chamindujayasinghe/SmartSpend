@@ -37,7 +37,6 @@ type EnhancedBudgetItem = {
 const BudgetAddScreen: React.FC = () => {
   const { titlecolor, secondarycolormode } = useThemeColors();
 
-  // --- CURRENCY HOOKS ---
   const { currency } = useCurrency();
   const [rates, setRates] = useState<any>(null);
 
@@ -65,7 +64,7 @@ const BudgetAddScreen: React.FC = () => {
 
   const [isRangePickerVisible, setIsRangePickerVisible] = useState(false);
 
-  // 🔹 Budget modal
+  // Budget modal
   const [selectedBudgetItem, setSelectedBudgetItem] =
     useState<EnhancedBudgetItem | null>(null);
 

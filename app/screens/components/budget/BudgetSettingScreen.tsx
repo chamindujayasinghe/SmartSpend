@@ -25,11 +25,9 @@ import {
   BudgetEntry,
   getAllBudgets,
   saveBudgetEntry,
-  deleteBudgetEntry, // <--- Import the delete function
+  deleteBudgetEntry,
 } from "../../../../utilities/BudgetStorage";
 import PeriodSelector, { Period } from "../PeriodSelector";
-
-// --- CURRENCY IMPORTS ---
 import { useCurrency } from "../../../../config/currencyProvider";
 import {
   convertToCurrency,
@@ -60,7 +58,6 @@ const BudgetSettingScreen: React.FC = () => {
   const { titlecolor, colormode1, textinputcolor, secondarycolormode } =
     useThemeColors();
 
-  // --- CURRENCY HOOKS ---
   const { currency } = useCurrency();
   const [rates, setRates] = useState<any>(null);
 
@@ -187,7 +184,7 @@ const BudgetSettingScreen: React.FC = () => {
     setModalItem(null);
   };
 
-  // --- DELETE HANDLER ---
+  //  DELETE HANDLER (Budget)
   const handleDeleteBudget = (item: BudgetItem) => {
     Alert.alert(
       "Delete Budget",
@@ -207,7 +204,7 @@ const BudgetSettingScreen: React.FC = () => {
                 i.category === item.category &&
                 i.type === item.type &&
                 i.period === item.period
-                  ? { ...i, budget: 0.0 } // Reset visually to 0
+                  ? { ...i, budget: 0.0 }
                   : i,
               ),
             );
@@ -240,7 +237,6 @@ const BudgetSettingScreen: React.FC = () => {
             />
           </TouchableOpacity>
         ) : (
-          // Spacer to keep alignment consistent even if no delete icon
           <View style={styles.deleteIconPlaceholder} />
         )}
 
@@ -452,7 +448,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   deleteIconPlaceholder: {
-    width: 30, // Approximate width of delete icon + margin + padding
+    width: 30,
     marginRight: 15,
   },
   leftContent: {
