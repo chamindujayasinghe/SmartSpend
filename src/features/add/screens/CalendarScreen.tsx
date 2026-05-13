@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
 import AppText from "../../../components/ui/AppText";
 import colors from "../../../config/colors";
 import CalendarHeader from "../components/calender/CalenderHeader";

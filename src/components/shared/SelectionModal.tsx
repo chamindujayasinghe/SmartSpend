@@ -8,9 +8,15 @@ import {
   Pressable,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+<<<<<<< HEAD:src/components/shared/SelectionModal.tsx
 import AppText from "../ui/AppText";
 import colors from "../../config/colors";
 import { useThemeColors } from "../../config/theme/colorMode";
+=======
+import AppText from "../../components/AppText";
+import colors from "../../../config/colors";
+import { useThemeColors } from "../../../config/theme/colorMode";
+>>>>>>> 2df68ee2fa9c5e3984406726648b7ae9c4cdc2b5:app/screens/components/SelectionModal.tsx
 
 interface Props {
   isVisible: boolean;

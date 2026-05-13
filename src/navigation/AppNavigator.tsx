@@ -5,9 +5,15 @@ import { User } from "@supabase/supabase-js";
 import MainTabNavigator from "./MainTabNavigator";
 
 import { Transaction } from "../../utilities/storage";
+<<<<<<< HEAD:src/navigation/AppNavigator.tsx
 import BudgetSettingScreen from "../features/budget/screens/BudgetSettingScreen";
 import BillTransactionForm from "../features/add/components/transactions/billTransactionForm";
 import TransactionForm from "../features/add/components/transactions/TransactionForm";
+=======
+import BudgetSettingScreen from "../screens/components/budget/BudgetSettingScreen";
+import BillTransactionForm from "../screens/components/transaction/billTransactionForm";
+import TransactionForm from "../screens/components/transaction/TransactionForm";
+>>>>>>> 2df68ee2fa9c5e3984406726648b7ae9c4cdc2b5:app/navigation/AppNavigator.tsx
 
 export type AppStackParamList = {
   MainTabs: { user: User };

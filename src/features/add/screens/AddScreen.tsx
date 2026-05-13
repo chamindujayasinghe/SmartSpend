@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import AppText from "../../../components/ui/AppText";
 import colors from "../../../config/colors";
-
 import CalendarScreen from "./CalendarScreen";
 import { useThemeColors } from "../../../config/theme/colorMode";
 import NoteAddScreen from "./NoteAddScreen";

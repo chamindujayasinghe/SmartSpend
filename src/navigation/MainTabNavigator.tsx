@@ -3,7 +3,6 @@ import { View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { User } from "@supabase/supabase-js";
-
 import colors from "../config/colors";
 import PicksScreen from "../features/picks/PicksScreen";
 import StatsScreen from "../features/stats/screens/StatsScreen";
