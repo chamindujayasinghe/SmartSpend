@@ -1,13 +1,13 @@
 import { Keyboard, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { AppContent } from "./app/AppContent";
+import { AppContent } from "./src/AppContent";
 import { NavigationContainer, DarkTheme } from "@react-navigation/native";
-import colors from "./config/colors";
-import { ThemeProvider, useTheme } from "./config/theme/ThemeProvider";
-import lightGradientColors from "./config/theme/LightGradientColors";
-import gradientColors from "./config/theme/GradientColors";
-import { CurrencyProvider } from "./config/currencyProvider";
+import colors from "./src/config/colors";
+import { ThemeProvider, useTheme } from "./src/contexts/ThemeProvider";
+import lightGradientColors from "./src/config/theme/LightGradientColors";
+import gradientColors from "./src/config/theme/GradientColors";
+import { CurrencyProvider } from "./src/contexts/currencyProvider";
 
 const AppGradientWrapper = () => {
   const { isLightMode } = useTheme();

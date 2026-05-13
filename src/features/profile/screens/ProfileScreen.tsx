@@ -1,0 +1,248 @@
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Switch,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { User } from "@supabase/supabase-js";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useTheme } from "../../../contexts/ThemeProvider";
+import { useAppScreenLogic } from "../../../Hooks/useAppScreen";
+import { useCurrency } from "../../../contexts/currencyProvider";
+import { useThemeColors } from "../../../config/theme/colorMode";
+import {
+  backupDataToCloud,
+  restoreDataFromCloud,
+} from "../../../utils/handleBackup";
+import AppText from "../../../components/ui/AppText";
+import colors from "../../../config/colors";
+import AppButton from "../../../components/ui/AppButton";
+import EditProfileModal from "../components/EditProfileModal";
+import CurrencyConverter from "../components/CurrencyConvertor";
+import CurrencySelector from "../components/CurrencySelector";
+
+interface ProfileScreenProps {
+  user: User;
+}
+
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ user }) => {
+  const { isLightMode, toggleTheme } = useTheme();
+  const { loading, handleSignOut } = useAppScreenLogic(user);
+  const { currency, setCurrency } = useCurrency();
+  const { titlecolor, secondarycolormode } = useThemeColors();
+  const { fullName } = useAppScreenLogic(user);
+
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+
+  const initialFirstName = user?.user_metadata?.first_name || "";
+  const initialLastName = user?.user_metadata?.last_name || "";
+
+  const handleBackup = async () => {
+    setIsBackingUp(true);
+    await backupDataToCloud();
+    setIsBackingUp(false);
+  };
+
+  const handleRestore = async () => {
+    setIsRestoring(true);
+    await restoreDataFromCloud();
+    setIsRestoring(false);
+  };
+
+  return (
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      style={{ flex: 1, width: "100%" }}
+    >
+      <View style={styles.container}>
+        <AppText style={[styles.title, { color: titlecolor }]}>Profile</AppText>
+
+        <TouchableOpacity
+          style={styles.editProfileButton}
+          onPress={() => setIsEditModalVisible(true)}
+        >
+          <MaterialCommunityIcons
+            name="pencil"
+            size={16}
+            color={colors.secondary}
+            style={styles.editIcon}
+          />
+          <AppText style={styles.editProfileText}>Edit Profile</AppText>
+        </TouchableOpacity>
+
+        <View style={styles.profileHeaderContainer}>
+          <View style={styles.nameContainer}>
+            <AppText style={[styles.nameLabel, { color: titlecolor }]}>
+              Logged in as
+            </AppText>
+            <AppText style={[styles.nameText, { color: secondarycolormode }]}>
+              {fullName}
+            </AppText>
+          </View>
+        </View>
+
+        <CurrencySelector value={currency} onSelect={setCurrency} />
+
+        <View style={styles.toggleContainer}>
+          <AppText style={[styles.toggleLabel, { color: titlecolor }]}>
+            {isLightMode ? "Light Mode" : "Dark Mode"}
+          </AppText>
+          <Switch
+            trackColor={{ false: colors.light, true: colors.secondary }}
+            thumbColor={colors.white}
+            onValueChange={toggleTheme}
+            value={isLightMode}
+            style={{ transform: [{ scale: 0.9 }] }}
+          />
+        </View>
+
+        <CurrencyConverter />
+
+        {isBackingUp ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.secondary}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <AppButton
+            textColor={colors.white}
+            iconName="cloud-upload"
+            title="Backup"
+            style={styles.cloudbackupbtn}
+            onPress={handleBackup}
+            fontSize={14}
+          />
+        )}
+
+        {isRestoring ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.secondary}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <AppButton
+            textColor={colors.white}
+            iconName="cloud-download"
+            title="Restore"
+            style={styles.cloudbackupbtn}
+            onPress={handleRestore}
+            fontSize={14}
+          />
+        )}
+
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color={colors.danger}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <AppButton
+            textColor={colors.white}
+            fontSize={14}
+            iconName="logout"
+            title="Sign Out"
+            onPress={handleSignOut}
+            style={styles.signOutButton}
+          />
+        )}
+
+        <EditProfileModal
+          isVisible={isEditModalVisible}
+          onClose={() => setIsEditModalVisible(false)}
+          initialFirstName={initialFirstName}
+          initialLastName={initialLastName}
+          onUpdateSuccess={() => setIsEditModalVisible(false)}
+        />
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    alignItems: "center",
+  },
+  container: {
+    flex: 1,
+    padding: 30,
+    alignItems: "center",
+    width: "100%",
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 28,
+    color: colors.white,
+    marginBottom: 5,
+  },
+  editProfileButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "rgba(158, 158, 158, 0.21)",
+    marginBottom: 25,
+  },
+  editIcon: {
+    marginRight: 5,
+  },
+  editProfileText: {
+    fontSize: 14,
+    color: colors.secondary,
+    fontWeight: "600",
+  },
+  profileHeaderContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  nameContainer: {
+    justifyContent: "space-between",
+    width: "100%",
+    flexDirection: "row",
+    marginBottom: 5,
+  },
+  nameLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.light,
+  },
+  nameText: {
+    fontSize: 18,
+    color: colors.white,
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 15,
+  },
+  toggleLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  signOutButton: {
+    height: 35,
+    marginTop: 20,
+    width: "40%",
+    backgroundColor: colors.danger,
+    shadowColor: colors.danger,
+  },
+  cloudbackupbtn: {
+    height: 35,
+    marginTop: 20,
+    backgroundColor: colors.secondary,
+    width: "40%",
+    fontSize: 12,
+  },
+});
+
+export default ProfileScreen;
