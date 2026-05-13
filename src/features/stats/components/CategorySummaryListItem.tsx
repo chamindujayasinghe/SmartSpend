@@ -1,12 +1,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-<<<<<<< HEAD:src/features/stats/components/CategorySummaryListItem.tsx
 import { PIE_CHART_COLORS } from "../../../config/theme/piechartcolors";
 import AppText from "../../../components/ui/AppText";
-=======
-import { PIE_CHART_COLORS } from "../../../../config/theme/piechartcolors";
-import AppText from "../../../components/AppText";
->>>>>>> 2df68ee2fa9c5e3984406726648b7ae9c4cdc2b5:app/screens/components/stats/CategorySummaryListItem.tsx
 
 import { useThemeColors } from "../../../config/theme/colorMode";
 
