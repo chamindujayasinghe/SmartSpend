@@ -18,9 +18,11 @@ export const backupDataToCloud = async (): Promise<boolean> => {
 
         const userId = session.user.id;
 
+        // Fetch local data
         const localTransactions = await getTransactions();
         const localBudgets = await getAllBudgets();
 
+        // Format transactions for Supabase
         const transactionsToBackup = localTransactions.map((tx) => ({
             id: tx.id,
             user_id: userId,
@@ -33,6 +35,7 @@ export const backupDataToCloud = async (): Promise<boolean> => {
             currency: tx.currency,
         }));
 
+        // Format budgets for Supabase
         const budgetsToBackup = localBudgets.map((bg) => ({
             user_id: userId,
             category: bg.category,
@@ -43,28 +46,43 @@ export const backupDataToCloud = async (): Promise<boolean> => {
             dateKey: bg.dateKey || null,
         }));
 
+        // 1. Delete all existing transactions for this user in the cloud
+        const { error: deleteTxError } = await supabase
+            .from("transactions")
+            .delete()
+            .eq("user_id", userId);
+
+        if (deleteTxError) {
+            throw new Error(
+                `Failed to clear old transactions: ${deleteTxError.message}`,
+            );
+        }
+
+        // 2. Insert current local transactions (if any exist)
         if (transactionsToBackup.length > 0) {
             const { error: txError } = await supabase
                 .from("transactions")
-                .upsert(transactionsToBackup, { onConflict: "id" });
+                .insert(transactionsToBackup);
 
             if (txError) {
                 throw new Error(`Transactions error: ${txError.message}`);
             }
         }
 
+        //  BUDGETS SYNC
+        const { error: deleteBgError } = await supabase
+            .from("budgets")
+            .delete()
+            .eq("user_id", userId);
+
+        if (deleteBgError) {
+            throw new Error(
+                `Failed to clear old budgets: ${deleteBgError.message}`,
+            );
+        }
+
+        // 2. Insert current local budgets (if any exist)
         if (budgetsToBackup.length > 0) {
-            const { error: deleteError } = await supabase
-                .from("budgets")
-                .delete()
-                .eq("user_id", userId);
-
-            if (deleteError) {
-                throw new Error(
-                    `Failed to clear old budgets: ${deleteError.message}`,
-                );
-            }
-
             const { error: bgError } = await supabase
                 .from("budgets")
                 .insert(budgetsToBackup);
@@ -122,7 +140,7 @@ export const restoreDataFromCloud = async (): Promise<boolean> => {
             throw new Error(`Failed to fetch budgets: ${bgError.message}`);
         }
 
-        // 3. Format data to match your local interfaces
+        // 3. Format data to match local interfaces
         const localTransactions = (cloudTransactions || []).map((tx) => ({
             id: tx.id,
             activeTab: tx.activeTab,
