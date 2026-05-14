@@ -24,7 +24,6 @@ import colors from "../../../config/colors";
 import AppTextInput from "../../../components/ui/AppTextInput";
 
 const NoteAddScreen = () => {
-  const navigation = useNavigation();
   const { colormode1, colormode2, secondarycolormode, textinputcolor } =
     useThemeColors();
 
